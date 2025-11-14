@@ -30,8 +30,8 @@ export default function CartItem({ item }: CartItemProps) {
       {/* Product Image */}
       <div className="relative w-24 h-24 flex-shrink-0 bg-muted rounded-md overflow-hidden">
         <Image
-          src={item.imageUrl || '/placeholder.jpg'}
-          alt={item.name}
+          src={item.image || '/placeholder.jpg'}
+          alt={item.productTitle || 'Product'}
           fill
           className="object-cover"
         />
@@ -39,7 +39,7 @@ export default function CartItem({ item }: CartItemProps) {
 
       {/* Product Details */}
       <div className="flex-grow">
-        <h3 className="font-semibold text-lg mb-1">{item.name}</h3>
+        <h3 className="font-semibold text-lg mb-1">{item.productTitle}</h3>
         {item.artist && (
           <p className="text-sm text-muted-foreground mb-2">by {item.artist}</p>
         )}

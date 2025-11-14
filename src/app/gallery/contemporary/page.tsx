@@ -1,41 +1,10 @@
 import { Metadata } from 'next';
-import ProductCards from '@/components/shop/ProductCards';
-import { Product } from '@/types/product';
+import ContemporaryArtGallery from '@/components/gallery/ContemporaryArtGallery';
 
 export const metadata: Metadata = {
   title: 'Contemporary Art Gallery - Hansy Fine Arts',
   description: 'Browse our contemporary art collection',
 };
-
-// Mock contemporary art data
-const contemporaryArtworks: Product[] = [
-  {
-    _id: 'con-1',
-    name: 'Urban Reflections',
-    description: 'Modern cityscape with bold colors',
-    price: 499.99,
-    category: 'contemporary',
-    imageUrl: '/images/contemporary/contemporary-1.jpg',
-    artist: 'Sarah Mitchell',
-    inStock: true,
-    featured: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: 'con-2',
-    name: 'Silent Voices',
-    description: 'A contemporary take on portraiture',
-    price: 449.99,
-    category: 'contemporary',
-    imageUrl: '/images/contemporary/contemporary-2.jpg',
-    artist: 'David Park',
-    inStock: true,
-    featured: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
 
 export default function ContemporaryGalleryPage() {
   return (
@@ -47,7 +16,7 @@ export default function ContemporaryGalleryPage() {
         </p>
       </div>
 
-      <ProductCards products={contemporaryArtworks} />
+      <ContemporaryArtGallery />
     </div>
   );
 }

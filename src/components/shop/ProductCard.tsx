@@ -45,8 +45,8 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/product/${product._id}`}>
         <div className="relative aspect-square overflow-hidden bg-muted">
           <Image
-            src={product.imageUrl || '/placeholder.jpg'}
-            alt={product.name}
+            src={product.image || '/placeholder.jpg'}
+            alt={product.productTitle || 'Product'}
             fill
             className="object-cover transition-transform group-hover:scale-105"
           />
@@ -79,7 +79,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <CardContent className="p-4">
         <Link href={`/product/${product._id}`}>
           <h3 className="font-semibold text-lg mb-1 line-clamp-1 hover:text-primary">
-            {product.name}
+            {product.productTitle}
           </h3>
         </Link>
         <p className="text-sm text-muted-foreground mb-2 line-clamp-2">

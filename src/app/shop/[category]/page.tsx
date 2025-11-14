@@ -23,11 +23,11 @@ const getCategoryProducts = (category: string): Product[] => {
   return [
     {
       _id: `${category}-1`,
-      name: `${category.charAt(0).toUpperCase() + category.slice(1)} Masterpiece`,
+      productTitle: `${category.charAt(0).toUpperCase() + category.slice(1)} Masterpiece`,
       description: `A stunning ${category} artwork`,
       price: 349.99,
       category,
-      imageUrl: `/images/products/${category}-1.jpg`,
+      image: `/cuadro-horizontal-1.jpg`,
       artist: 'Featured Artist',
       inStock: true,
       featured: true,

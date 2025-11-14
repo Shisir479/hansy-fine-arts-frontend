@@ -1,41 +1,10 @@
 import { Metadata } from 'next';
-import ProductCards from '@/components/shop/ProductCards';
-import { Product } from '@/types/product';
+import AbstractArtGallery from '@/components/gallery/AbstractArtGallery';
 
 export const metadata: Metadata = {
   title: 'Abstract Art Gallery - Hansy Fine Arts',
   description: 'Browse our abstract art collection',
 };
-
-// Mock abstract art data
-const abstractArtworks: Product[] = [
-  {
-    _id: 'abs-1',
-    name: 'Vibrant Chaos',
-    description: 'An explosion of colors and emotions',
-    price: 399.99,
-    category: 'abstract',
-    imageUrl: '/images/abstract/abstract-1.jpg',
-    artist: 'Maria Rodriguez',
-    inStock: true,
-    featured: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: 'abs-2',
-    name: 'Fluid Dreams',
-    description: 'Flowing forms and dreamy textures',
-    price: 349.99,
-    category: 'abstract',
-    imageUrl: '/images/abstract/abstract-2.jpg',
-    artist: 'James Chen',
-    inStock: true,
-    featured: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
 
 export default function AbstractGalleryPage() {
   return (
@@ -47,7 +16,7 @@ export default function AbstractGalleryPage() {
         </p>
       </div>
 
-      <ProductCards products={abstractArtworks} />
+      <AbstractArtGallery />
     </div>
   );
 }

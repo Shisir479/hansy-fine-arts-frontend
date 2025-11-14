@@ -1,19 +1,23 @@
 export interface Product {
   _id: string;
-  name: string;
-  description: string;
+  productTitle: string;
+  name?: string; // Alias for productTitle
+  description?: string;
   price: number;
   category: string;
-  imageUrl: string;
+  image: string; // Main image from API
+  imageUrl?: string; // Alias for image
   images?: string[];
   artist?: string;
-  dimensions?: { width: number; height: number };
+  dimensions?: { width?: number; height?: number };
   material?: string;
-  inStock: boolean;
+  inStock?: boolean;
   featured?: boolean;
   tags?: string[];
-  createdAt: string;
-  updatedAt: string;
+  sku?: string;
+  quantity?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CartItem extends Product {

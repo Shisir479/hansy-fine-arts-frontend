@@ -20,16 +20,16 @@ interface ProductPageProps {
 // Mock product data
 const mockProduct = {
   _id: '1',
-  name: 'Abstract Waves',
+  productTitle: 'Abstract Waves',
   description:
     'A stunning abstract piece featuring flowing waves. This artwork captures the essence of movement and fluidity, perfect for modern interiors.',
   price: 299.99,
   category: 'abstract',
-  imageUrl: '/images/products/abstract-1.jpg',
+  image: '/cuadro-horizontal-1.jpg',
   images: [
-    '/images/products/abstract-1.jpg',
-    '/images/products/abstract-2.jpg',
-    '/images/products/abstract-3.jpg',
+    '/cuadro-horizontal-1.jpg',
+    '/cuadro-horizontal-2.jpg',
+    '/cuadro-horizontal-3.jpg',
   ],
   artist: 'Jane Smith',
   dimensions: { width: 24, height: 36 },
@@ -58,8 +58,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div>
           <div className="relative aspect-square bg-muted rounded-lg overflow-hidden mb-4">
             <Image
-              src={product.imageUrl}
-              alt={product.name}
+              src={product.image}
+              alt={product.productTitle}
               fill
               className="object-cover"
               priority
@@ -70,7 +70,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {/* Product Info */}
         <div>
-          <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
+          <h1 className="text-4xl font-bold mb-4">{product.productTitle}</h1>
           {product.artist && (
             <p className="text-lg text-muted-foreground mb-4">by {product.artist}</p>
           )}
