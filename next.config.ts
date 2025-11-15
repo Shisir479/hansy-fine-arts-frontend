@@ -15,6 +15,18 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.finerworks.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'finerworks.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co.com',
+      },
     ],
   },
   experimental: {

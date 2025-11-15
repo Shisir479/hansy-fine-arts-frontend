@@ -1,5 +1,5 @@
 import BannerSlider from '@/components/home/BannerSlider';
-import TabCategories from '@/components/home/TabCategories';
+import FileImageFormFineWork from '@/components/features/FileImageFormFineWork';
 import MasonaryGrid from '@/components/gallery/MasonaryGrid';
 import AboutUs from '@/components/home/AboutUs';
 import PricingTestimonials from '@/components/features/PricingTestimonials';
@@ -9,7 +9,7 @@ export default function HomePage() {
   return (
     <div>
       <BannerSlider />
-      <TabCategories />
+      <FileImageFormFineWork />
       <MasonaryGrid />
       <AboutUs />
       <PricingTestimonials />
