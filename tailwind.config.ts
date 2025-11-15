@@ -9,6 +9,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        Raleway: ['"Raleway"', 'serif'],
+        yesterYear: ['Yesteryear', 'cursive'],
+        Meie: ['"Meie Script"', 'serif'],
+        Lato: ['Lato', 'serif'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -43,11 +49,22 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        blackPrimary: '#030712',
+        blackSecondary: 'rgba(48, 48, 48, 0.90)',
+        whiteSecondary: '#F0F0F0',
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+      },
+      backgroundImage: {
+        banner: "url('/cuadro-horizontal-1.jpg')",
+        banner_2: "url('/cuadro-horizontal-2.jpg')",
+        banner_4: "url('/gallery-banner.jpg')",
+      },
+      boxShadow: {
+        'custom-white': '0px 4px 10px 0px rgba(255, 255, 255, 0.90)',
       },
     },
   },
