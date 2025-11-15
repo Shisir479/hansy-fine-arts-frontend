@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/providers/ThemeProvider';
 import { Toaster } from 'react-hot-toast';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import TopNavbar from '@/components/layout/TopNavbar';
 
 export const metadata: Metadata = {
   title: 'Hansy Fine Arts - Original Art & Custom Portraits',
@@ -19,16 +20,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased bg-white dark:bg-black transition-colors duration-300 min-h-screen">
         <StoreProvider>
           <ThemeProvider>
-            <div className="flex flex-col min-h-screen">
-              <Navbar />
-              <main className="flex-grow">
-                {children}
-              </main>
-              <Footer />
-            </div>
+            <TopNavbar />
+            <Navbar />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
             <Toaster position="top-right" />
           </ThemeProvider>
         </StoreProvider>
