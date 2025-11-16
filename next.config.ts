@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'www.finerworks.com',
       },
       {
@@ -26,6 +30,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'i.ibb.co.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'inventory.finerworks.com',
       },
     ],
   },

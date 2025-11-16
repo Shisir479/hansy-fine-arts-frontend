@@ -1,10 +1,10 @@
-import { Metadata } from 'next';
-import ShopArtCategory from '@/components/shop/ShopArtCategory';
-import MasonaryGrid from '@/components/gallery/MasonaryGrid';
+import { Metadata } from "next";
+import ShopArtCategory from "@/components/shop/ShopArtCategory";
+import MasonaryGrid from "@/components/gallery/DomeGallery";
 
 export const metadata: Metadata = {
-  title: 'Gallery - Hansy Fine Arts',
-  description: 'Browse our art galleries',
+  title: "Gallery - Hansy Fine Arts",
+  description: "Browse our art galleries",
 };
 
 export default function GalleryPage() {

@@ -8,8 +8,11 @@ import { toggleTheme } from "@/lib/redux/slices/themeSlice";
 
 // Icons
 import { FaPhoneAlt } from "react-icons/fa";
+import { HiOutlineShoppingBag } from "react-icons/hi";
+import { BsHeartFill } from "react-icons/bs";
+import { BiUserCircle } from "react-icons/bi";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 
-// ShadCN
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -40,6 +43,12 @@ import {
 
 import { Button } from "@/components/ui/button";
 
+// Main border color for layout (e.g., navbar bottom)
+const borderColor = "border-gray-200 dark:border-gray-800";
+// Icon text color
+const iconColor = "text-gray-600 dark:text-gray-300";
+
+
 const Navbar = () => {
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state) => state.theme.mode);
@@ -51,9 +60,9 @@ const Navbar = () => {
     .toFixed(2);
 
   return (
-    <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
+    <div className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}>
       <div className="container mx-auto py-3 px-4 flex items-center justify-between">
-        {/* LOGO LEFT */}
+        {/* ONLY LOGO */}
         <Link href="/" className="hidden lg:flex">
           <Image
             src="/hansyeaggy-logo.png"
@@ -72,7 +81,7 @@ const Navbar = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 stroke="currentColor"
                 fill="none"
-                className="w-6 h-6"
+                className={`w-6 h-6 ${iconColor}`}
               >
                 <path d="M4 6h16M4 12h16M4 18h16" />
               </svg>
@@ -88,7 +97,6 @@ const Navbar = () => {
               <Link href="/contact">Contact</Link>
               <Link href="/shop">Artist Shop</Link>
               <Link href="/faq">FAQ</Link>
-
               <div>
                 <p className="font-semibold mb-1">Shop Art</p>
                 <div className="flex flex-col pl-3 space-y-2 text-base">
@@ -100,26 +108,37 @@ const Navbar = () => {
             </div>
           </SheetContent>
         </Sheet>
-        {/* DESKTOP MENU */}
+
         {/* DESKTOP MENU */}
         <NavigationMenu className="hidden lg:flex">
           <NavigationMenuList className="space-x-6">
             <NavigationMenuItem>
-              <NavigationMenuTrigger className="font-semibold text-base hover:text-[#b09f7b] transition-colors bg-transparent border-0 p-0 h-auto [&>svg]:hidden data-[state=open]:bg-transparent data-[state=open]:text-[#b09f7b]">
+              <NavigationMenuTrigger
+                className="font-semibold text-base hover:text-gray-900 dark:hover:text-white transition-colors bg-transparent border-0 p-0 h-auto [&>svg]:hidden data-[state=open]:bg-transparent"
+              >
                 SHOP ART
               </NavigationMenuTrigger>
-
+              {/* DROPDOWN WITH ANIMATION ON HOVER */}
               <NavigationMenuContent>
-                <ul className="grid gap-1 p-4 w-64 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 shadow-xl rounded-lg">
+                <ul
+                  className={`grid gap-1 p-4 w-[250px] bg-white dark:bg-gray-950 border ${borderColor} shadow-xl rounded-lg
+                    transition-all duration-300 ease-in-out
+                    group-hover:w-[450px] hover:w-[450px] data-[state=open]:w-[450px]`}
+                  style={{
+                    width: "250px",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.width = "450px")}
+                  onMouseLeave={e => (e.currentTarget.style.width = "250px")}
+                >
                   <li>
                     <Link
                       href="/contemporary"
-                      className="group block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#b09f7b]/10 hover:text-[#b09f7b] focus:bg-[#b09f7b]/10 focus:text-[#b09f7b]"
+                      className="group block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                     >
                       <div className="text-sm font-semibold leading-none mb-1">
                         Contemporary
                       </div>
-                      <p className="line-clamp-2 text-xs leading-snug text-muted-foreground group-hover:text-[#b09f7b]/80">
+                      <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
                         Modern and contemporary art pieces
                       </p>
                     </Link>
@@ -127,12 +146,12 @@ const Navbar = () => {
                   <li>
                     <Link
                       href="/abstract-designs"
-                      className="group block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#b09f7b]/10 hover:text-[#b09f7b] focus:bg-[#b09f7b]/10 focus:text-[#b09f7b]"
+                      className="group block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                     >
                       <div className="text-sm font-semibold leading-none mb-1">
                         Abstract & Designs
                       </div>
-                      <p className="line-clamp-2 text-xs leading-snug text-muted-foreground group-hover:text-[#b09f7b]/80">
+                      <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
                         Unique abstract artwork and patterns
                       </p>
                     </Link>
@@ -140,12 +159,12 @@ const Navbar = () => {
                   <li>
                     <Link
                       href="/custom-portrait"
-                      className="group block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-[#b09f7b]/10 hover:text-[#b09f7b] focus:bg-[#b09f7b]/10 focus:text-[#b09f7b]"
+                      className="group block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                     >
                       <div className="text-sm font-semibold leading-none mb-1">
                         Custom Portraits
                       </div>
-                      <p className="line-clamp-2 text-xs leading-snug text-muted-foreground group-hover:text-[#b09f7b]/80">
+                      <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
                         Personalized portraits made just for you
                       </p>
                     </Link>
@@ -153,145 +172,97 @@ const Navbar = () => {
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
-
             <NavigationMenuItem>
               <Link
-                href="/artsy-product"
-                className="font-semibold text-base hover:text-[#b09f7b] transition-colors"
+                href="/gallery"
+                className="font-semibold text-base hover:text-gray-900 dark:hover:text-white transition-colors"
               >
-                ARTSY PRODUCTS
+                GALLERY
               </Link>
             </NavigationMenuItem>
-
             <NavigationMenuItem>
               <Link
                 href="/bio"
-                className="font-semibold text-base hover:text-[#b09f7b] transition-colors"
+                className="font-semibold text-base hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 ABOUT
               </Link>
             </NavigationMenuItem>
-
             <NavigationMenuItem>
               <Link
                 href="/contact"
-                className="font-semibold text-base hover:text-[#b09f7b] transition-colors"
+                className="font-semibold text-base hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 CONTACT
               </Link>
             </NavigationMenuItem>
-
             <NavigationMenuItem>
               <Link
                 href="/faq"
-                className="font-semibold text-base hover:text-[#b09f7b] transition-colors"
+                className="font-semibold text-base hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 FAQ
               </Link>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
+
         {/* RIGHT SIDE ICONS */}
         <div className="flex items-center gap-6">
           {/* THEME TOGGLE */}
           <button
             onClick={() => dispatch(toggleTheme())}
-            className="text-muted-foreground hover:text-foreground transition"
+            className={`transition ${iconColor} hover:text-gray-900 dark:hover:text-white`}
           >
             {theme === "light" ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-6 h-6"
-                fill="none"
-                strokeWidth="1.5"
-                stroke="currentColor"
-              >
-                <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
-              </svg>
+              <MdDarkMode className="w-6 h-6" />
             ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-6 h-6"
-                fill="none"
-                strokeWidth="1.5"
-                stroke="currentColor"
-              >
-                <circle cx="12" cy="12" r="5" />
-                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42" />
-              </svg>
+              <MdLightMode className="w-6 h-6" />
             )}
           </button>
-
-          {/* FAVORITES */}
-          <button className="relative text-muted-foreground hover:text-foreground transition">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              stroke="currentColor"
-              fill="none"
-              className="w-6 h-6"
-            >
-              <path d="M4.3 6.3a4.5 4.5 0 016.4 0L12 7.6l1.3-1.3a4.5 4.5 0 016.4 6.4L12 21.3 4.3 12.7a4.5 4.5 0 010-6.4z" />
-            </svg>
-
+          
+          {/* FAVORITES -- BORDER REMOVED */}
+          <button className={`relative transition ${iconColor} hover:text-gray-900 dark:hover:text-white`}>
+            <BsHeartFill className="w-6 h-6" />
             <span className="absolute -top-1 -right-2 bg-background text-foreground text-xs w-5 h-5 flex items-center justify-center rounded-full shadow">
               0
             </span>
           </button>
-
-          {/* CART */}
+          
+          {/* CART -- BORDER REMOVED */}
           <Popover>
-            <PopoverTrigger className="relative text-muted-foreground hover:text-foreground transition">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                stroke="currentColor"
-                fill="none"
-                className="w-6 h-6"
-              >
-                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
-                <circle cx="9" cy="21" r="1" />
-                <circle cx="20" cy="21" r="1" />
-              </svg>
-
+            <PopoverTrigger className={`relative transition ${iconColor} hover:text-gray-900 dark:hover:text-white`}>
+              <HiOutlineShoppingBag className="w-7 h-7" />
               <span className="absolute -top-1 -right-2 bg-background text-foreground text-xs w-5 h-5 flex items-center justify-center rounded-full shadow">
                 {totalItems}
               </span>
             </PopoverTrigger>
-
-            <PopoverContent className="w-60">
+            <PopoverContent className={`w-60 rounded-lg border ${borderColor}`}>
               <p className="font-semibold text-lg">Items: {totalItems}</p>
               <p className="text-sm text-muted-foreground">
                 Subtotal: ${totalPrice}
               </p>
-
               <Button className="w-full mt-3" asChild>
                 <Link href="/cart">View Cart</Link>
               </Button>
             </PopoverContent>
           </Popover>
-
-          {/* PROFILE */}
+          
+          {/* PROFILE -- BORDER AND BG REMOVED */}
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-accent transition">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  stroke="currentColor"
-                  fill="none"
-                  className="w-5 h-5"
-                >
-                  <circle cx="12" cy="7" r="4" />
-                  <path d="M5.5 20a6.5 6.5 0 0113 0" />
-                </svg>
+              <div 
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${iconColor} hover:text-gray-900 dark:hover:text-white transition`}
+              >
+                <BiUserCircle className="w-7 h-7" />
               </div>
             </DropdownMenuTrigger>
-
-            <DropdownMenuContent className="w-48">
+            <DropdownMenuContent className={`w-48 border ${borderColor}`}>
               <DropdownMenuItem>
                 <Link href="/login" className="w-full block">
                   Login
                 </Link>
               </DropdownMenuItem>
-
               <DropdownMenuItem>
                 <Link href="/sign-up" className="w-full block">
                   Create Account

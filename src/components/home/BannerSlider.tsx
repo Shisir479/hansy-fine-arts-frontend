@@ -1,93 +1,147 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
-const ArtCarousel = () => {
-  const images = [
-    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1600&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1600&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=1600&h=600&fit=crop"
-  ];
+const images = [
+  {
+    id: 1,
+    src: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1600&h=600&fit=crop",
+    alt: "Image 1",
+  },
+  {
+    id: 2,
+    src:   "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1600&h=600&fit=crop",
+    alt: "Image 2",
+  },
+  {
+    id: 3,
+    src:"https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=1600&h=600&fit=crop",
+    alt: "Image 3",
+  },
+];
 
+const autoPlayInterval = 5000;
+const showIndicators = true;
+const showControls = true;
+const height = "h-[250px] md:h-[600px]";
+
+const ArtCarousel: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [direction, setDirection] = useState('next');
-
-  const goToNext = useCallback(() => {
-    if (isAnimating) return;
-    setDirection('next');
-    setIsAnimating(true);
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-    setTimeout(() => setIsAnimating(false), 500);
-  }, [isAnimating, images.length]);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
   const goToPrevious = useCallback(() => {
-    if (isAnimating) return;
-    setDirection('prev');
-    setIsAnimating(true);
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-    setTimeout(() => setIsAnimating(false), 500);
-  }, [isAnimating, images.length]);
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  }, []);
 
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+  }, []);
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+  };
+
+  // Auto-play functionality
   useEffect(() => {
-    const interval = setInterval(goToNext, 5000);
+    if (!isAutoPlaying || isHovered) return;
+    const interval = setInterval(() => {
+      goToNext();
+    }, autoPlayInterval);
     return () => clearInterval(interval);
-  }, [goToNext]);
+  }, [isAutoPlaying, isHovered, goToNext]);
 
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') goToPrevious();
-      if (e.key === 'ArrowRight') goToNext();
+      if (e.key === "ArrowLeft") goToPrevious();
+      if (e.key === "ArrowRight") goToNext();
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [goToNext, goToPrevious]);
-
-  const currentImage = images[currentIndex];
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [goToPrevious, goToNext]);
 
   return (
-    <div className="w-full bg-white">
-      {/* Carousel Container */}
-      <div className="relative w-full">
-        {/* Main Image Area */}
-        <div className="relative w-full aspect-[16/6] overflow-hidden bg-gray-900">
+    <div
+      className={`relative w-full ${height} overflow-hidden group bg-gray-900`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Slides Container */}
+      <div className="relative w-full h-full">
+        {images.map((image, index) => (
           <div
-            className={`absolute inset-0 transition-all duration-500 ease-out ${
-              isAnimating
-                ? direction === 'next'
-                  ? 'translate-x-full opacity-0'
-                  : '-translate-x-full opacity-0'
-                : 'translate-x-0 opacity-100'
+            key={image.id}
+            className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+              index === currentIndex
+                ? "opacity-100 scale-100 z-10"
+                : "opacity-0 scale-105 z-0"
             }`}
           >
             <Image
-              src={currentImage}
-              alt={`Banner ${currentIndex + 1}`}
+              src={image.src}
+              alt={image.alt}
               fill
-              priority={currentIndex === 0}
+              className="object-cover"
+              draggable={false}
+              priority={index === 0}
             />
           </div>
+        ))}
+      </div>
 
-          {/* Navigation Arrows */}
+      {/* Navigation Controls */}
+      {showControls && (
+        <>
           <button
             onClick={goToPrevious}
-            disabled={isAnimating}
-            className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:scale-110"
-            aria-label="Previous image"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 transform -translate-x-4 group-hover:translate-x-0 shadow-lg"
+            aria-label="Previous slide"
           >
-            <ChevronLeft className="md:w-6 md:h-6 w-4 h-4" />
+            <ChevronLeft className="w-6 h-6" />
           </button>
-
           <button
             onClick={goToNext}
-            disabled={isAnimating}
-            className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:scale-110"
-            aria-label="Next image"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 shadow-lg"
+            aria-label="Next slide"
           >
-            <ChevronRight className="md:w-6 md:h-6 w-4 h-4" />
+            <ChevronRight className="w-6 h-6" />
           </button>
-        </div>
+        </>
+      )}
+
+      {/* Auto-play Toggle */}
+      <button
+        onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+        className="absolute top-4 right-4 z-20 p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg"
+        aria-label={isAutoPlaying ? "Pause autoplay" : "Start autoplay"}
+      >
+        {isAutoPlaying ? (
+          <Pause className="w-5 h-5" />
+        ) : (
+          <Play className="w-5 h-5" />
+        )}
+      </button>
+
+      {/* Indicators */}
+
+      {/* Progress Bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-20">
+        <div
+          className="h-full bg-[#b09f7b] transition-all duration-300 ease-linear"
+          style={{
+            width: isAutoPlaying && !isHovered ? "100%" : "0%",
+            transition:
+              isAutoPlaying && !isHovered
+                ? `width ${autoPlayInterval}ms linear`
+                : "width 0.3s",
+          }}
+        />
       </div>
     </div>
   );
