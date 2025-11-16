@@ -7,60 +7,36 @@ export const metadata: Metadata = {
   description: 'Browse our collection of fine art pieces',
 };
 
-// Mock data - in production, fetch from API
-const mockProducts: Product[] = [
-  {
-    _id: '1',
-    productTitle: 'Abstract Waves',
-    description: 'A stunning abstract piece featuring flowing waves',
-    price: 299.99,
-    category: 'abstract',
-    image: '/cuadro-horizontal-1.jpg',
-    artist: 'Jane Smith',
-    inStock: true,
-    featured: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: '2',
-    productTitle: 'Contemporary Portrait',
-    description: 'Modern portrait with bold colors',
-    price: 499.99,
-    category: 'contemporary',
-    image: '/cuadro-horizontal-2.jpg',
-    artist: 'John Doe',
-    inStock: true,
-    featured: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: '3',
-    productTitle: 'Mountain Sunset',
-    description: 'Beautiful landscape of mountains at sunset',
-    price: 399.99,
-    category: 'landscape',
-    image: '/cuadro-horizontal-3.jpg',
-    artist: 'Sarah Johnson',
-    inStock: true,
-    featured: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+async function getProducts(): Promise<Product[]> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/products`, {
+      cache: 'no-store',
+    });
 
-export default function ShopPage() {
+    if (!response.ok) {
+      console.error('Failed to fetch products');
+      return [];
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
+  }
+}
+
+export default async function ShopPage() {
+  const products = await getProducts();
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">Shop All Artworks</h1>
-        <p className="text-lg text-muted-foreground">
-          Discover unique pieces from talented artists
-        </p>
-      </div>
-
-      <ProductCards products={mockProducts} />
+    <div className="w-full">
+      {products.length > 0 ? (
+        <ProductCards products={products} />
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-lg text-gray-600">No products available at the moment.</p>
+        </div>
+      )}
     </div>
   );
 }

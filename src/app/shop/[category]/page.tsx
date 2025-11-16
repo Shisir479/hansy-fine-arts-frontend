@@ -18,40 +18,39 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   };
 }
 
-// Mock category products
-const getCategoryProducts = (category: string): Product[] => {
-  return [
-    {
-      _id: `${category}-1`,
-      productTitle: `${category.charAt(0).toUpperCase() + category.slice(1)} Masterpiece`,
-      description: `A stunning ${category} artwork`,
-      price: 349.99,
-      category,
-      image: `/cuadro-horizontal-1.jpg`,
-      artist: 'Featured Artist',
-      inStock: true,
-      featured: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ];
-};
+async function getCategoryProducts(category: string): Promise<Product[]> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/products`, {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      console.error('Failed to fetch products');
+      return [];
+    }
+
+    const products: Product[] = await response.json();
+    return products.filter((product) => product.category.toLowerCase() === category.toLowerCase());
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
+  }
+}
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = await params;
-  const products = getCategoryProducts(category);
+  const products = await getCategoryProducts(category);
   const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">{categoryName} Art</h1>
-        <p className="text-lg text-muted-foreground">
-          Explore our curated collection of {category} artworks
-        </p>
-      </div>
-
-      <ProductCards products={products} />
+    <div className="w-full">
+      {products.length > 0 ? (
+        <ProductCards products={products} />
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-lg text-gray-600">No {categoryName} products available at the moment.</p>
+        </div>
+      )}
     </div>
   );
 }
