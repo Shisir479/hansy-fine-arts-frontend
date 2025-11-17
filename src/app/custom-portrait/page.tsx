@@ -90,45 +90,48 @@ export default function CustomPortraitPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="portraitType">Portrait Type</Label>
-                      <Select
+                      <select
                         id="portraitType"
                         name="portraitType"
                         value={formData.portraitType}
                         onChange={handleChange}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <option value="individual">Individual</option>
                         <option value="couple">Couple</option>
                         <option value="family">Family</option>
                         <option value="pet">Pet</option>
-                      </Select>
+                      </select>
                     </div>
                     <div>
                       <Label htmlFor="size">Size</Label>
-                      <Select
+                      <select
                         id="size"
                         name="size"
                         value={formData.size}
                         onChange={handleChange}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <option value="small">Small (8x10&quot;)</option>
                         <option value="medium">Medium (16x20&quot;)</option>
                         <option value="large">Large (24x36&quot;)</option>
                         <option value="xlarge">X-Large (30x40&quot;)</option>
-                      </Select>
+                      </select>
                     </div>
                     <div>
                       <Label htmlFor="style">Style</Label>
-                      <Select
+                      <select
                         id="style"
                         name="style"
                         value={formData.style}
                         onChange={handleChange}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <option value="realistic">Realistic</option>
                         <option value="abstract">Abstract</option>
                         <option value="impressionist">Impressionist</option>
                         <option value="contemporary">Contemporary</option>
-                      </Select>
+                      </select>
                     </div>
                   </div>
 

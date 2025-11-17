@@ -2,21 +2,22 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import banner1 from "/public/Hansy-Banner.jpg";
 
 const images = [
   {
     id: 1,
-    src: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1600&h=600&fit=crop",
+    src: banner1,
     alt: "Image 1",
   },
   {
     id: 2,
-    src:   "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1600&h=600&fit=crop",
+    src: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1600&h=600&fit=crop",
     alt: "Image 2",
   },
   {
     id: 3,
-    src:"https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=1600&h=600&fit=crop",
+    src: "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=1600&h=600&fit=crop",
     alt: "Image 3",
   },
 ];
@@ -24,7 +25,7 @@ const images = [
 const autoPlayInterval = 5000;
 const showIndicators = true;
 const showControls = true;
-const height = "h-[250px] md:h-[600px]";
+const height = "h-[250px] md:h-[650px]";
 
 const ArtCarousel: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -100,14 +101,14 @@ const ArtCarousel: React.FC = () => {
         <>
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 transform -translate-x-4 group-hover:translate-x-0 shadow-lg"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white transition-all duration-300 opacity-0 group-hover:opacity-100 transform -translate-x-4 group-hover:translate-x-0 shadow-lg"
             aria-label="Previous slide"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 shadow-lg"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white  transition-all duration-300 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 shadow-lg"
             aria-label="Next slide"
           >
             <ChevronRight className="w-6 h-6" />
@@ -118,7 +119,7 @@ const ArtCarousel: React.FC = () => {
       {/* Auto-play Toggle */}
       <button
         onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-        className="absolute top-4 right-4 z-20 p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg"
+        className="absolute top-4 right-4 z-20 p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white  transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg"
         aria-label={isAutoPlaying ? "Pause autoplay" : "Start autoplay"}
       >
         {isAutoPlaying ? (

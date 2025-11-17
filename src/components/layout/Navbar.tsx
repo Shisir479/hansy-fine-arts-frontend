@@ -42,12 +42,12 @@ import {
 } from "@/components/ui/sheet";
 
 import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 // Main border color for layout (e.g., navbar bottom)
 const borderColor = "border-gray-200 dark:border-gray-800";
 // Icon text color
 const iconColor = "text-gray-600 dark:text-gray-300";
-
 
 const Navbar = () => {
   const dispatch = useAppDispatch();
@@ -60,8 +60,10 @@ const Navbar = () => {
     .toFixed(2);
 
   return (
-    <div className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}>
-      <div className="container mx-auto py-3 px-4 flex items-center justify-between">
+    <div
+      className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}
+    >
+      <div className="container mx-auto py-3 md:px-4 flex items-center justify-between">
         {/* ONLY LOGO */}
         <Link href="/" className="hidden lg:flex">
           <Image
@@ -76,15 +78,8 @@ const Navbar = () => {
         {/* MOBILE MENU */}
         <Sheet>
           <SheetTrigger className="lg:hidden">
-            <Button variant="ghost">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                stroke="currentColor"
-                fill="none"
-                className={`w-6 h-6 ${iconColor}`}
-              >
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+            <Button variant="ghost" className="h-10 px-2">
+              <Menu className={`w-7 h-7 text-gray-900`} />
             </Button>
           </SheetTrigger>
 
@@ -92,7 +87,7 @@ const Navbar = () => {
             <SheetTitle>Menu</SheetTitle>
 
             <div className="mt-6 flex flex-col space-y-4 text-lg">
-              <Link href="/gallery">Gallery</Link>
+              <Link href="/artsy-products">ARTSY PRODUCTS</Link>
               <Link href="/bio">Bio</Link>
               <Link href="/contact">Contact</Link>
               <Link href="/shop">Artist Shop</Link>
@@ -113,27 +108,25 @@ const Navbar = () => {
         <NavigationMenu className="hidden lg:flex">
           <NavigationMenuList className="space-x-6">
             <NavigationMenuItem>
-              <NavigationMenuTrigger
-                className="font-semibold text-base hover:text-gray-900 dark:hover:text-white transition-colors bg-transparent border-0 p-0 h-auto [&>svg]:hidden data-[state=open]:bg-transparent"
-              >
+              <NavigationMenuTrigger className=" text-base font-normal hover:text-gray-900 dark:hover:text-white transition-colors bg-transparent border-0 p-0 h-auto [&>svg]:hidden data-[state=open]:bg-transparent italic">
                 SHOP ART
               </NavigationMenuTrigger>
               {/* DROPDOWN WITH ANIMATION ON HOVER */}
               <NavigationMenuContent>
                 <ul
-                  className={`grid gap-1 p-4 w-[250px] bg-white dark:bg-gray-950 border ${borderColor} shadow-xl rounded-lg
+                  className={`grid gap-1 p-4 w-[250px] bg-white dark:bg-gray-950 border ${borderColor} shadow-xl 
                     transition-all duration-300 ease-in-out
                     group-hover:w-[450px] hover:w-[450px] data-[state=open]:w-[450px]`}
                   style={{
                     width: "250px",
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.width = "450px")}
-                  onMouseLeave={e => (e.currentTarget.style.width = "250px")}
+                  onMouseEnter={(e) => (e.currentTarget.style.width = "450px")}
+                  onMouseLeave={(e) => (e.currentTarget.style.width = "250px")}
                 >
                   <li>
                     <Link
                       href="/contemporary"
-                      className="group block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                      className="group block select-none p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                     >
                       <div className="text-sm font-semibold leading-none mb-1">
                         Contemporary
@@ -146,7 +139,7 @@ const Navbar = () => {
                   <li>
                     <Link
                       href="/abstract-designs"
-                      className="group block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                      className="group block select-none p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                     >
                       <div className="text-sm font-semibold leading-none mb-1">
                         Abstract & Designs
@@ -159,7 +152,7 @@ const Navbar = () => {
                   <li>
                     <Link
                       href="/custom-portrait"
-                      className="group block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                      className="group block select-none p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                     >
                       <div className="text-sm font-semibold leading-none mb-1">
                         Custom Portraits
@@ -174,16 +167,16 @@ const Navbar = () => {
             </NavigationMenuItem>
             <NavigationMenuItem>
               <Link
-                href="/gallery"
-                className="font-semibold text-base hover:text-gray-900 dark:hover:text-white transition-colors"
+                href="/arsy-products"
+                className=" text-base hover:text-gray-900 dark:hover:text-white transition-colors italic"
               >
-                GALLERY
+                ARTSY PRODUCTS
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <Link
                 href="/bio"
-                className="font-semibold text-base hover:text-gray-900 dark:hover:text-white transition-colors"
+                className=" text-base hover:text-gray-900 dark:hover:text-white transition-colors italic"
               >
                 ABOUT
               </Link>
@@ -191,7 +184,7 @@ const Navbar = () => {
             <NavigationMenuItem>
               <Link
                 href="/contact"
-                className="font-semibold text-base hover:text-gray-900 dark:hover:text-white transition-colors"
+                className=" text-base hover:text-gray-900 dark:hover:text-white transition-colors italic"
               >
                 CONTACT
               </Link>
@@ -199,7 +192,7 @@ const Navbar = () => {
             <NavigationMenuItem>
               <Link
                 href="/faq"
-                className="font-semibold text-base hover:text-gray-900 dark:hover:text-white transition-colors"
+                className=" text-base hover:text-gray-900 dark:hover:text-white transition-colors italic"
               >
                 FAQ
               </Link>
@@ -220,18 +213,22 @@ const Navbar = () => {
               <MdLightMode className="w-6 h-6" />
             )}
           </button>
-          
+
           {/* FAVORITES -- BORDER REMOVED */}
-          <button className={`relative transition ${iconColor} hover:text-gray-900 dark:hover:text-white`}>
+          <button
+            className={`relative transition ${iconColor} hover:text-gray-900 dark:hover:text-white`}
+          >
             <BsHeartFill className="w-6 h-6" />
             <span className="absolute -top-1 -right-2 bg-background text-foreground text-xs w-5 h-5 flex items-center justify-center rounded-full shadow">
               0
             </span>
           </button>
-          
+
           {/* CART -- BORDER REMOVED */}
           <Popover>
-            <PopoverTrigger className={`relative transition ${iconColor} hover:text-gray-900 dark:hover:text-white`}>
+            <PopoverTrigger
+              className={`relative transition ${iconColor} hover:text-gray-900 dark:hover:text-white`}
+            >
               <HiOutlineShoppingBag className="w-7 h-7" />
               <span className="absolute -top-1 -right-2 bg-background text-foreground text-xs w-5 h-5 flex items-center justify-center rounded-full shadow">
                 {totalItems}
@@ -247,11 +244,11 @@ const Navbar = () => {
               </Button>
             </PopoverContent>
           </Popover>
-          
+
           {/* PROFILE -- BORDER AND BG REMOVED */}
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <div 
+              <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center ${iconColor} hover:text-gray-900 dark:hover:text-white transition`}
               >
                 <BiUserCircle className="w-7 h-7" />

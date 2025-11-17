@@ -1,121 +1,185 @@
-import Link from 'next/link';
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+"use client"
+import { useState } from 'react';
+import { Mail, Phone, MapPin, ArrowUpRight, Send } from 'lucide-react';
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [isHovered, setIsHovered] = useState<string | null>(null);
   const currentYear = new Date().getFullYear();
 
+  const socialLinks = [
+    { name: 'Instagram', url: '#', handle: '@hansyfinearts' },
+    { name: 'Facebook', url: '#', handle: '/hansyfinearts' },
+    { name: 'Twitter', url: '#', handle: '@hansyarts' },
+    { name: 'LinkedIn', url: '#', handle: '/hansyfinearts' },
+  ];
+
+  const navSections = [
+    {
+      title: 'Explore',
+      links: ['Shop', 'Gallery', 'Custom Portraits', 'About', 'Process']
+    },
+    {
+      title: 'Support',
+      links: ['Contact', 'FAQ', 'Shipping', 'Returns', 'Care Guide']
+    },
+    {
+      title: 'Legal',
+      links: ['Privacy', 'Terms', 'Cookies', 'Licenses']
+    }
+  ];
+
   return (
-    <footer className="bg-muted mt-16">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* About */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Hansy Fine Arts</h3>
-            <p className="text-sm text-muted-foreground">
-              Discover unique fine art pieces, custom portraits, and 3D art previews. 
-              Shop our curated collection of contemporary and abstract art.
-            </p>
+    <footer className="bg-white text-black relative overflow-hidden">
+      {/* Main Footer Content */}
+      <div className="container mx-auto px-4 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-20">
+          {/* Left Section - Brand & Newsletter */}
+          <div className="lg:col-span-5">
+            {/* Brand */}
+            <div className="mb-12">
+              <h2 className="text-5xl md:text-6xl font-extralight tracking-tighter mb-3">
+                Hansy
+              </h2>
+              <h2 className="text-5xl md:text-6xl font-light tracking-tighter italic">
+                Fine Arts
+              </h2>
+              <div className="w-20 h-[1px] bg-black mt-6 mb-8"></div>
+              <p className="text-zinc-600 font-light leading-relaxed max-w-md">
+                Creating timeless art that transforms spaces and captures emotions. 
+                Every piece tells a story, every stroke holds meaning.
+              </p>
+            </div>
+
+            {/* Newsletter */}
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 mb-4">
+                Stay Inspired
+              </p>
+              <div className="flex border-b border-zinc-300 pb-2 group">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-transparent flex-1 text-black placeholder:text-zinc-400 focus:outline-none text-sm"
+                />
+                <button 
+                  className="ml-4 text-black hover:text-zinc-600 transition-colors"
+                  aria-label="Subscribe"
+                >
+                  <Send className="h-4 w-4" strokeWidth={1.5} />
+                </button>
+              </div>
+              <p className="text-zinc-500 text-xs mt-3 font-light">
+                Subscribe for exclusive previews and art insights
+              </p>
+            </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/shop" className="text-sm text-muted-foreground hover:text-primary">
-                  Shop
-                </Link>
-              </li>
-              <li>
-                <Link href="/gallery" className="text-sm text-muted-foreground hover:text-primary">
-                  Gallery
-                </Link>
-              </li>
-              <li>
-                <Link href="/custom-portrait" className="text-sm text-muted-foreground hover:text-primary">
-                  Custom Portraits
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-sm text-muted-foreground hover:text-primary">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="text-sm text-muted-foreground hover:text-primary">
-                  FAQ
-                </Link>
-              </li>
-            </ul>
+          {/* Middle Section - Navigation */}
+          <div className="lg:col-span-4">
+            <div className="grid grid-cols-2 gap-8">
+              {navSections.map((section, idx) => (
+                <div key={idx}>
+                  <h3 className="text-xs uppercase tracking-[0.3em] text-zinc-500 mb-6">
+                    {section.title}
+                  </h3>
+                  <ul className="space-y-3">
+                    {section.links.map((link, linkIdx) => (
+                      <li key={linkIdx}>
+                        <a
+                          href="#"
+                          className="text-zinc-700 hover:text-black transition-colors text-sm font-light group inline-flex items-center gap-2"
+                        >
+                          {link}
+                          <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" strokeWidth={1.5} />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Customer Service */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Customer Service</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary">
-                  Contact Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="text-sm text-muted-foreground hover:text-primary">
-                  FAQs
-                </Link>
-              </li>
-              <li>
-                <Link href="/cart" className="text-sm text-muted-foreground hover:text-primary">
-                  Shopping Cart
-                </Link>
-              </li>
-              <li>
-                <Link href="/wishlist" className="text-sm text-muted-foreground hover:text-primary">
-                  Wishlist
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* Right Section - Contact & Social */}
+          <div className="lg:col-span-3">
+            <h3 className="text-xs uppercase tracking-[0.3em] text-zinc-500 mb-6">
+              Connect
+            </h3>
+            
+            {/* Contact Info */}
+            <div className="space-y-4 mb-10">
+              <a 
+                href="mailto:info@hansyfinearts.com"
+                className="flex items-start gap-3 text-zinc-700 hover:text-black transition-colors group"
+              >
+                <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+                <span className="text-sm font-light">info@hansyfinearts.com</span>
+              </a>
+              <a 
+                href="tel:+15551234567"
+                className="flex items-start gap-3 text-zinc-700 hover:text-black transition-colors group"
+              >
+                <Phone className="h-4 w-4 mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+                <span className="text-sm font-light">+1 (555) 123-4567</span>
+              </a>
+              <div className="flex items-start gap-3 text-zinc-600">
+                <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+                <span className="text-sm font-light">123 Art Street<br />New York, NY 10001</span>
+              </div>
+            </div>
 
-          {/* Contact Info */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Contact</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center text-sm text-muted-foreground">
-                <Mail className="h-4 w-4 mr-2" />
-                info@hansyfinearts.com
-              </li>
-              <li className="flex items-center text-sm text-muted-foreground">
-                <Phone className="h-4 w-4 mr-2" />
-                +1 (555) 123-4567
-              </li>
-              <li className="flex items-center text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4 mr-2" />
-                123 Art Street, NY 10001
-              </li>
-            </ul>
-
-            {/* Social Media */}
-            <div className="flex space-x-4 mt-4">
-              <a href="#" className="text-muted-foreground hover:text-primary">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary">
-                <Twitter className="h-5 w-5" />
-              </a>
+            {/* Social Links */}
+            <div>
+              <div className="space-y-2">
+                {socialLinks.map((social, idx) => (
+                  <a
+                    key={idx}
+                    href={social.url}
+                    onMouseEnter={() => setIsHovered(social.name)}
+                    onMouseLeave={() => setIsHovered(null)}
+                    className="flex items-center justify-between py-2 border-b border-zinc-200 hover:border-zinc-400 transition-colors group"
+                  >
+                    <span className="text-sm font-light text-zinc-600 group-hover:text-black transition-colors">
+                      {social.name}
+                    </span>
+                    <span className="text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">
+                      {social.handle}
+                    </span>
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t mt-8 pt-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} Hansy Fine Arts. All rights reserved.
-          </p>
+        <div className="border-t border-zinc-200 pt-10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-zinc-500 font-light tracking-wider">
+              © {currentYear} Hansy Fine Arts. All Rights Reserved.
+            </p>
+            
+            <div className="flex items-center gap-8">
+              <a href="#" className="text-xs text-zinc-500 hover:text-zinc-800 transition-colors tracking-wider">
+                Privacy Policy
+              </a>
+              <a href="#" className="text-xs text-zinc-500 hover:text-zinc-800 transition-colors tracking-wider">
+                Terms of Service
+              </a>
+              <a href="#" className="text-xs text-zinc-500 hover:text-zinc-800 transition-colors tracking-wider">
+                Cookies
+              </a>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Decorative Elements */}
+      <div className="absolute top-0 left-1/4 w-px h-full bg-zinc-200 opacity-50"></div>
+      <div className="absolute top-0 right-[26%] w-px h-full bg-zinc-200 opacity-50"></div>
     </footer>
   );
 }
