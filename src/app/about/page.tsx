@@ -1,9 +1,5 @@
 // src/app/about/page.tsx
-import React from "react";
-import AboutHero from "@/components/AboutHero";
 
-import TeamCarousel from "@/components/TeamCarousel";
-import Timeline from "@/components/TimeLine";
 
 export const metadata = {
   title: "About — Amar Gallery",
@@ -14,7 +10,7 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-white text-zinc-900 antialiased">
-      <AboutHero />
+      
 
       <section className="max-w-[1200px] mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -23,7 +19,7 @@ export default function AboutPage() {
               Our Philosophy
             </h2>
             <p className="mt-4 text-zinc-700 text-base leading-relaxed">
-              Amar Gallery dedicated to celebrating contemporary and classical
+              Hansy's Gallery dedicated to celebrating contemporary and classical
               art — a place where artists' stories meet audiences who cherish
               the craft. We focus on limited editions, curated exhibitions and
               sustainable partnerships with local and international artists.
@@ -99,7 +95,7 @@ export default function AboutPage() {
               <div className="mt-4">
                 <a
                   href="/contact"
-                  className="inline-block px-4 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium shadow-sm"
+                  className="inline-block px-5 py-3 bg-white text-black font-semibold shadow"
                 >
                   Book a visit
                 </a>
@@ -109,44 +105,9 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-white border-t border-zinc-100">
-        <div className="max-w-[1200px] mx-auto px-4 py-12">
-          <h3 className="text-2xl font-serif font-semibold">Our Journey</h3>
-          <p className="mt-3 text-zinc-600">
-            A short timeline of Amar Gallery and milestones that shaped us.
-          </p>
+      
 
-          <div className="mt-8">
-            <Timeline />
-          </div>
-        </div>
-      </section>
-
-      <section className="max-w-[1200px] mx-auto px-4 py-12">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <h3 className="text-2xl md:text-3xl font-serif font-semibold">
-              Meet our Curators
-            </h3>
-            <p className="mt-2 text-zinc-600 text-sm">
-              A passionate team who brings artworks to life.
-            </p>
-          </div>
-
-          <div>
-            <a
-              href="/careers"
-              className="inline-block px-4 py-2 rounded-full border border-zinc-200 text-sm"
-            >
-              Work with us
-            </a>
-          </div>
-        </div>
-
-        <div className="mt-8">
-          <TeamCarousel />
-        </div>
-      </section>
+     
 
       <section className="bg-indigo-50">
         <div className="max-w-[1200px] mx-auto px-4 py-12 text-center">
@@ -157,14 +118,7 @@ export default function AboutPage() {
             We partner with artists, curators and institutions to bring
             meaningful exhibitions to life.
           </p>
-          <div className="mt-6">
-            <a
-              href="/contact"
-              className="inline-block px-6 py-3 rounded-full bg-indigo-600 text-white font-medium shadow-lg"
-            >
-              Contact the team
-            </a>
-          </div>
+         
         </div>
       </section>
     </main>
