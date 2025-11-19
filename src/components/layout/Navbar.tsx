@@ -110,7 +110,7 @@ const Navbar = () => {
                 label === "ARTSY PRODUCTS"
                   ? "/artsy-products"
                   : label === "ABOUT"
-                  ? "/bio"
+                  ? "/about"
                   : label === "CONTACT"
                   ? "/contact"
                   : "/faq";
