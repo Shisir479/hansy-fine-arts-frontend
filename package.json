@@ -38,6 +38,7 @@
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^11.18.2",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.441.0",
     "nanoid": "^5.0.7",
     "next": "^15.0.3",

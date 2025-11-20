@@ -12,7 +12,7 @@ const BADGES = [
 
 export default function TrustedBadges() {
   return (
-    <div className="rounded-2xl overflow-hidden">
+    <div className=" overflow-hidden">
       <div className="bg-black text-white p-6 rounded-2xl">
         <h4 className="text-lg font-medium">Trusted & Recognized</h4>
         <p className="mt-2 text-sm text-white/70">
@@ -36,7 +36,7 @@ export default function TrustedBadges() {
               whileHover={{ scale: 1.05 }}
               className="flex items-center gap-3 bg-white/05 backdrop-blur-sm rounded-xl p-3"
             >
-              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
+              <div className="w-10 h-10  bg-white/10 flex items-center justify-center text-white">
                 ●
               </div>
               <div className="text-white text-sm font-medium">{b.label}</div>

@@ -132,9 +132,9 @@ const ArtCarousel: React.FC = () => {
       {/* Indicators */}
 
       {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-20">
+      {/* <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 z-20">
         <div
-          className="h-full bg-[#b09f7b] transition-all duration-300 ease-linear"
+          className="h-full bg-[#00000079] transition-all duration-300 ease-linear"
           style={{
             width: isAutoPlaying && !isHovered ? "100%" : "0%",
             transition:
@@ -143,7 +143,7 @@ const ArtCarousel: React.FC = () => {
                 : "width 0.3s",
           }}
         />
-      </div>
+      </div> */}
     </div>
   );
 };
