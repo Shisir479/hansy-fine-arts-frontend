@@ -145,3 +145,14 @@
     background-position: 100% 50%;
   }
 }
+/* Custom utility class to disable the number input spinners */
+.no-spin-buttons::-webkit-outer-spin-button,
+.no-spin-buttons::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0; /* Ensures no extra space is left behind */
+}
+
+/* Firefox */
+.no-spin-buttons[type='number'] {
+  -moz-appearance: textfield;
+}

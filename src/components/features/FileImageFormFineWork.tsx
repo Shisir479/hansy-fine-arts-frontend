@@ -1,8 +1,37 @@
+// components/FileImageFormFineWork.tsx (Updated)
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import ProductModal from "./ProductModal";
+
+// Define a separate Skeleton component
+const FileImageSkeleton = ({ colIdx, columnCount, isMobile }: { colIdx: number, columnCount: number, isMobile: boolean }) => {
+  // Use the same height logic as the main component to maintain the masonry look
+  const desktopHeights = ["h-64", "h-80", "h-96", "h-72"];
+  const mobileHeights = ["h-48", "h-56", "h-60"];
+  const randomHeight = isMobile
+    ? mobileHeights[colIdx % mobileHeights.length]
+    : desktopHeights[colIdx % desktopHeights.length];
+
+  return (
+    // Skeleton card with pulsating animation
+    <div 
+      className={`bg-gray-200 dark:bg-gray-800 animate-pulse ${randomHeight} overflow-hidden shadow-lg transition-shadow duration-500`}
+      // Inherit the animation delay for a staggered effect
+      style={{ animationDelay: `${colIdx * 0.1}s` }}
+    >
+      {/* Optional: Placeholder for text lines */}
+      <div className="absolute inset-0 p-5 flex flex-col justify-end">
+        <div className="h-6 w-3/4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
+        <div className="h-3 w-full bg-gray-300 dark:bg-gray-700 rounded mb-1"></div>
+        <div className="h-3 w-1/2 bg-gray-300 dark:bg-gray-700 rounded"></div>
+        <div className="h-8 w-1/3 bg-gray-300 dark:bg-gray-700 mt-4"></div>
+      </div>
+    </div>
+  );
+};
+
 
 interface ImageType {
   guid: string;
@@ -12,7 +41,11 @@ interface ImageType {
   products?: any[];
 }
 
+// Define the number of skeleton items to display while loading
+const SKELETON_ITEMS_COUNT = 9; 
+
 const fetchFileImages = async () => {
+  // ... (unchanged)
   const { data } = await axios.post(
     `${process.env.NEXT_PUBLIC_API_URL}/image-file-manager`,
     {
@@ -24,8 +57,9 @@ const fetchFileImages = async () => {
       },
       search_filter: "",
       guid_filter: null,
+      // Change per_page to match the skeleton count or fetch dynamically later
       page_number: 1,
-      per_page: 10,
+      per_page: 10, // Use the original per_page for data fetch
       sort_field: "id",
       sort_direction: "DESC",
       upload_date_from: null,
@@ -99,20 +133,28 @@ export default function FileImageFormFineWork() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [isMobile]);
 
-  const distributeToColumns = (items: ImageType[]) => {
-    const columns: ImageType[][] = Array.from(
+  const distributeToColumns = (items: ImageType[] | { guid: string }[]) => {
+    const columns: ImageType[][] | { guid: string }[][] = Array.from(
       { length: columnCount },
       () => []
     );
     items.forEach((item, idx) => {
-      columns[idx % columnCount].push(item);
+      // Use modulus operator to distribute items evenly across columns
+      columns[idx % columnCount].push(item as any); 
     });
     return columns;
   };
 
-  const columns = distributeToColumns(images);
+  // --- Conditional Data/Skeleton Setup ---
+  // Create an array of dummy items for the skeleton when loading
+  const skeletonItems = Array.from({ length: SKELETON_ITEMS_COUNT }, (_, i) => ({
+    guid: `skeleton-${i}`, // Provide a unique key for mapping
+  }));
+  
+  // Decide which items to display: real images or skeleton placeholders
+  const displayItems = isLoading ? skeletonItems : images;
+  const columns = distributeToColumns(displayItems);
 
-  if (isLoading) return <div className="text-center py-8">Loading...</div>;
   if (error)
     return <div className="text-center py-8 text-red-500">{error}</div>;
 
@@ -143,10 +185,16 @@ export default function FileImageFormFineWork() {
         <div className="flex gap-6">
           {columns.map((column, colIdx) => (
             <div key={colIdx} className="flex-1 flex flex-col gap-6">
-              {column.map((image, idx) => {
-                // Varying heights for masonry effect, mobile slightly smaller
+              {column.map((item, idx) => {
+                // If loading, render the skeleton component
+                if (isLoading) {
+                  return <FileImageSkeleton key={item.guid} colIdx={colIdx + idx} columnCount={columnCount} isMobile={isMobile} />;
+                }
+                
+                // Otherwise, render the actual image card
+                const image = item as ImageType;
                 const desktopHeights = ["h-64", "h-80", "h-96", "h-72"];
-                const mobileHeights = ["h-48", "h-56", "h-60"]; // ~10-20px smaller than desktop
+                const mobileHeights = ["h-48", "h-56", "h-60"]; 
                 const randomHeight = isMobile
                   ? mobileHeights[(colIdx + idx) % mobileHeights.length]
                   : desktopHeights[(colIdx + idx) % desktopHeights.length];
@@ -191,7 +239,7 @@ export default function FileImageFormFineWork() {
 
                       {/* Simple dark overlay */}
                       <div
-                        className="absolute inset-0 transition-opacity duration-700"
+                        className="absolute inset-0 transition-opacity duration-700 bg-black"
                         style={{
                           opacity: isHovered ? 0.5 : isMobile ? 0.15 : 0.2,
                         }}
@@ -292,6 +340,13 @@ export default function FileImageFormFineWork() {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
       `}</style>
     </div>

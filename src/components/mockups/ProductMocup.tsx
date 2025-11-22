@@ -17,6 +17,7 @@ import DynamicMockup from "./DynamicMockup";
 import { PHONE_MODELS } from "./mockupConfig";
 import LivePreviewARModal from "../preview/LivePreviewARModal";
 import WallPreviewTool from "../preview/RoomPreview";
+import { IoFlash } from "react-icons/io5";
 
 export default function ProductMockup({
   product,
@@ -275,7 +276,7 @@ export default function ProductMockup({
                   className="flex flex-col items-center gap-2 text-gray-500 hover:text-black transition group"
                 >
                   <Video
-                    className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform"
+                    className="w-5 h-5 md:w-7 md:h-7 group-hover:scale-110 transition-transform"
                     strokeWidth={1.5}
                   />
                   <span className="text-[10px] md:text-[11px] uppercase tracking-wide">
@@ -290,7 +291,7 @@ export default function ProductMockup({
                   className="flex flex-col items-center gap-2 text-gray-500 hover:text-black transition group"
                 >
                   <ImageIcon
-                    className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform"
+                    className="w-5 h-5 md:w-7 md:h-7 group-hover:scale-110 transition-transform"
                     strokeWidth={1.5}
                   />
                   <span className="text-[10px] md:text-[11px] uppercase tracking-wide">
@@ -298,20 +299,9 @@ export default function ProductMockup({
                   </span>
                 </button>
               )}
-
-              <button className="flex flex-col items-center gap-2 text-gray-500 hover:text-black transition group">
-                <Box
-                  className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform"
-                  strokeWidth={1.5}
-                />
-                <span className="text-[10px] md:text-[11px] uppercase tracking-wide">
-                  360° View
-                </span>
-              </button>
-
               <button className="flex flex-col items-center gap-2 text-gray-500 hover:text-black transition group">
                 <Heart
-                  className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform"
+                  className="w-5 h-5 md:w-7 md:h-7 group-hover:scale-110 transition-transform"
                   strokeWidth={1.5}
                 />
                 <span className="text-[10px] md:text-[11px] uppercase tracking-wide">
@@ -321,11 +311,11 @@ export default function ProductMockup({
 
               <button className="flex flex-col items-center gap-2 text-gray-500 hover:text-black transition group">
                 <Mail
-                  className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform"
+                  className="w-5 h-5 md:w-7 md:h-7 group-hover:scale-110 transition-transform"
                   strokeWidth={1.5}
                 />
                 <span className="text-[10px] md:text-[11px] uppercase tracking-wide">
-                  Share
+                  Email a Friend
                 </span>
               </button>
             </div>
@@ -338,32 +328,47 @@ export default function ProductMockup({
               {product.title ?? "Product Title"}
             </h1>
             <div className="mb-6">
-              <div className="text-3xl md:text-4xl font-light mb-2">
+              <div className="md:text-3xl text-xl font-semibold mb-2">
                 ${product.price}
               </div>
             </div>
 
             {/* QUANTITY + ADD TO CART (Stacked Layout) */}
-            <div className="md:flex flex-col gap-4 mb-8">
-              <label className="text-sm font-medium text-gray-700">
-                Quantity
-              </label>
-              <input
-                type="number"
-                defaultValue={1}
-                min={1}
-                className="w-full md:w-32 px-4 py-3 border text-center"
-              />
-              <button className="w-full mt-5 md:mt-0 bg-black text-white py-4 hover:bg-gray-800 transition uppercase tracking-widest text-sm font-medium">
-                Add to Cart
-              </button>
+            <div className="md:flex gap-4 mb-8">
+              <div>
+                <input
+                  type="number"
+                  defaultValue={1}
+                  min={1}
+                  // ADDED the class to hide the spin buttons
+                  className="w-full md:w-14 px-4 py-2 border text-center no-spin-buttons"
+                />
+              </div>
+              <div className="flex gap-4 md:gap-5 w-full mt-4 md:mt-0">
+                {/* Button 1: Add to Cart (Default: Black, Hover: White) */}
+                <button
+                  className="w-full bg-black text-white py-2 border border-black transition uppercase tracking-widest text-[12px] font-medium
+                   hover:bg-white hover:text-black"
+                >
+                  Add to Cart
+                </button>
+
+                {/* Button 2: Instant checkout (Default: Black, Hover: White, Flash Icon) */}
+                <button
+                  className="w-full bg-black text-white py-2 border border-black transition uppercase tracking-widest text-[12px] font-medium 
+                   flex items-center justify-center gap-2 
+                   hover:bg-white hover:text-black"
+                >
+                  ⚡ Instant checkout
+                </button>
+              </div>
             </div>
 
             {/* SECTION 1: PRODUCT SELECTOR */}
             <div className="border border-gray-300 mb-4 overflow-hidden">
               <button
                 onClick={() => toggleSection("product")}
-                className={`w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition ${
+                className={`w-full flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 transition ${
                   activeSection === "product"
                     ? "font-bold text-black"
                     : "text-gray-600"
@@ -425,13 +430,13 @@ export default function ProductMockup({
 
             {/* SECTION 2: CUSTOMIZE IT */}
             {mockupActive && (
-              <div className="border border-gray-300 rounded-md overflow-hidden transition-all duration-500">
+              <div className="border border-gray-300  overflow-hidden transition-all duration-500">
                 <button
                   onClick={() => toggleSection("customize")}
-                  className={`w-full flex justify-between items-center p-4 transition ${
+                  className={`w-full flex justify-between items-center p-3 transition ${
                     activeSection === "customize"
                       ? "bg-gray-50 font-bold text-black"
-                      : "bg-white hover:bg-gray-50 text-blue-600"
+                      : "bg-white hover:bg-gray-50 text-gray-600"
                   }`}
                 >
                   <span className="flex items-center gap-2">
