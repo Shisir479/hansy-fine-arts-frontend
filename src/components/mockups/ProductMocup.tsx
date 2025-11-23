@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Heart,
   Mail,
@@ -13,6 +14,8 @@ import {
   Smartphone, 
   Image as ImageIcon
 } from "lucide-react";
+import { useCart } from "@/hooks/use-cart";
+import { toast } from "react-hot-toast";
 import DynamicMockup from "./DynamicMockup";
 import { PHONE_MODELS } from "./mockupConfig";
 import LivePreviewARModal from "../preview/LivePreviewARModal";
@@ -20,8 +23,10 @@ import LivePreviewARModal from "../preview/LivePreviewARModal";
 export default function ProductMockup({
   product,
 }: {
-  product: { image: string; title?: string; price?: number };
+  product: { image: string; title?: string; price?: number; _id?: string };
 }) {
+  const { add } = useCart();
+  const [quantity, setQuantity] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<string>("default");
   const [activeSection, setActiveSection] = useState<string | null>("product");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,7 +34,7 @@ export default function ProductMockup({
   // AR MODAL STATE
   const [isAROpen, setIsAROpen] = useState(false);
 
-  const [selectedColor, setSelectedColor] = useState<string>("ash");
+  const [selectedColor, setSelectedColor] = useState<string>("black");
   const [placement, setPlacement] = useState<string>("Center Front");
   const [imageScale, setImageScale] = useState<number>(1);
   const [rotation, setRotation] = useState<number>(0);
@@ -140,6 +145,24 @@ export default function ProductMockup({
     setRotation(0);
   };
 
+  const handleAddToCart = () => {
+    const cartProduct = {
+      _id: product._id || Date.now().toString(),
+      title: product.title || "Product",
+      productTitle: product.title || "Product",
+      image: product.image,
+      price: product.price || 0,
+      category: "art",
+      quantity: 1
+    };
+    
+    for (let i = 0; i < quantity; i++) {
+      add(cartProduct);
+    }
+    
+    toast.success(`Added ${quantity} item(s) to cart!`);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       
@@ -159,9 +182,11 @@ export default function ProductMockup({
           >
             <X size={40} />
           </button>
-          <img 
+          <Image 
             src={product.image} 
             alt="Enlarged Product" 
+            width={800}
+            height={800}
             className="max-w-full max-h-full object-contain"
           />
         </div>
@@ -179,9 +204,11 @@ export default function ProductMockup({
               {!mockupActive && (
                 <div className="relative w-full h-full flex items-center justify-center">
                   {/* Standard Image Tag - Responsive */}
-                  <img
+                  <Image
                     src={product.image}
                     alt="Product"
+                    width={600}
+                    height={600}
                     className="w-full h-auto object-contain max-h-[500px] md:max-h-[600px] rounded-lg"
                   />
                 </div>
@@ -263,11 +290,15 @@ export default function ProductMockup({
               <label className="text-sm font-medium text-gray-700">Quantity</label>
               <input
                 type="number"
-                defaultValue={1}
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                 min={1}
                 className="w-full md:w-32 px-4 py-3 border text-center"
               />
-              <button className="w-full mt-5 md:mt-0 bg-black text-white py-4 hover:bg-gray-800 transition uppercase tracking-widest text-sm font-medium">
+              <button 
+                onClick={handleAddToCart}
+                className="w-full mt-5 md:mt-0 bg-black text-white py-4 hover:bg-gray-800 transition uppercase tracking-widest text-sm font-medium"
+              >
                 Add to Cart
               </button>
             </div>
@@ -445,7 +476,6 @@ export default function ProductMockup({
                             value={selectedColor}
                             onChange={(e) => setSelectedColor(e.target.value)}
                           >
-                            <option value="ash">Ash</option>
                             <option value="black">Black</option>
                             <option value="white">White</option>
                           </select>

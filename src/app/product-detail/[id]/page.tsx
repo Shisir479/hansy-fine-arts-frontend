@@ -27,14 +27,18 @@ export default function ProductDetail() {
 
     const loadProduct = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/arts/${id}`,
-          { cache: "no-store" }
-        );
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/arts/${id}`;
+        console.log("🔗 API URL:", apiUrl);
+        
+        const res = await fetch(apiUrl, { cache: "no-store" });
         const data = await res.json();
+        
+        console.log("📦 API Response:", data);
+        console.log("🎯 Final Product Data:", data.data ?? data);
+        
         setProduct(data.data ?? data);
       } catch (err) {
-        console.log("Fetch error:", err);
+        console.log("❌ Fetch error:", err);
       } finally {
         setLoading(false);
       }

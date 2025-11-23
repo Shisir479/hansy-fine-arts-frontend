@@ -26,6 +26,7 @@ import { HiOutlineShoppingBag } from "react-icons/hi";
 import { BsHeartFill } from "react-icons/bs";
 import { BiUserCircle } from "react-icons/bi";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
+import CartButton from "@/components/cart/CartButton";
 
 import {
   NavigationMenu,
@@ -147,21 +148,7 @@ const Navbar = () => {
           </button>
 
           {/* Cart */}
-          <Popover>
-            <PopoverTrigger className={`relative transition ${iconColor} hover:text-foreground`}>
-              <HiOutlineShoppingBag className="w-7 h-7" />
-              <span className="absolute -top-1 -right-2 bg-background text-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center shadow">
-                {totalItems}
-              </span>
-            </PopoverTrigger>
-            <PopoverContent className={`w-64 border ${borderColor}`}>
-              <p className="font-semibold">Items: {totalItems}</p>
-              <p className="text-sm text-muted-foreground">Subtotal: ${totalPrice}</p>
-              <Button asChild className="w-full mt-4">
-                <Link href="/cart">View Cart</Link>
-              </Button>
-            </PopoverContent>
-          </Popover>
+          <CartButton />
 
           {/* Profile */}
           <DropdownMenu>

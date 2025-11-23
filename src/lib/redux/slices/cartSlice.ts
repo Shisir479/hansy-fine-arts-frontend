@@ -2,10 +2,21 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Product, CartItem } from '@/types/product';
 import { CartState } from '@/types/cart';
 
-const initialState: CartState = {
-  items: [],
-  total: 0,
+const loadCartFromStorage = (): CartState => {
+  if (typeof window !== 'undefined') {
+    try {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        return JSON.parse(savedCart);
+      }
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+    }
+  }
+  return { items: [], total: 0 };
 };
+
+const initialState: CartState = loadCartFromStorage();
 
 const calculateTotal = (items: CartItem[]): number => {
   return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
