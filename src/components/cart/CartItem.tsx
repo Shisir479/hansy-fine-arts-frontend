@@ -3,25 +3,24 @@
 import Image from 'next/image';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CartItem as CartItemType } from '@/types/product';
-import { useCart } from '@/hooks/use-cart';
-import { formatPrice } from '@/lib/utils/helpers';
+import { useAppDispatch } from '@/lib/redux/hooks';
+import { updateQuantity, removeFromCart } from '@/lib/redux/slices/cartSlice';
 import { toast } from 'react-hot-toast';
 
 interface CartItemProps {
-  item: CartItemType;
+  item: any;
 }
 
 export default function CartItem({ item }: CartItemProps) {
-  const { update, remove } = useCart();
+  const dispatch = useAppDispatch();
 
   const handleUpdateQuantity = (newQuantity: number) => {
     if (newQuantity < 1) return;
-    update(item._id, newQuantity);
+    dispatch(updateQuantity({ id: item._id, quantity: newQuantity }));
   };
 
   const handleRemove = () => {
-    remove(item._id);
+    dispatch(removeFromCart(item._id));
     toast.success('Removed from cart');
   };
 
@@ -31,7 +30,7 @@ export default function CartItem({ item }: CartItemProps) {
       <div className="relative w-24 h-24 flex-shrink-0 bg-muted rounded-md overflow-hidden">
         <Image
           src={item.image || '/placeholder.jpg'}
-          alt={item.productTitle || 'Product'}
+          alt={item.title || 'Product'}
           fill
           className="object-cover"
         />
@@ -39,11 +38,11 @@ export default function CartItem({ item }: CartItemProps) {
 
       {/* Product Details */}
       <div className="flex-grow">
-        <h3 className="font-semibold text-lg mb-1">{item.productTitle}</h3>
+        <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
         {item.artist && (
           <p className="text-sm text-muted-foreground mb-2">by {item.artist}</p>
         )}
-        <p className="text-lg font-bold text-primary">{formatPrice(item.price)}</p>
+        <p className="text-lg font-bold text-primary">${item.price}</p>
       </div>
 
       {/* Quantity Controls */}
@@ -77,7 +76,7 @@ export default function CartItem({ item }: CartItemProps) {
         </div>
 
         <p className="text-lg font-semibold">
-          {formatPrice(item.price * item.quantity)}
+          ${(item.price * item.quantity).toFixed(2)}
         </p>
       </div>
     </div>

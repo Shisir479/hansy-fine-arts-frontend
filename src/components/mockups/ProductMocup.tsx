@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Heart,
   Mail,
@@ -13,6 +14,8 @@ import {
   Smartphone,
   Image as ImageIcon,
 } from "lucide-react";
+import { useCart } from "@/hooks/use-cart";
+import { toast } from "react-hot-toast";
 import DynamicMockup from "./DynamicMockup";
 import { PHONE_MODELS } from "./mockupConfig";
 import LivePreviewARModal from "../preview/LivePreviewARModal";
@@ -22,8 +25,10 @@ import { IoFlash } from "react-icons/io5";
 export default function ProductMockup({
   product,
 }: {
-  product: { image: string; title?: string; price?: number };
+  product: { image: string; title?: string; price?: number; _id?: string };
 }) {
+  const { add } = useCart();
+  const [quantity, setQuantity] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<string>("default");
   const [activeSection, setActiveSection] = useState<string | null>("product");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -195,6 +200,24 @@ export default function ProductMockup({
     setRotation(0);
   };
 
+  const handleAddToCart = () => {
+    const cartProduct = {
+      _id: product._id || Date.now().toString(),
+      title: product.title || "Product",
+      productTitle: product.title || "Product",
+      image: product.image,
+      price: product.price || 0,
+      category: "art",
+      quantity: 1
+    };
+    
+    for (let i = 0; i < quantity; i++) {
+      add(cartProduct);
+    }
+    
+    toast.success(`Added ${quantity} item(s) to cart!`);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* AR MODAL COMPONENT */}
@@ -218,9 +241,11 @@ export default function ProductMockup({
           >
             <X size={40} />
           </button>
-          <img
-            src={product.image}
-            alt="Enlarged Product"
+          <Image 
+            src={product.image} 
+            alt="Enlarged Product" 
+            width={800}
+            height={800}
             className="max-w-full max-h-full object-contain"
           />
         </div>
@@ -236,9 +261,11 @@ export default function ProductMockup({
               {!mockupActive && (
                 <div className="relative w-full h-full flex items-center justify-center">
                   {/* Standard Image Tag - Responsive */}
-                  <img
+                  <Image
                     src={product.image}
                     alt="Product"
+                    width={600}
+                    height={600}
                     className="w-full h-auto object-contain max-h-[500px] md:max-h-[600px] rounded-lg"
                   />
                 </div>
@@ -537,7 +564,6 @@ export default function ProductMockup({
                             value={selectedColor}
                             onChange={(e) => setSelectedColor(e.target.value)}
                           >
-                            <option value="ash">Ash</option>
                             <option value="black">Black</option>
                             <option value="white">White</option>
                           </select>
