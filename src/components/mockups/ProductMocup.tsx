@@ -217,7 +217,6 @@ export default function ProductMockup({
     
     toast.success(`Added ${quantity} item(s) to cart!`);
   };
-
   return (
     <div className="min-h-screen bg-white">
       {/* AR MODAL COMPONENT */}
@@ -241,9 +240,9 @@ export default function ProductMockup({
           >
             <X size={40} />
           </button>
-          <Image 
-            src={product.image} 
-            alt="Enlarged Product" 
+          <Image
+            src={product.image}
+            alt="Enlarged Product"
             width={800}
             height={800}
             className="max-w-full max-h-full object-contain"
@@ -374,6 +373,7 @@ export default function ProductMockup({
               <div className="flex gap-4 md:gap-5 w-full mt-4 md:mt-0">
                 {/* Button 1: Add to Cart (Default: Black, Hover: White) */}
                 <button
+                  onClick={handleAddToCart}
                   className="w-full bg-black text-white py-2 border border-black transition uppercase tracking-widest text-[12px] font-medium
                    hover:bg-white hover:text-black"
                 >
