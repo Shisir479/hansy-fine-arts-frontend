@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation"; // 1. Import the hook
+import { useMemo } from "react";
+import { useParams } from "next/navigation";
 import ProductMockup from "@/components/mockups/ProductMocup";
+import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
 
 interface ProductType {
   _id: string;
@@ -12,48 +13,74 @@ interface ProductType {
   description?: string;
 }
 
-// 2. Remove 'params' from the props here
 export default function ProductDetail() {
-  // 3. Get the params using the hook
   const params = useParams();
-  const id = params.id as string; // Cast to string
+  const id = params.id as string; // url: /product/[id] → id = guid
 
-  const [product, setProduct] = useState<ProductType | null>(null);
-  const [loading, setLoading] = useState(true);
+  // 🔹 FinerWorks library info – real value diye de
+  const library = {
+    name: "inventory",
+    session_id: "1234567890",
+    account_key: "dc9e5410-0107-441a-92eb-6a4fd1c34c79",
+    site_id: 2,
+  };
 
-  useEffect(() => {
-    // Add a check to ensure id exists before fetching
-    if (!id) return;
+  // 🔥 RTK Query diye list API call
+  // এখানে ধরলাম first page thekei product ta peye jachchi
+  // jodi page-wise search korte hoy, alada queryFn banabo
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+  } = useListFinerworksImagesQuery({ library, page: 1 });
 
-    const loadProduct = async () => {
-      try {
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/arts/${id}`;
-        console.log("🔗 API URL:", apiUrl);
-        
-        const res = await fetch(apiUrl, { cache: "no-store" });
-        const data = await res.json();
-        
-        console.log("📦 API Response:", data);
-        console.log("🎯 Final Product Data:", data.data ?? data);
-        
-        setProduct(data.data ?? data);
-      } catch (err) {
-        console.log("❌ Fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
+  // images array fallback
+  const images = data?.images ?? [];
+
+  // 🎯 URL er id (guid) diye image ber kore ProductType e map
+  const product: ProductType | null = useMemo(() => {
+    if (!id || images.length === 0) return null;
+
+    const img = images.find((item) => item.guid === id);
+    if (!img) return null;
+
+    return {
+      _id: img.guid,
+      title: img.title,
+      image: img.public_preview_uri || img.public_thumbnail_uri || "",
+      price: 0, // jodi price info onno place theke ashe, pore replace korbi
+      description: img.description,
     };
+  }, [id, images]);
 
-    loadProduct();
-  }, [id]);
+  // Debug chai gele:
+  // console.log({ id, imagesCount: images.length, product });
 
-  if (loading)
-    return <div className="text-center py-20 text-xl font-semibold">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="text-center py-20 text-xl font-semibold">
+        Loading...
+      </div>
+    );
+  }
 
-  if (!product)
-    return <div className="text-center py-20 text-red-600">Product not found.</div>;
+  if (isError) {
+    console.error("❌ FinerWorks list error in ProductDetail:", error);
+    return (
+      <div className="text-center py-20 text-red-600">
+        Failed to load product.
+      </div>
+    );
+  }
 
-  return (
-    <ProductMockup product={product} />
-  );
+  if (!product) {
+    return (
+      <div className="text-center py-20 text-red-600">
+        Product not found.
+      </div>
+    );
+  }
+
+  return <ProductMockup product={product} />;
 }

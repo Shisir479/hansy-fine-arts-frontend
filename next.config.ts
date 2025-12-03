@@ -2,38 +2,14 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
+   remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com',
+        protocol: 'http',
+        hostname: '**', // Matches any hostname
       },
       {
         protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.finerworks.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'finerworks.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.ibb.co.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'inventory.finerworks.com',
+        hostname: '**', // Matches any hostname
       },
     ],
   },

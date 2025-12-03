@@ -261,11 +261,11 @@ export default function ProductMockup({
                 <div className="relative w-full h-full flex items-center justify-center">
                   {/* Standard Image Tag - Responsive */}
                   <Image
-                    src={product.image}
+                    src={product?.image}
                     alt="Product"
                     width={600}
                     height={600}
-                    className="w-full h-auto object-contain max-h-[500px] md:max-h-[600px] rounded-lg"
+                    className="w-full h-auto object-contain max-h-[500px] md:max-h-[600px]"
                   />
                 </div>
               )}
