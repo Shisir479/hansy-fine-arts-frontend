@@ -1,5 +1,5 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +16,8 @@ import {
 import {
   useResendOtpMutation,
   useVerifyEmailMutation,
-} from "@/redux/featured/auth/authApi"; // Adjust import
+  // } from "@/redux/featured/auth/authApi"; // Adjust import
+} from "@/lib/redux/api/authApi"; // Adjust import
 import { ArrowLeft, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";

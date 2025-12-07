@@ -3,7 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useResetPasswordWithOtpMutation } from "@/redux/featured/auth/authApi";
+// import { useResetPasswordWithOtpMutation } from "@/redux/featured/auth/authApi";
+import { useResetPasswordWithOtpMutation } from "@/lib/redux/api/authApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, CheckCircle, Eye, EyeOff } from "lucide-react";
 import React, { useEffect, useState } from "react";
