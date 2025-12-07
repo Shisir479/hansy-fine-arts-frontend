@@ -4,6 +4,8 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+// Import usePathname from next/navigation
+import { usePathname } from "next/navigation"; 
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { toggleTheme } from "@/lib/redux/slices/themeSlice";
 import dynamic from "next/dynamic";
@@ -61,6 +63,25 @@ const Navbar = () => {
   const user = useAppSelector((state) => state.auth.user);
   const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
   const totalPrice = cart.reduce((t, i) => t + i.quantity * i.price, 0).toFixed(2);
+  
+  // 1. Initialize usePathname
+  const currentPath = usePathname();
+
+  // Helper function to check if a path is active, handling the root path case
+  const isActive = (href: string) => {
+      // Check for exact match (e.g., /about == /about)
+      if (currentPath === href) return true;
+      // Handle the root path "/" special case: only true if exactly "/"
+      if (href === "/") return currentPath === "/";
+      return false;
+  };
+
+  const menuItems = [
+    { label: "ARTSY PRODUCTS", href: "/artsy-products" },
+    { label: "ABOUT", href: "/about" },
+    { label: "CONTACT", href: "/contact" },
+    { label: "FAQ", href: "/faq" },
+  ];
 
   return (
     <div className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}>
@@ -89,9 +110,9 @@ const Navbar = () => {
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 w-96 bg-white dark:bg-gray-950 border rounded-lg shadow-xl">
                   {[
-                    { href: "/contemporary", title: "Contemporary", desc: "Modern and contemporary art pieces" },
-                    { href: "/abstract-designs", title: "Abstract & Designs", desc: "Unique abstract artwork and patterns" },
-                    { href: "/custom-portrait", title: "Custom Portraits", desc: "Personalized portraits made just for you" },
+                    { href: "/contemporary", title: "Contemporary",},
+                    { href: "/abstract-designs", title: "Abstract & Designs", },
+                    { href: "/custom-portrait", title: "Custom Portraits",  },
                   ].map((item) => (
                     <li key={item.href}>
                       <Link
@@ -99,7 +120,6 @@ const Navbar = () => {
                         className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
                       >
                         <div className="text-sm font-semibold">{item.title}</div>
-                        <p className="line-clamp-2 text-xs text-muted-foreground">{item.desc}</p>
                       </Link>
                     </li>
                   ))}
@@ -107,21 +127,19 @@ const Navbar = () => {
               </NavigationMenuContent>
             </NavigationMenuItem>
 
-            {["ARTSY PRODUCTS", "ABOUT", "CONTACT", "FAQ"].map((label) => {
-              const href =
-                label === "ARTSY PRODUCTS"
-                  ? "/artsy-products"
-                  : label === "ABOUT"
-                  ? "/about"
-                  : label === "CONTACT"
-                  ? "/contact"
-                  : "/faq";
+            {/* Re-mapping the menu items for clarity and using the helper function */}
+            {menuItems.map((item) => {
+              const active = isActive(item.href);
 
               return (
-                <NavigationMenuItem key={label}>
-                  <Link href={href} legacyBehavior passHref>
-                    <span className="text-base italic cursor-pointer hover:text-primary transition">
-                      {label}
+                <NavigationMenuItem key={item.label}>
+                  <Link href={item.href} legacyBehavior passHref>
+                    <span 
+                      className={`text-base italic cursor-pointer transition 
+                        ${active ? "text-black font-bold underline decoration-2 decoration-black" : "hover:text-primary"}
+                      `}
+                    >
+                      {item.label}
                     </span>
                   </Link>
                 </NavigationMenuItem>

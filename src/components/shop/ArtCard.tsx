@@ -2,12 +2,13 @@
 
 import { Eye, Heart } from "lucide-react";
 import { ArtType } from "../gallery/ContemporaryArtGallery";
+import Link from "next/link";
 
 export default function ArtCard({ art }: { art: ArtType }) {
   const { _id, title, image, category } = art;
 
   return (
-    <a href={`/product-detail/${_id}`} className="group block">
+    <Link href={`/product-detail/${_id}`} className="group block">
       <div className="relative overflow-visible bg-white">
         {/* Subtle shadow on hover */}
         <div className="absolute -inset-1 bg-black/0 group-hover:bg-black/5 blur-xl transition-all duration-700"></div>
@@ -48,6 +49,6 @@ export default function ArtCard({ art }: { art: ArtType }) {
         <div className="absolute top-3 left-3 w-6 h-6 border-l border-t border-neutral-200 group-hover:border-neutral-400 transition-all duration-500"></div>
         <div className="absolute bottom-3 right-3 w-6 h-6 border-r border-b border-neutral-200 group-hover:border-neutral-400 transition-all duration-500"></div>
       </div>
-    </a>
+    </Link>
   );
 }

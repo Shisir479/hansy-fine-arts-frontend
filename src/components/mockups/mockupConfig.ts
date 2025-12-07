@@ -19,7 +19,7 @@ export type ProductConfig = {
   } | null;
 };
 // 📱 PHONE MODELS LIST (iPhone 14 - 16)
-export const PHONE_MODELS: Record<string, { mask: string; overlay: string }> = {
+export const PHONE_MODELS: Record<string, { mask: string; overlay: string; width?: number; height?: number }> = {
   // iPhone 16 Series
   iphone16: {
     mask: "/Iphone_16_Snap_Mask.png",
@@ -93,9 +93,9 @@ export const DEFAULT_PRODUCTS: Record<string, ProductConfig> = {
     id: "hoodie",
     label: "Hoodie",
     type: "apparel",
-    base: "/mockups/hoodie/base.png", // সাদা হুডি
+    base: "/t-shirt.png", // সাদা হুডি
     mask: null,
-    overlay: "/mockups/hoodie/wrinkles.png", // কাপড়ের ভাজ
+    overlay: "", // কাপড়ের ভাজ
     width: 600,
     height: 700,
     fullCover: false, // ছবি জামার উপরে বসবে
