@@ -12,6 +12,7 @@ export default function GoogleCallbackPage() {
 
   useEffect(() => {
     const handleCallback = async () => {
+      const token = searchParams.get("token");
       const name = searchParams.get("name");
       const email = searchParams.get("email");
       const error = searchParams.get("error");
@@ -22,14 +23,15 @@ export default function GoogleCallbackPage() {
         return;
       }
 
-      if (name && email) {
+      if (token && name && email) {
+        // Backend already processed, just save to Redux
         await authHandlers.handleGoogleLogin({
           name,
           email,
           provider: "google",
         });
       } else {
-        toast.error("Missing user information");
+        toast.error("Google login failed");
         router.push("/auth/login");
       }
     };

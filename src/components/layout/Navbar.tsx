@@ -58,6 +58,7 @@ const Navbar = () => {
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state) => state.theme.mode);
   const cart = useAppSelector((state) => state.cart.items);
+  const user = useAppSelector((state) => state.auth.user);
   const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
   const totalPrice = cart.reduce((t, i) => t + i.quantity * i.price, 0).toFixed(2);
 
@@ -153,17 +154,43 @@ const Navbar = () => {
           {/* Profile */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className={`transition ${iconColor} hover:text-foreground`}>
+              <button className={`transition ${iconColor} hover:text-foreground flex items-center gap-2`}>
                 <BiUserCircle className="w-8 h-8" />
+                {user && <span className="hidden md:block text-sm">{user.name}</span>}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className={`w-48 border ${borderColor}`}>
-              <DropdownMenuItem asChild>
-                <Link href="/login" className="w-full">Login</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/sign-up" className="w-full">Create Account</Link>
-              </DropdownMenuItem>
+              {user ? (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="w-full">Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/orders" className="w-full">My Orders</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/profile" className="w-full">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      dispatch({ type: 'auth/logoutUser' });
+                      window.location.href = '/auth/login';
+                    }}
+                    className="text-red-600 cursor-pointer"
+                  >
+                    Logout
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/auth/login" className="w-full">Login</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/auth/register" className="w-full">Create Account</Link>
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
