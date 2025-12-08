@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/providers/ThemeProvider';
 import { Toaster } from 'react-hot-toast';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import TopNavbar from '@/components/layout/TopNavbar';
+// import TopNavbar from '@/components/layout/TopNavbar';
 import CartProvider from '@/components/cart/CartProvider';
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default function RootLayout({
         <StoreProvider>
           <ThemeProvider>
             <CartProvider>
-              <TopNavbar />
+              {/* <TopNavbar /> */}
               <Navbar />
               <main className="flex-grow">
                 {children}

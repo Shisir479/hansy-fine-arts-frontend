@@ -1,13 +1,20 @@
-// components/FileImageFormFineWork.tsx (Updated)
+// components/FileImageFormFineWork.tsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import ProductModal from "./ProductModal";
+import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
 
 // Define a separate Skeleton component
-const FileImageSkeleton = ({ colIdx, columnCount, isMobile }: { colIdx: number, columnCount: number, isMobile: boolean }) => {
-  // Use the same height logic as the main component to maintain the masonry look
+const FileImageSkeleton = ({
+  colIdx,
+  columnCount,
+  isMobile,
+}: {
+  colIdx: number;
+  columnCount: number;
+  isMobile: boolean;
+}) => {
   const desktopHeights = ["h-64", "h-80", "h-96", "h-72"];
   const mobileHeights = ["h-48", "h-56", "h-60"];
   const randomHeight = isMobile
@@ -15,13 +22,10 @@ const FileImageSkeleton = ({ colIdx, columnCount, isMobile }: { colIdx: number, 
     : desktopHeights[colIdx % desktopHeights.length];
 
   return (
-    // Skeleton card with pulsating animation
-    <div 
+    <div
       className={`bg-gray-200 dark:bg-gray-800 animate-pulse ${randomHeight} overflow-hidden shadow-lg transition-shadow duration-500`}
-      // Inherit the animation delay for a staggered effect
       style={{ animationDelay: `${colIdx * 0.1}s` }}
     >
-      {/* Optional: Placeholder for text lines */}
       <div className="absolute inset-0 p-5 flex flex-col justify-end">
         <div className="h-6 w-3/4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
         <div className="h-3 w-full bg-gray-300 dark:bg-gray-700 rounded mb-1"></div>
@@ -32,7 +36,6 @@ const FileImageSkeleton = ({ colIdx, columnCount, isMobile }: { colIdx: number, 
   );
 };
 
-
 interface ImageType {
   guid: string;
   title: string;
@@ -41,41 +44,9 @@ interface ImageType {
   products?: any[];
 }
 
-// Define the number of skeleton items to display while loading
-const SKELETON_ITEMS_COUNT = 9; 
-
-const fetchFileImages = async () => {
-  // ... (unchanged)
-  const { data } = await axios.post(
-    `${process.env.NEXT_PUBLIC_API_URL}/image-file-manager`,
-    {
-      library: {
-        name: "inventory",
-        session_id: "123456789",
-        account_key: "dc9e5410-0107-441a-92eb-6a4fd1c34c79",
-        site_id: 2,
-      },
-      search_filter: "",
-      guid_filter: null,
-      // Change per_page to match the skeleton count or fetch dynamically later
-      page_number: 1,
-      per_page: 10, // Use the original per_page for data fetch
-      sort_field: "id",
-      sort_direction: "DESC",
-      upload_date_from: null,
-      upload_date_to: null,
-      list_products: true,
-      active: null,
-    }
-  );
-  return data.images;
-};
+const SKELETON_ITEMS_COUNT = 9;
 
 export default function FileImageFormFineWork() {
-  const [images, setImages] = useState<ImageType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const [selectedImage, setSelectedImage] = useState<ImageType | null>(null);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
@@ -93,6 +64,24 @@ export default function FileImageFormFineWork() {
   const cursorRef = useRef<HTMLDivElement | null>(null);
   const [showCursor, setShowCursor] = useState(false);
 
+  // 🔹 Same library config as other components
+  const library = {
+    name: "inventory",
+    session_id: "123456789",
+    account_key: "dc9e5410-0107-441a-92eb-6a4fd1c34c79",
+    site_id: 2,
+  };
+
+  // ইচ্ছা করলে পরে pagination যোগ করা যাবে
+  const [page] = useState(1);
+
+  const { data, isLoading, isError, error } = useListFinerworksImagesQuery({
+    library,
+    page,
+  });
+
+  const images: ImageType[] = (data?.images as ImageType[]) ?? [];
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
@@ -103,21 +92,6 @@ export default function FileImageFormFineWork() {
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    const loadImages = async () => {
-      try {
-        setIsLoading(true);
-        const data = await fetchFileImages();
-        setImages(data || []);
-      } catch (err) {
-        setError("Failed to load images");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadImages();
   }, []);
 
   // custom cursor movement (only for non-mobile)
@@ -133,30 +107,36 @@ export default function FileImageFormFineWork() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [isMobile]);
 
-  const distributeToColumns = (items: ImageType[] | { guid: string }[]) => {
-    const columns: ImageType[][] | { guid: string }[][] = Array.from(
+  const distributeToColumns = (items: (ImageType | { guid: string })[]) => {
+    const columns: (ImageType | { guid: string })[][] = Array.from(
       { length: columnCount },
       () => []
     );
     items.forEach((item, idx) => {
-      // Use modulus operator to distribute items evenly across columns
-      columns[idx % columnCount].push(item as any); 
+      columns[idx % columnCount].push(item);
     });
     return columns;
   };
 
-  // --- Conditional Data/Skeleton Setup ---
-  // Create an array of dummy items for the skeleton when loading
-  const skeletonItems = Array.from({ length: SKELETON_ITEMS_COUNT }, (_, i) => ({
-    guid: `skeleton-${i}`, // Provide a unique key for mapping
-  }));
-  
-  // Decide which items to display: real images or skeleton placeholders
+  // skeleton items
+  const skeletonItems = Array.from(
+    { length: SKELETON_ITEMS_COUNT },
+    (_, i) => ({
+      guid: `skeleton-${i}`,
+    })
+  );
+
   const displayItems = isLoading ? skeletonItems : images;
   const columns = distributeToColumns(displayItems);
 
-  if (error)
-    return <div className="text-center py-8 text-red-500">{error}</div>;
+  if (isError) {
+    console.error("FinerWorks images load error:", error);
+    return (
+      <div className="text-center py-8 text-red-500">
+        Failed to load images.
+      </div>
+    );
+  }
 
   return (
     <div
@@ -188,13 +168,20 @@ export default function FileImageFormFineWork() {
               {column.map((item, idx) => {
                 // If loading, render the skeleton component
                 if (isLoading) {
-                  return <FileImageSkeleton key={item.guid} colIdx={colIdx + idx} columnCount={columnCount} isMobile={isMobile} />;
+                  return (
+                    <FileImageSkeleton
+                      key={item.guid}
+                      colIdx={colIdx + idx}
+                      columnCount={columnCount}
+                      isMobile={isMobile}
+                    />
+                  );
                 }
-                
+
                 // Otherwise, render the actual image card
                 const image = item as ImageType;
                 const desktopHeights = ["h-64", "h-80", "h-96", "h-72"];
-                const mobileHeights = ["h-48", "h-56", "h-60"]; 
+                const mobileHeights = ["h-48", "h-56", "h-60"];
                 const randomHeight = isMobile
                   ? mobileHeights[(colIdx + idx) % mobileHeights.length]
                   : desktopHeights[(colIdx + idx) % desktopHeights.length];
@@ -205,7 +192,9 @@ export default function FileImageFormFineWork() {
                   <div
                     key={image.guid}
                     className="relative group"
-                    onMouseEnter={() => !isMobile && setHoveredCard(image.guid)}
+                    onMouseEnter={() =>
+                      !isMobile && setHoveredCard(image.guid)
+                    }
                     onMouseLeave={() => !isMobile && setHoveredCard(null)}
                     style={{
                       animation: `fadeInUp 0.6s ease-out ${idx * 0.1}s both`,
@@ -223,9 +212,10 @@ export default function FileImageFormFineWork() {
                     {/* Card - no border radius */}
                     <div
                       className={`relative ${randomHeight} overflow-hidden cursor-pointer transform transition-all duration-500 ${
-                        isHovered ? "md:scale-[1.02] md:shadow-2xl" : "shadow-lg"
+                        isHovered
+                          ? "md:scale-[1.02] md:shadow-2xl"
+                          : "shadow-lg"
                       }`}
-                      // only open modal on card click for non-mobile (keep mobile safe)
                       onClick={() => !isMobile && setSelectedImage(image)}
                     >
                       {/* Image with zoom effect */}
@@ -245,7 +235,7 @@ export default function FileImageFormFineWork() {
                         }}
                       />
 
-                      {/* Glassmorphism overlay on hover (desktop only) */}
+                      {/* Glass overlay */}
                       <div
                         className="absolute inset-0 transition-all duration-700"
                         style={{
@@ -259,7 +249,9 @@ export default function FileImageFormFineWork() {
                         {/* Title */}
                         <h2
                           className={`text-white italic ${
-                            isMobile ? "text-lg font-semibold" : "text-2xl font-bold mb-2"
+                            isMobile
+                              ? "text-lg font-semibold"
+                              : "text-2xl font-bold mb-2"
                           } transition-all duration-500 uppercase tracking-wider`}
                           style={{
                             opacity: isMobile ? 1 : isHovered ? 1 : 0,
@@ -267,7 +259,8 @@ export default function FileImageFormFineWork() {
                               isMobile || isHovered
                                 ? "translateY(0) scale(1)"
                                 : "translateY(30px) scale(0.9)",
-                            textShadow: "2px 2px 12px rgba(0,0,0,0.9)",
+                            textShadow:
+                              "2px 2px 12px rgba(0,0,0,0.9)",
                           }}
                         >
                           {image.title}
@@ -276,39 +269,56 @@ export default function FileImageFormFineWork() {
                         {/* Description */}
                         <p
                           className={`text-white italic ${
-                            isMobile ? "text-xs leading-relaxed" : "text-sm leading-relaxed"
+                            isMobile
+                              ? "text-xs leading-relaxed"
+                              : "text-sm leading-relaxed"
                           } transition-all duration-500`}
                           style={{
                             opacity: isMobile ? 1 : isHovered ? 0.95 : 0,
                             transform:
-                              isMobile || isHovered ? "translateY(0)" : "translateY(30px)",
+                              isMobile || isHovered
+                                ? "translateY(0)"
+                                : "translateY(30px)",
                             transitionDelay: "150ms",
-                            textShadow: "1px 1px 8px rgba(0,0,0,0.9)",
+                            textShadow:
+                              "1px 1px 8px rgba(0,0,0,0.9)",
                           }}
                         >
                           {image.description}
                         </p>
 
-                        {/* View button - preserved design; visible on mobile always, on desktop only on hover */}
+                        {/* View button */}
                         <div
                           className="mt-4 transition-all duration-500"
                           style={{
                             opacity: isMobile ? 1 : isHovered ? 1 : 0,
                             transform:
-                              isMobile || isHovered ? "translateY(0)" : "translateY(30px)",
+                              isMobile || isHovered
+                                ? "translateY(0)"
+                                : "translateY(30px)",
                             transitionDelay: "250ms",
                           }}
                         >
                           <button
                             onClick={(e) => {
-                              e.stopPropagation(); // prevent card click (desktop handled above)
+                              e.stopPropagation();
                               setSelectedImage(image);
                             }}
                             className="inline-flex items-center gap-2 md:px-4 md:py-2 px-3 py-[4px] bg-white text-black text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition-all"
                           >
                             <span>View Details</span>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
                             </svg>
                           </button>
                         </div>
@@ -342,11 +352,16 @@ export default function FileImageFormFineWork() {
           }
         }
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
         }
         .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
       `}</style>
     </div>

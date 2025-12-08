@@ -1,250 +1,246 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import {
-  Heart,
-  Mail,
   ChevronDown,
   ChevronUp,
-  CheckCircle,
-  Video,
   Maximize2,
-  Box,
   X,
-  Smartphone,
   Image as ImageIcon,
 } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { toast } from "react-hot-toast";
-import DynamicMockup from "./DynamicMockup";
-import { PHONE_MODELS } from "./mockupConfig";
 import LivePreviewARModal from "../preview/LivePreviewARModal";
 import WallPreviewTool from "../preview/RoomPreview";
-import { IoFlash } from "react-icons/io5";
+
+const BASE_IMG_URL = "https://finerworks.com";
+const API_URL = "http://localhost:5000/api/v1/finerworks";
 
 export default function ProductMockup({
   product,
 }: {
-  product: { image: string; title?: string; price?: number; _id?: string };
+  product: {
+    image: string;
+    title?: string;
+    price?: number;
+    _id?: string;
+    sku?: string;
+  };
 }) {
   const { add } = useCart();
+
+  const [items, setItems] = useState<any[]>([]);
+  const [mats, setMats] = useState<any[]>([]);
+  const [glazing, setGlazing] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const [viewState, setViewState] = useState<"collections" | "frames">(
+    "collections"
+  );
+  const [cachedCollections, setCachedCollections] = useState<any[]>([]);
+
+  const [selectedFrame, setSelectedFrame] = useState<any>(null);
+  const [selectedMat, setSelectedMat] = useState<any>(null);
+  const [selectedGlazing, setSelectedGlazing] = useState<any>(null);
+
   const [quantity, setQuantity] = useState(1);
-  const [selectedProduct, setSelectedProduct] = useState<string>("default");
-  const [activeSection, setActiveSection] = useState<string | null>("product");
+  const [colorCorrection, setColorCorrection] = useState(false);
+
+  const [activeSection, setActiveSection] = useState<string | null>("selection");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // AR MODAL STATE
   const [isAROpen, setIsAROpen] = useState(false);
-  // WALL PREVIEW STATE (NEW)
   const [isWallViewOpen, setIsWallViewOpen] = useState(false);
-  const [selectedColor, setSelectedColor] = useState<string>("ash");
-  const [placement, setPlacement] = useState<string>("Center Front");
-  const [imageScale, setImageScale] = useState<number>(1);
-  const [rotation, setRotation] = useState<number>(0);
-  const [selectedPhoneModel, setSelectedPhoneModel] =
-    useState<string>("iphone16");
 
-  const mockupActive = selectedProduct !== "default";
+  // Fetch initial data (frames, mats, glazing)
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Collections
+        const frameRes = await fetch(`${API_URL}/framing/collections`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        const frameData = await frameRes.json();
 
-  const productOptions = [
-    {
-      id: "hoodie",
-      name: "Hoodies",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M6 20V10l4-3 2 2 2-2 4 3v10H6z" />
-          <path d="M10 7V5a2 2 0 1 1 4 0v2" />
-        </svg>
-      ),
-    },
-    {
-      id: "tshirt",
-      name: "T-Shirts",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M4 7l4-2 4 2 4-2 4 2-2 13H6L4 7z" />
-        </svg>
-      ),
-    },
-    {
-      id: "tank",
-      name: "Tank Tops",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M8 4h2l1 4h2l1-4h2l2 16H6L8 4z" />
-        </svg>
-      ),
-    },
-    {
-      id: "tote",
-      name: "Tote Bags",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <rect x="4" y="9" width="16" height="12" rx="2" />
-          <path d="M8 9V7a4 4 0 0 1 8 0v2" />
-        </svg>
-      ),
-    },
-    {
-      id: "pillow",
-      name: "Throw Pillows",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <rect x="5" y="6" width="14" height="12" rx="3" />
-        </svg>
-      ),
-    },
-    {
-      id: "phone",
-      name: "Phone Cases",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <rect x="8" y="4" width="8" height="16" rx="2" />
-        </svg>
-      ),
-    },
-    {
-      id: "mug",
-      name: "Mugs",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <rect x="4" y="7" width="10" height="10" rx="2" />
-          <path d="M14 9h2a2 2 0 0 1 0 4h-2" />
-        </svg>
-      ),
-    },
-    {
-      id: "puzzle",
-      name: "Puzzles",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M9 4a2 2 0 0 1 4 0v2h3v3h2a2 2 0 1 1 0 4h-2v3h-3v2a2 2 0 1 1-4 0v-2H6v-3H4a2 2 0 1 1 0-4h2V6h3V4z" />
-        </svg>
-      ),
-    },
-    {
-      id: "ornament",
-      name: "Ornaments",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M12 20s-6-4-6-8a4 4 0 0 1 8 0 4 4 0 0 1 8 0c0 4-6 8-6 8z" />
-        </svg>
-      ),
-    },
-  ];
+        // Mats & Glazing
+        const [matRes, glazeRes] = await Promise.all([
+          fetch(`${API_URL}/framing/mats`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({}),
+          }),
+          fetch(`${API_URL}/framing/glazing`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({}),
+          }),
+        ]);
+        const matData = await matRes.json();
+        const glazeData = await glazeRes.json();
 
-  const placements = [
-    "Center Front",
-    "Center Back",
-    "Left Chest",
-    "Right Chest",
-  ];
+        // Extract collections
+        let cols: any[] = [];
+        if (frameData.data?.collections) cols = frameData.data.collections;
+        else if (frameData.collections) cols = frameData.collections;
 
-  const toggleSection = (section: string) => {
-    if (activeSection === section) {
-      setActiveSection(null);
+        const mappedCollections = cols.map((c: any) => ({
+          ...c,
+          displayImage: c.icon_url_1 || c.image_1,
+          type: "folder",
+        }));
+
+        setItems(mappedCollections);
+        setCachedCollections(mappedCollections);
+
+        if (matData.data?.mats) setMats(matData.data.mats);
+        if (glazeData.data?.glazing) setGlazing(glazeData.data.glazing);
+      } catch (error) {
+        console.error("❌ API Error:", error);
+        toast.error("Failed to load framing options");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Handle frame selection / collection navigation
+  const handleItemClick = async (item: any) => {
+    if (viewState === "collections") {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/framing/collections`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: item.id }),
+        });
+        const data = await res.json();
+
+        let targetCol = data.data?.collections
+          ? data.data.collections[0]
+          : data.collections
+          ? data.collections[0]
+          : null;
+
+        if (targetCol && targetCol.frames) {
+          const frameList = targetCol.frames.map((f: any) => ({
+            ...f,
+            displayImage:
+              f.sample_image_url_1 || f.image_url || f.segment_url,
+            type: "frame",
+          }));
+          setItems(frameList);
+          setViewState("frames");
+        }
+      } catch (err) {
+        toast.error("Could not load frames");
+      } finally {
+        setLoading(false);
+      }
     } else {
-      setActiveSection(section);
+      setSelectedFrame(item);
     }
   };
 
-  const handleProductSelect = (id: string) => {
-    setSelectedProduct(id);
-    setImageScale(1);
-    setRotation(0);
+  const handleMatChange = (mat: any) => {
+    setSelectedMat(mat);
+  };
+
+  const handleGlazingChange = (glaze: any) => {
+    setSelectedGlazing(glaze);
+  };
+
+  const handleBackToFolders = () => {
+    setItems(cachedCollections);
+    setViewState("collections");
+    setSelectedFrame(null);
+  };
+
+  const toggleColorCorrection = () => {
+    setColorCorrection((prev) => !prev);
+  };
+
+  const getFullImageUrl = (url: string | null) => {
+    if (!url) return "/placeholder.png";
+    return url.startsWith("http") ? url : `${BASE_IMG_URL}${url}`;
+  };
+
+  const getFrameStyle = () => {
+    if (!selectedFrame) return {};
+
+    if (selectedFrame.segment_url) {
+      return {
+        border: "35px solid transparent",
+        borderImageSource: `url(${getFullImageUrl(
+          selectedFrame.segment_url
+        )})`,
+        borderImageSlice: "10",
+        borderImageRepeat: "no-repeat",
+        boxShadow:
+          "inset 0 0 20px rgba(0,0,0,0.5), 10px 10px 30px rgba(0,0,0,0.4)",
+      };
+    }
+
+    return {
+      border: `35px ridge ${selectedFrame.color || "#333"}`,
+      boxShadow:
+        "inset 0 0 10px rgba(0,0,0,0.5), 10px 10px 30px rgba(0,0,0,0.4)",
+    };
   };
 
   const handleAddToCart = () => {
-    const cartProduct = {
+    const cartItem = {
       _id: product._id || Date.now().toString(),
-      title: product.title || "Product",
-      productTitle: product.title || "Product",
-      image: product.image,
+      productTitle: product.title || "Untitled Artwork",
+      // Static price: jeita product e set kora
       price: product.price || 0,
       category: "art",
-      quantity: 1
+      image: product.image,
+      quantity,
+      framingConfig: {
+        frame: selectedFrame,
+        mat: selectedMat,
+        glazing: selectedGlazing,
+        options: {
+          quantity,
+          colorCorrection,
+        },
+        timestamp: new Date().toISOString(),
+      },
     };
-    
-    for (let i = 0; i < quantity; i++) {
-      add(cartProduct);
-    }
-    
-    toast.success(`Added ${quantity} item(s) to cart!`);
+
+    add(cartItem);
+    toast.success("Added to cart!");
   };
+
   return (
     <div className="min-h-screen bg-white">
-      {/* AR MODAL COMPONENT */}
       <LivePreviewARModal
         isOpen={isAROpen}
         onClose={() => setIsAROpen(false)}
         imageSrc={product.image}
       />
-      {/* WALL PREVIEW TOOL (NEW) */}
       <WallPreviewTool
         isOpen={isWallViewOpen}
         onClose={() => setIsWallViewOpen(false)}
         productImage={product.image}
       />
-      {/* CLICK TO ENLARGE MODAL */}
+
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 p-4">
           <button
             onClick={() => setIsModalOpen(false)}
-            className="absolute top-5 right-5 text-white hover:text-gray-300"
+            className="absolute top-5 right-5 text-white"
           >
             <X size={40} />
           </button>
           <Image
             src={product.image}
-            alt="Enlarged Product"
-            width={800}
-            height={800}
+            alt="Zoom"
+            width={1000}
+            height={1000}
             className="max-w-full max-h-full object-contain"
           />
         </div>
@@ -252,328 +248,334 @@ export default function ProductMockup({
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
-          {/* LEFT SIDE : PREVIEW */}
-          {/* Sticky only on medium screens and up (md:sticky). Relative on mobile to fix overlap issue. */}
+          
+          {/* PREVIEW AREA */}
           <div className="relative md:sticky md:top-4 flex flex-col items-center w-full z-10">
-            {/* REMOVED GlassMagnifier & Adjusted Styles for Mobile Full View */}
-            <div className="w-full relative mb-2 flex items-center justify-center rounded-lg bg-white">
-              {!mockupActive && (
-                <div className="relative w-full h-full flex items-center justify-center">
-                  {/* Standard Image Tag - Responsive */}
-                  <Image
-                    src={product?.image}
-                    alt="Product"
-                    width={600}
-                    height={600}
-                    className="w-full h-auto object-contain max-h-[500px] md:max-h-[600px]"
-                  />
+            <div className="w-full relative mb-4 flex items-center justify-center  min-h-[500px] transition-all duration-300">
+              <div className="relative inline-block transition-all duration-300 ease-in-out">
+                {/* 🖼️ FRAME VISUAL */}
+                <div
+                  style={{
+                    ...getFrameStyle(),
+                    display: "inline-block",
+                    backgroundColor: selectedMat ? selectedMat.color : "#fff",
+                  }}
+                >
+                  <div style={{ padding: selectedMat ? "30px" : "0px" }}>
+                    <img
+                      src={product?.image}
+                      alt="Art"
+                      className="max-h-[450px] w-auto block"
+                      style={{
+                        boxShadow: selectedMat
+                          ? "inset 2px 2px 5px rgba(0,0,0,0.3), 1px 1px 0px rgba(255,255,255,0.2)"
+                          : "none",
+                        border: selectedMat
+                          ? "1px solid rgba(0,0,0,0.1)"
+                          : "none",
+                      }}
+                    />
+                  </div>
                 </div>
-              )}
 
-              {mockupActive && (
-                // Constrain the container of DynamicMockup
-                <div className="w-full h-full flex items-center justify-center max-w-full">
-                  <DynamicMockup
-                    artwork={product.image}
-                    productType={selectedProduct}
-                    phoneModelId={selectedPhoneModel}
-                    scale={imageScale}
-                    rotate={rotation}
+                {/* ✨ GLAZING */}
+                {selectedGlazing && (
+                  <div
+                    className="absolute inset-0 z-20 pointer-events-none"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.1) 100%)",
+                      mixBlendMode: "soft-light",
+                    }}
                   />
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
-            {/* Click to Enlarge Text */}
-            {!mockupActive && (
+            <div className="flex justify-center gap-6 border-t border-gray-200 pt-4 w-full">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="text-xs text-gray-500 underline hover:text-black mb-6 flex items-center gap-1"
+                className="flex flex-col items-center gap-1 text-gray-500 hover:text-black text-xs uppercase tracking-wide"
               >
-                click to enlarge <Maximize2 size={10} />
+                <Maximize2 size={20} /> Zoom
               </button>
-            )}
-
-            {/* Action Icons */}
-            <div className="flex flex-wrap justify-center gap-4 md:gap-8 w-full border-t border-gray-200 pt-6 bg-white pb-2">
-              {!mockupActive && (
-                <button
-                  onClick={() => setIsAROpen(true)}
-                  className="flex flex-col items-center gap-2 text-gray-500 hover:text-black transition group"
-                >
-                  <Video
-                    className="w-5 h-5 md:w-7 md:h-7 group-hover:scale-110 transition-transform"
-                    strokeWidth={1.5}
-                  />
-                  <span className="text-[10px] md:text-[11px] uppercase tracking-wide">
-                    Live AR
-                  </span>
-                </button>
-              )}
-
-              {!mockupActive && (
-                <button
-                  onClick={() => setIsWallViewOpen(true)} // TRIGGER WALL PREVIEW
-                  className="flex flex-col items-center gap-2 text-gray-500 hover:text-black transition group"
-                >
-                  <ImageIcon
-                    className="w-5 h-5 md:w-7 md:h-7 group-hover:scale-110 transition-transform"
-                    strokeWidth={1.5}
-                  />
-                  <span className="text-[10px] md:text-[11px] uppercase tracking-wide">
-                    Wall View
-                  </span>
-                </button>
-              )}
-              <button className="flex flex-col items-center gap-2 text-gray-500 hover:text-black transition group">
-                <Heart
-                  className="w-5 h-5 md:w-7 md:h-7 group-hover:scale-110 transition-transform"
-                  strokeWidth={1.5}
-                />
-                <span className="text-[10px] md:text-[11px] uppercase tracking-wide">
-                  Save
-                </span>
-              </button>
-
-              <button className="flex flex-col items-center gap-2 text-gray-500 hover:text-black transition group">
-                <Mail
-                  className="w-5 h-5 md:w-7 md:h-7 group-hover:scale-110 transition-transform"
-                  strokeWidth={1.5}
-                />
-                <span className="text-[10px] md:text-[11px] uppercase tracking-wide">
-                  Email a Friend
-                </span>
+              <button
+                onClick={() => setIsWallViewOpen(true)}
+                className="flex flex-col items-center gap-1 text-gray-500 hover:text-black text-xs uppercase tracking-wide"
+              >
+                <ImageIcon size={20} /> Wall View
               </button>
             </div>
           </div>
-          {/* End of Left Wrapper */}
 
-          {/* RIGHT SIDE : CONTROLS */}
+          {/* CONTROLS */}
           <div className="relative z-0">
-            <h1 className="text-2xl md:text-3xl font-light tracking-wider mb-4">
-              {product.title ?? "Product Title"}
-            </h1>
-            <div className="mb-6">
-              <div className="md:text-3xl text-xl font-semibold mb-2">
-                ${product.price}
-              </div>
+            <div className="flex flex-col gap-1 mb-4">
+              <h1 className="text-3xl font-light tracking-wide text-gray-900">
+                {product.title || "Untitled Artwork"}
+              </h1>
+
+              {typeof product.price === "number" && (
+                <p className="text-xl font-medium text-gray-800">
+                  ${product.price.toFixed(2)}
+                </p>
+              )}
             </div>
 
-            {/* QUANTITY + ADD TO CART (Stacked Layout) */}
-            <div className="md:flex gap-4 mb-8">
-              <div>
+            {/* Color Correction Option (no price text) */}
+            <div className="mb-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={colorCorrection}
+                  onChange={toggleColorCorrection}
+                  className="w-4 h-4 text-black focus:ring-black focus:ring-2 focus:ring-offset-0"
+                />
+                <span className="text-sm text-gray-700">
+                  Add Professional Color Correction
+                </span>
+              </label>
+            </div>
+
+            {/* Quantity + Add to Cart */}
+            <div className="flex gap-4 mb-8">
+              <div className="relative">
                 <input
                   type="number"
-                  defaultValue={1}
-                  min={1}
-                  // ADDED the class to hide the spin buttons
-                  className="w-full md:w-14 px-4 py-2 border text-center no-spin-buttons"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) =>
+                    setQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                  }
+                  className="w-20 border border-gray-300 text-center p-3 text-lg focus:outline-none focus:border-black"
                 />
+                <div className="absolute -top-2 left-2 bg-white px-1 text-xs text-gray-500">
+                  Qty
+                </div>
               </div>
-              <div className="flex gap-4 md:gap-5 w-full mt-4 md:mt-0">
-                {/* Button 1: Add to Cart (Default: Black, Hover: White) */}
-                <button
-                  onClick={handleAddToCart}
-                  className="w-full bg-black text-white py-2 border border-black transition uppercase tracking-widest text-[12px] font-medium
-                   hover:bg-white hover:text-black"
-                >
-                  Add to Cart
-                </button>
-
-                {/* Button 2: Instant checkout (Default: Black, Hover: White, Flash Icon) */}
-                <button
-                  className="w-full bg-black text-white py-2 border border-black transition uppercase tracking-widest text-[12px] font-medium 
-                   flex items-center justify-center gap-2 
-                   hover:bg-white hover:text-black"
-                >
-                  ⚡ Instant checkout
-                </button>
-              </div>
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 bg-black text-white uppercase text-sm font-bold tracking-widest hover:bg-gray-800 transition py-3"
+              >
+                Add Framed Art To Cart
+              </button>
             </div>
 
-            {/* SECTION 1: PRODUCT SELECTOR */}
-            <div className="border border-gray-300 mb-4 overflow-hidden">
-              <button
-                onClick={() => toggleSection("product")}
-                className={`w-full flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 transition ${
-                  activeSection === "product"
-                    ? "font-bold text-black"
-                    : "text-gray-600"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  1. Select Product
-                  {mockupActive && activeSection !== "product" && (
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+            {/* FRAMING PANEL */}
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              {/* FRAME SELECTION */}
+              <div className="border-b border-gray-200">
+                <button
+                  onClick={() =>
+                    setActiveSection(
+                      activeSection === "selection" ? null : "selection"
+                    )
+                  }
+                  className="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 font-bold text-sm text-gray-700"
+                >
+                  <div className="flex items-center gap-2">
+                    <span>1. Select Frame</span>
+                  </div>
+                  {activeSection === "selection" ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
                   )}
-                </span>
-                {activeSection === "product" ? (
-                  <ChevronUp size={20} />
-                ) : (
-                  <ChevronDown size={20} />
-                )}
-              </button>
+                </button>
 
-              <div
-                className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                  activeSection === "product"
-                    ? "max-h-[600px] opacity-100"
-                    : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className="p-4 border-t border-gray-200">
-                  <select
-                    className="w-full p-3 border mb-3 text-sm"
-                    value={selectedProduct}
-                    onChange={(e) => handleProductSelect(e.target.value)}
-                  >
-                    <option value="default">Select a Product…</option>
-                    {productOptions.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 mt-3">
-                    {productOptions.map((po) => (
+                {activeSection === "selection" && (
+                  <div className="p-4 bg-white">
+                    {viewState === "frames" && (
                       <button
-                        key={po.id}
-                        onClick={() => handleProductSelect(po.id)}
-                        className={`p-2 border text-center text-xs rounded flex flex-col items-center justify-center gap-1 transition-colors ${
-                          selectedProduct === po.id
-                            ? "border-black bg-gray-100 ring-1 ring-black"
-                            : "border-gray-200 hover:border-gray-400"
+                        onClick={handleBackToFolders}
+                        className="mb-3 text-sm text-blue-600 flex items-center gap-1 hover:underline"
+                      >
+                        ← Back to Styles
+                      </button>
+                    )}
+
+                    {loading ? (
+                      <div className="py-8 text-center text-gray-400">
+                        Loading...
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-96 overflow-y-auto p-1">
+                        {viewState === "frames" && (
+                          <div
+                            onClick={() => setSelectedFrame(null)}
+                            className={`cursor-pointer border-2 p-3 flex flex-col items-center justify-center min-h-[120px] ${
+                              !selectedFrame
+                                ? "border-black bg-gray-50"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                          >
+                            <div className="h-12 w-12 border-2 border-dashed border-gray-300 mb-2 bg-white"></div>
+                            <span className="text-xs font-medium">
+                              No Frame
+                            </span>
+                          </div>
+                        )}
+
+                        {items.map((item: any) => (
+                          <div
+                            key={item.id}
+                            onClick={() => handleItemClick(item)}
+                            className={`cursor-pointer border-2 p-2 flex flex-col items-center ${
+                              selectedFrame?.id === item.id
+                                ? "border-blue-600 ring-2 ring-blue-100"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                          >
+                            <div className="h-20 w-full relative bg-gray-100 mb-2 overflow-hidden">
+                              {viewState === "collections" && (
+                                <span className="absolute top-0 right-0 bg-gray-800 text-white text-[8px] px-1">
+                                  Collection
+                                </span>
+                              )}
+                              <img
+                                src={getFullImageUrl(item.displayImage)}
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <p className="text-xs font-medium text-center truncate w-full">
+                              {item.name}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* MAT SELECTION */}
+              <div className="border-b border-gray-200">
+                <button
+                  onClick={() =>
+                    setActiveSection(activeSection === "mat" ? null : "mat")
+                  }
+                  className="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 font-bold text-sm text-gray-700"
+                >
+                  <div className="flex items-center gap-2">
+                    <span>2. Add Mat</span>
+                  </div>
+                  {activeSection === "mat" ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
+                </button>
+
+                {activeSection === "mat" && (
+                  <div className="p-4 bg-white">
+                    <div className="mb-3">
+                      <button
+                        onClick={() => handleMatChange(null)}
+                        className={`px-4 py-2 text-sm border ${
+                          !selectedMat
+                            ? "bg-gray-900 text-white border-gray-900"
+                            : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
                         }`}
                       >
-                        <div className="text-xl">{po.icon}</div>
-                        <span className="truncate w-full">{po.name}</span>
+                        No Mat
                       </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+                    </div>
 
-            {/* SECTION 2: CUSTOMIZE IT */}
-            {mockupActive && (
-              <div className="border border-gray-300  overflow-hidden transition-all duration-500">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-60 overflow-y-auto">
+                      {mats.map((mat: any) => (
+                        <div
+                          key={mat.id}
+                          onClick={() => handleMatChange(mat)}
+                          className={`cursor-pointer border-2 p-1 flex flex-col items-center ${
+                            selectedMat?.id === mat.id
+                              ? "border-blue-600 ring-1 ring-blue-100"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                        >
+                          <div
+                            className="w-full h-16 mb-1 rounded-sm"
+                            style={{ backgroundColor: mat.color }}
+                            title={mat.name}
+                          />
+                          <span className="text-[10px] text-center truncate w-full">
+                            {mat.name}
+                          </span>
+                          {mat.thickness && (
+                            <span className="text-[8px] text-gray-500">
+                              {mat.thickness}/16&quot;
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* GLAZING SELECTION */}
+              <div>
                 <button
-                  onClick={() => toggleSection("customize")}
-                  className={`w-full flex justify-between items-center p-3 transition ${
-                    activeSection === "customize"
-                      ? "bg-gray-50 font-bold text-black"
-                      : "bg-white hover:bg-gray-50 text-gray-600"
-                  }`}
+                  onClick={() =>
+                    setActiveSection(
+                      activeSection === "glaze" ? null : "glaze"
+                    )
+                  }
+                  className="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 font-bold text-sm text-gray-700"
                 >
-                  <span className="flex items-center gap-2">
-                    2. Customize It
-                    {activeSection !== "customize" && (
-                      <span className="text-xs font-normal text-gray-500 ml-2">
-                        (Click to expand)
-                      </span>
-                    )}
-                  </span>
-                  {activeSection === "customize" ? (
-                    <ChevronUp size={20} />
+                  <div className="flex items-center gap-2">
+                    <span>3. Glazing</span>
+                  </div>
+                  {activeSection === "glaze" ? (
+                    <ChevronUp size={18} />
                   ) : (
-                    <ChevronDown size={20} />
+                    <ChevronDown size={18} />
                   )}
                 </button>
 
-                <div
-                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                    activeSection === "customize"
-                      ? "max-h-[600px] opacity-100"
-                      : "max-h-0 opacity-0"
-                  }`}
-                >
-                  <div className="p-4 border-t border-gray-200">
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium mb-1">
-                        Image Size
-                      </label>
-                      <input
-                        type="range"
-                        min={0.2}
-                        max={2}
-                        step={0.01}
-                        value={imageScale}
-                        onChange={(e) => setImageScale(Number(e.target.value))}
-                        className="w-full accent-black"
-                      />
+                {activeSection === "glaze" && (
+                  <div className="p-4 bg-white">
+                    <div className="mb-3">
+                      <button
+                        onClick={() => handleGlazingChange(null)}
+                        className={`px-4 py-2 text-sm border ${
+                          !selectedGlazing
+                            ? "bg-gray-900 text-white border-gray-900"
+                            : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
+                        }`}
+                      >
+                        No Glazing
+                      </button>
                     </div>
 
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium mb-1">
-                        Rotate
-                      </label>
-                      <input
-                        type="range"
-                        min={0}
-                        max={360}
-                        value={rotation}
-                        onChange={(e) => setRotation(Number(e.target.value))}
-                        className="w-full accent-black"
-                      />
-                    </div>
-
-                    {selectedProduct === "phone" && (
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium mb-1">
-                          Phone Model
-                        </label>
-                        <select
-                          className="w-full p-2 border rounded"
-                          value={selectedPhoneModel}
-                          onChange={(e) =>
-                            setSelectedPhoneModel(e.target.value)
-                          }
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {glazing.map((glaze: any) => (
+                        <div
+                          key={glaze.id}
+                          onClick={() => handleGlazingChange(glaze)}
+                          className={`cursor-pointer border-2 p-3 flex flex-col items-center justify-center ${
+                            selectedGlazing?.id === glaze.id
+                              ? "border-blue-600 bg-blue-50"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
                         >
-                          {Object.keys(PHONE_MODELS).map((key) => (
-                            <option key={key} value={key}>
-                              {key.toUpperCase()}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-
-                    {selectedProduct !== "phone" && (
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">
-                            Placement
-                          </label>
-                          <select
-                            className="w-full p-2 border rounded"
-                            value={placement}
-                            onChange={(e) => setPlacement(e.target.value)}
-                          >
-                            {placements.map((p) => (
-                              <option key={p}>{p}</option>
-                            ))}
-                          </select>
+                          <div className="text-center">
+                            <div className="font-medium text-sm mb-1">
+                              {glaze.name}
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              {glaze.description || "Protective covering"}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">
-                            Color
-                          </label>
-                          <select
-                            className="w-full p-2 border rounded"
-                            value={selectedColor}
-                            onChange={(e) => setSelectedColor(e.target.value)}
-                          >
-                            <option value="black">Black</option>
-                            <option value="white">White</option>
-                          </select>
-                        </div>
-                      </div>
-                    )}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* Konfig summary / size / price breakdown kichui nai */}
           </div>
         </div>
       </div>
