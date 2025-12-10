@@ -5,29 +5,35 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 // Import usePathname from next/navigation
-import { usePathname } from "next/navigation"; 
+import { usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { toggleTheme } from "@/lib/redux/slices/themeSlice";
 import dynamic from "next/dynamic";
-
+import { Moon, Sun, Heart, ShoppingCart, User } from "lucide-react";
 // Dynamic imports (এগুলো শুধু ক্লায়েন্টে লোড হবে)
 const MobileMenu = dynamic(() => import("@/components/layout/MobileMenu"), {
   ssr: false,
   loading: () => (
     <button className="lg:hidden h-10 px-2">
-      <svg className="w-7 h-7 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+      <svg
+        className="w-7 h-7 animate-pulse"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="square"    // no rounded edges
+          strokeLinejoin="miter"    // sharp corners
+          strokeWidth={1.3}         // thin, flat style
+          d="M4 6h16M4 12h16M4 18h16"
+        />
       </svg>
     </button>
   ),
 });
 
+
 // Icons
-import { FaPhoneAlt } from "react-icons/fa";
-import { HiOutlineShoppingBag } from "react-icons/hi";
-import { BsHeartFill } from "react-icons/bs";
-import { BiUserCircle } from "react-icons/bi";
-import { MdDarkMode, MdLightMode } from "react-icons/md";
 import CartButton from "@/components/cart/CartButton";
 
 import {
@@ -45,13 +51,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-
-import { Button } from "@/components/ui/button";
 
 const borderColor = "border-gray-200 dark:border-gray-800";
 const iconColor = "text-gray-600 dark:text-gray-300";
@@ -61,18 +60,20 @@ const Navbar = () => {
   const theme = useAppSelector((state) => state.theme.mode);
   const cart = useAppSelector((state) => state.cart.items);
   const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
-  const totalPrice = cart.reduce((t, i) => t + i.quantity * i.price, 0).toFixed(2);
-  
+  const totalPrice = cart
+    .reduce((t, i) => t + i.quantity * i.price, 0)
+    .toFixed(2);
+
   // 1. Initialize usePathname
   const currentPath = usePathname();
 
   // Helper function to check if a path is active, handling the root path case
   const isActive = (href: string) => {
-      // Check for exact match (e.g., /about == /about)
-      if (currentPath === href) return true;
-      // Handle the root path "/" special case: only true if exactly "/"
-      if (href === "/") return currentPath === "/";
-      return false;
+    // Check for exact match (e.g., /about == /about)
+    if (currentPath === href) return true;
+    // Handle the root path "/" special case: only true if exactly "/"
+    if (href === "/") return currentPath === "/";
+    return false;
   };
 
   const menuItems = [
@@ -83,7 +84,9 @@ const Navbar = () => {
   ];
 
   return (
-    <div className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}>
+    <div
+      className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}
+    >
       <div className="container mx-auto py-3 md:px-4 px-1 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="hidden lg:flex">
@@ -106,19 +109,21 @@ const Navbar = () => {
               <NavigationMenuTrigger className="text-base font-normal italic bg-transparent data-[state=open]:bg-transparent">
                 SHOP ART
               </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid gap-3 p-6 w-96 bg-white dark:bg-gray-950 border rounded-lg shadow-xl">
+              <NavigationMenuContent >
+                <ul className="grid gap-3 p-6 w-96 bg-white dark:bg-gray-950 border shadow-xl ">
                   {[
-                    { href: "/contemporary", title: "Contemporary",},
-                    { href: "/abstract-designs", title: "Abstract & Designs", },
-                    { href: "/custom-portrait", title: "Custom Portraits",  },
+                    { href: "/contemporary", title: "Contemporary" },
+                    { href: "/abstract-designs", title: "Abstract & Designs" },
+                    { href: "/custom-portrait", title: "Custom Portraits" },
                   ].map((item) => (
                     <li key={item.href}>
                       <Link
                         href={item.href}
-                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                        className="block select-none space-y-1 p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
                       >
-                        <div className="text-sm font-semibold">{item.title}</div>
+                        <div className="text-sm font-semibold">
+                          {item.title}
+                        </div>
                       </Link>
                     </li>
                   ))}
@@ -133,9 +138,13 @@ const Navbar = () => {
               return (
                 <NavigationMenuItem key={item.label}>
                   <Link href={item.href} legacyBehavior passHref>
-                    <span 
+                    <span
                       className={`text-base italic cursor-pointer transition 
-                        ${active ? "text-black font-bold underline decoration-2 decoration-black" : "hover:text-primary"}
+                        ${
+                          active
+                            ? "text-black font-bold underline decoration-2 decoration-black"
+                            : "hover:text-primary"
+                        }
                       `}
                     >
                       {item.label}
@@ -148,19 +157,35 @@ const Navbar = () => {
         </NavigationMenu>
 
         {/* Right Icons */}
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4">
           {/* Theme Toggle */}
           <button
             onClick={() => dispatch(toggleTheme())}
-            className={`transition ${iconColor} hover:text-foreground`}
+            className={`transition ${iconColor} hover:text-foreground/90`}
           >
-            {theme === "light" ? <MdDarkMode className="w-6 h-6" /> : <MdLightMode className="w-6 h-6" />}
+            {theme === "light" ? (
+              <Moon className="md:w-7 md:h-7 w-6 h-6" />
+            ) : (
+              <Sun className="md:w-7 md:h-7 w-6 h-6" />
+            )}
           </button>
 
           {/* Favorites */}
-          <button className={`relative transition ${iconColor} hover:text-foreground`}>
-            <BsHeartFill className="w-6 h-6" />
-            <span className="absolute -top-1 -right-2 bg-background text-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center shadow">
+          <button
+            className={`relative inline-flex items-center transition ${iconColor} hover:text-foreground/90`}
+          >
+            <Heart className="md:w-7 md:h-7 w-6 h-6" />
+            <span
+              className="
+        absolute -top-1 -right-3 
+        text-[10px] leading-none 
+        px-[4px] py-[2px]
+        bg-background 
+        text-foreground/80 
+        border 
+        rounded-[2px]     /* no rounded-full */
+      "
+            >
               0
             </span>
           </button>
@@ -171,16 +196,24 @@ const Navbar = () => {
           {/* Profile */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className={`transition ${iconColor} hover:text-foreground`}>
-                <BiUserCircle className="w-8 h-8" />
+              <button
+                className={`transition ${iconColor} hover:text-foreground/90 inline-flex items-center`}
+              >
+                <User className="md:w-7 md:h-7 w-6 h-6" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className={`w-48 border ${borderColor}`}>
+            <DropdownMenuContent
+              className={`w-48 border ${borderColor} rounded-none`} // jodi pura no-rounded chai
+            >
               <DropdownMenuItem asChild>
-                <Link href="/login" className="w-full">Login</Link>
+                <Link href="/login" className="w-full">
+                  Login
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/sign-up" className="w-full">Create Account</Link>
+                <Link href="/sign-up" className="w-full">
+                  Create Account
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
