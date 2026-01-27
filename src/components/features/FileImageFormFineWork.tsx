@@ -78,8 +78,9 @@ export default function FileImageFormFineWork() {
   const { data, isLoading, isError, error } = useListFinerworksImagesQuery({
     library,
     page,
+    list_products: true,
   });
-
+  console.log(data)
   const images: ImageType[] = (data?.images as ImageType[]) ?? [];
 
   useEffect(() => {

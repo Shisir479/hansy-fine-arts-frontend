@@ -6,6 +6,8 @@ export interface FinerworksImage {
   description?: string;
   public_preview_uri?: string;
   public_thumbnail_uri?: string;
+  // You should likely add products here to satisfy TypeScript in your component
+  products?: any[]; 
 }
 
 export interface LibraryPayload {
@@ -23,13 +25,15 @@ interface ListImagesApiResponse {
     images: FinerworksImage[];
     page_number: number;
     per_page: number;
-    count: number; // total count or current page count (FinerWorks er doc onujayi)
+    count: number;
   };
 }
 
 export interface ListImagesQueryArg {
   library: LibraryPayload;
   page?: number;
+  // 1. Add this optional property
+  list_products?: boolean; 
 }
 
 export const finerworksApi = createApi({
@@ -39,13 +43,16 @@ export const finerworksApi = createApi({
   }),
   endpoints: (builder) => ({
     listFinerworksImages: builder.query<ListImagesApiResponse["data"], ListImagesQueryArg>({
-      query: ({ library, page = 1 }) => ({
+      // 2. Destructure list_products and default it to true (or false)
+      query: ({ library, page = 1, list_products = true }) => ({
         url: "/finerworks/images/list",
         method: "POST",
         body: {
           library,
           page_number: page,
-          per_page: 10, // tumi chaile env/param o korte paro
+          per_page: 10,
+          // 3. Pass the flag to the API
+          list_products: list_products, 
         },
       }),
       transformResponse: (response: ListImagesApiResponse) => response.data,

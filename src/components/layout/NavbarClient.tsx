@@ -1,0 +1,200 @@
+// components/NavbarClient.tsx
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { toggleTheme } from "@/lib/redux/slices/themeSlice";
+import dynamic from "next/dynamic";
+import { Moon, Sun, Heart, User } from "lucide-react";
+
+// Icons & Components
+import CartButton from "@/components/cart/CartButton";
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu";
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+// Dynamic imports
+const MobileMenu = dynamic(() => import("@/components/layout/MobileMenu"), {
+  ssr: false,
+  loading: () => <div className="w-7 h-7" />,
+});
+
+const borderColor = "border-gray-200 dark:border-gray-800";
+const iconColor = "text-gray-600 dark:text-gray-300";
+
+const NavbarClient = () => {
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector((state) => state.theme.mode);
+  const currentPath = usePathname();
+
+  // Helper: Check if path is active
+  const isActive = (href: string) => {
+    if (currentPath === href) return true;
+    if (href === "/") return currentPath === "/";
+    return false;
+  };
+
+  // 1. Define Shop Art sub-routes to check for active state
+  const shopArtRoutes = [
+    "/contemporary",
+    "/abstract-designs",
+    "/custom-portrait",
+  ];
+
+  // 2. Check if we are currently inside any Shop Art route
+  const isShopArtActive = shopArtRoutes.some((route) =>
+    currentPath.startsWith(route)
+  );
+
+  const menuItems = [
+    { label: "ARTSY PRODUCTS", href: "/artsy-products" },
+    { label: "ABOUT", href: "/about" },
+    { label: "CONTACT", href: "/contact" },
+    { label: "FAQ", href: "/faq" },
+  ];
+
+  return (
+    <div className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}>
+      <div className="container mx-auto py-2 md:px-4 px-1 flex items-center justify-between">
+        
+        {/* Logo */}
+        <Link href="/" className="hidden lg:flex">
+          <Image
+            src="/hansyeaggy-logo.png"
+            alt="Hans Yeaggy"
+            width={140}
+            height={140}
+            className="object-contain"
+          />
+        </Link>
+
+        {/* Mobile Menu */}
+        <MobileMenu />
+
+        {/* Desktop Menu */}
+        <NavigationMenu className="hidden lg:flex">
+          <NavigationMenuList className="space-x-8">
+            
+            <NavigationMenuItem>
+              {/* 3. Dynamic Class Logic:
+                  If isShopArtActive is true, we force the bold/underline styles 
+                  even if the menu is closed.
+              */}
+              <NavigationMenuTrigger
+                className={`text-base font-normal italic bg-transparent data-[state=open]:bg-transparent hover:bg-transparent focus:bg-transparent
+                  ${isShopArtActive 
+                    ? "text-black font-bold underline decoration-2 decoration-black" 
+                    : ""
+                  }
+                `}
+              >
+                SHOP ART
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid gap-3 p-6 w-96 bg-white dark:bg-gray-950 border shadow-xl">
+                  {shopArtRoutes.map((route, index) => {
+                     // Mapping titles manually since array above is just strings
+                     const titles = ["Contemporary", "Abstract & Designs", "Custom Portraits"];
+                     return (
+                      <li key={route}>
+                        <Link href={route} legacyBehavior passHref>
+                          <NavigationMenuLink
+                            className={`block select-none space-y-1 p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground rounded-md
+                              ${currentPath === route ? "bg-accent/50" : ""}
+                            `}
+                          >
+                            <div className="text-sm font-semibold leading-none">
+                              {titles[index]}
+                            </div>
+                          </NavigationMenuLink>
+                        </Link>
+                      </li>
+                     )
+                  })}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            {/* Other Menu Items */}
+            {menuItems.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <NavigationMenuItem key={item.label}>
+                  <Link href={item.href} legacyBehavior passHref>
+                    <span
+                      className={`text-base italic cursor-pointer transition 
+                        ${active
+                          ? "text-black font-bold underline decoration-2 decoration-black"
+                          : "hover:text-primary"
+                        }
+                      `}
+                    >
+                      {item.label}
+                    </span>
+                  </Link>
+                </NavigationMenuItem>
+              );
+            })}
+          </NavigationMenuList>
+        </NavigationMenu>
+
+        {/* Right Icons */}
+        <div className="flex items-center gap-4">
+          {/* Theme Toggle */}
+          <button
+            onClick={() => dispatch(toggleTheme())}
+            className={`transition ${iconColor} hover:text-foreground/90`}
+          >
+            {theme === "light" ? <Moon className="w-6 h-6" /> : <Sun className="w-6 h-6" />}
+          </button>
+
+          {/* Favorites */}
+          <button className={`relative inline-flex items-center transition ${iconColor} hover:text-foreground/90`}>
+            <Heart className="w-6 h-6" />
+            <span className="absolute -top-1 -right-3 text-[10px] leading-none px-[4px] py-[2px] bg-background text-foreground/80 border rounded-[2px]">
+              0
+            </span>
+          </button>
+
+          {/* Cart */}
+          <CartButton />
+
+          {/* Profile */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={`transition ${iconColor} hover:text-foreground/90 inline-flex items-center`}>
+                <User className="w-6 h-6" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className={`w-48 border ${borderColor} rounded-none`}>
+              <DropdownMenuItem asChild>
+                <Link href="/login" className="w-full">Login</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/sign-up" className="w-full">Create Account</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default NavbarClient;
