@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 import { useGesture } from "@use-gesture/react";
-import axios from "axios";
+import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
 
 type ImageItem = string | { src: string; alt?: string; isSkeleton?: boolean };
 
@@ -168,7 +168,7 @@ export default function DomeGallery({
   segments = DEFAULTS.segments,
   dragDampening = 2,
   openedImageWidth = "90vh",
-  openedImageHeight = "75vh",
+  openedImageHeight = "80vh",
   imageBorderRadius = "0px",
   openedImageBorderRadius = "0px",
   grayscale = false,
@@ -323,46 +323,50 @@ export default function DomeGallery({
     }
   }, []);
 
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchAllProducts();
-  }, []);
-
-  const fetchAllProducts = async () => {
-    try {
-      setLoading(true);
-      const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/arts`
-      );
-      setProducts(data.slice(0, 12)); // first 12
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  // 🔹 FinerWorks library info (same as other components)
+  const library = {
+    name: "inventory",
+    session_id: "1234567890",
+    account_key: "dc9e5410-0107-441a-92eb-6a4fd1c34c79",
+    site_id: 2,
   };
 
-  // Logic to determine final items: Skeleton, Products, or Default
+  // Dome er jonno just ekta page use korchi (sob images from response, no filtering)
+  const [page] = useState(1);
+  const { data, isLoading, isError, error } = useListFinerworksImagesQuery({
+    library,
+    page,
+  });
+
+  const fwImages: any[] = data?.images ?? [];
+
+  // Logic to determine final items: skeleton (loading) → FinerWorks images → fallback
   const finalImages = useMemo(() => {
-    if (loading) {
-        // Create 50 skeleton items to fill the dome
-        return Array.from({ length: 50 }).map(() => ({
-            src: "",
-            alt: "",
-            isSkeleton: true
-        }));
+    if (isLoading) {
+      // Create skeleton items to fill the dome
+      return Array.from({ length: 50 }).map(() => ({
+        src: "",
+        alt: "",
+        isSkeleton: true,
+      }));
     }
-    if (products.length > 0) {
-        return products.map((p) => ({
-            src: p.image || "/placeholder.jpg",
-            alt: p.productTitle || "Product",
-            isSkeleton: false
-        }));
+
+    if (fwImages.length > 0) {
+      // 🔥 NO FILTERING – sob response image use hocche
+      return fwImages.map((img: any) => ({
+        src: img.public_preview_uri || img.public_thumbnail_uri || "",
+        alt: img.title || "",
+        isSkeleton: false,
+      }));
     }
+
+    // Fallback: local DEFAULT_IMAGES
     return DEFAULT_IMAGES;
-  }, [loading, products]);
+  }, [isLoading, fwImages]);
+
+  if (isError) {
+    console.error("DomeGallery: FinerWorks images fetch failed", error);
+  }
 
   const items = useMemo(
     () => buildItems(finalImages, segments),
@@ -371,7 +375,6 @@ export default function DomeGallery({
 
   // Responsive opened image size
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
   const responsiveOpenedWidth = isMobile ? "90vw" : openedImageWidth;
   const responsiveOpenedHeight = isMobile ? "55vh" : openedImageHeight;
 
@@ -742,12 +745,12 @@ export default function DomeGallery({
     const img = document.createElement("img");
     img.src = rawSrc;
     img.alt = rawAlt;
-    
-    // MODIFIED: Using contain to show full image aspect ratio when opened
+
+    // opened image full contain
     img.style.cssText = `width:100%; height:100%; object-fit:contain; filter:${
       grayscale ? "grayscale(1)" : "none"
     };`;
-    
+
     overlay.appendChild(img);
     viewerRef.current!.appendChild(overlay);
     const tx0 = tileR.left - frameR.left;
@@ -988,8 +991,8 @@ export default function DomeGallery({
                         inset: "10px",
                         borderRadius: `var(--tile-radius, ${imageBorderRadius})`,
                         backfaceVisibility: "hidden",
-                        pointerEvents: it.isSkeleton ? 'none' : 'auto', // Disable click on skeleton
-                        cursor: it.isSkeleton ? 'default' : 'pointer',
+                        pointerEvents: it.isSkeleton ? "none" : "auto", // Disable click on skeleton
+                        cursor: it.isSkeleton ? "default" : "pointer",
                       }}
                     >
                       {it.isSkeleton ? (

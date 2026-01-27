@@ -61,7 +61,7 @@ export default function MobileMenu() {
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" className="lg:hidden h-10 px-2">
-          <Menu className="h-7 w-7 text-gray-900 dark:text-gray-300" />
+          <Menu className="h-7 w-7 text-gray-700 dark:text-gray-300" />
         </Button>
       </SheetTrigger>
 
