@@ -222,15 +222,10 @@ export default function WallPreviewTool({ isOpen, onClose, productImage }: Props
                       zIndex: customRoom ? 30 : 10 
                   }}
                >
-                  {/* Clean Shadow */}
-                  <div className="absolute top-5 left-5 w-full h-full bg-black/25 blur-2xl -z-10"></div>
                   
                   {/* Minimal Frame */}
-                  <div className="w-full h-full bg-white p-2 shadow-2xl flex items-center justify-center border-[3px] border-black relative group">
-                     <img src={productImage} alt="Art" className="w-full h-full object-cover pointer-events-none"/>
-                     
-                     {/* Hover Border */}
-                     <div className="absolute -inset-4 border-2 border-black opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                  <div className="w-full h-full flex items-center justify-center relative group">
+                     <img src={productImage} alt="Art" className="w-full h-full object-contain pointer-events-none"/>
                      
                      {/* Size Label */}
                      <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-3 py-1 opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap font-bold tracking-wider uppercase">
