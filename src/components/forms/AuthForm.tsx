@@ -17,7 +17,8 @@ type AuthFormProps = {
 };
 
 type FormData = {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   password: string;
   role: string;
@@ -38,6 +39,7 @@ export default function AuthForm({ type }: AuthFormProps) {
 
   const onSubmit = async (data: FormData) => {
     setError("");
+    console.log(" register data", data);
     try {
       if (type === "register") {
         await handleRegister(data);
@@ -55,9 +57,9 @@ export default function AuthForm({ type }: AuthFormProps) {
       className="min-h-screen mx-auto overflow-hidden flex justify-center flex-col
      w-96 md:w-[450px] lg:w-[666px] sm:px-8"
     >
-      <div className="flex justify-center">
+      {/* <div className="flex justify-center">
         <h1 className="font-bold bg-base lg:text-3xl text-xl">Milko</h1>
-      </div>
+      </div> */}
 
       <h2 className="my-6 capitalize text-center">{type} to dashboard</h2>
 
@@ -67,11 +69,19 @@ export default function AuthForm({ type }: AuthFormProps) {
           {type === "register" && (
             <>
               <InputField
-                label="Name"
-                id="name"
-                placeholder="Name"
-                register={register("name", { required: true })}
-                error={errors.name && "Name is required"}
+                label="First Name"
+                id="firstName"
+                placeholder="First Name"
+                register={register("firstName", { required: true })}
+                error={errors.firstName && "First name is required"}
+              />
+
+              <InputField
+                label="Last Name"
+                id="lastName"
+                placeholder="Last Name"
+                register={register("lastName", { required: true })}
+                error={errors.lastName && "Last name is required"}
               />
 
               {/* Role Dropdown */}
@@ -85,11 +95,10 @@ export default function AuthForm({ type }: AuthFormProps) {
                 <select
                   id="role"
                   {...register("role", { required: "Role is required" })}
-                  defaultValue="user"
+                  defaultValue="customer"
                   className="border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
                 >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
+                  <option value="customer">Customer</option>
                 </select>
                 {errors.role && (
                   <p className="text-red-500 text-xs mt-1">
@@ -157,9 +166,10 @@ export default function AuthForm({ type }: AuthFormProps) {
               Continue with Google
             </Button> */}
             <Button
-              onClick={() =>
-                window.open(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`)
-              }
+              onClick={() => {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+                window.location.href = `${apiUrl}/auth/google`;
+              }}
               type="button"
               variant="outline"
               className="w-full cursor-pointer"

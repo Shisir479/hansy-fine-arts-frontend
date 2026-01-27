@@ -1,6 +1,5 @@
-// store.ts
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import { finerworksApi } from "./api/finerworksApi"; // এটাই রাখো
+import { finerworksApi } from "./api/finerworksApi";
 import authReducer from "./slices/authSlice";
 import cartReducer from "./slices/cartSlice";
 import wishlistReducer from "./slices/wishlistSlice";
@@ -26,23 +25,26 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "cart", "wishlist", "theme"], // চাইলে শুধু auth, cart রাখতে পারো
+  whitelist: ["auth", "cart", "wishlist", "theme"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-export const store = configureStore({
-  reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: [PERSIST, REHYDRATE, REGISTER],
-      },
-    }).concat(finerworksApi.middleware), // শুধু এটাই
-});
+export const makeStore = () => {
+  return configureStore({
+    reducer: persistedReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: [PERSIST, REHYDRATE, REGISTER],
+        },
+      }).concat(finerworksApi.middleware),
+  });
+};
 
+export const store = makeStore();
 export const persistor = persistStore(store);
 
-export type AppStore = typeof store;
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export type AppStore = ReturnType<typeof makeStore>;
+export type RootState = ReturnType<AppStore["getState"]>;
+export type AppDispatch = AppStore["dispatch"];
