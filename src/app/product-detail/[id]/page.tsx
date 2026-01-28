@@ -4,6 +4,10 @@ import React, { useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
+import { useAppDispatch } from "@/lib/redux/hooks";
+import { addToCart } from "@/lib/redux/slices/cartSlice";
+import { useCartSidebar } from "@/hooks/use-cart-sidebar";
+import { toast } from "react-hot-toast";
 import {
   Select,
   SelectContent,
@@ -72,6 +76,8 @@ const getUniqueValues = (key: string, products: Product[]): string[] => {
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
+  const dispatch = useAppDispatch();
+  const { openSidebar } = useCartSidebar();
 
   // State for Preview Tools
   const [isAROpen, setIsAROpen] = useState(false);
@@ -168,12 +174,6 @@ export default function ProductDetailPage() {
     return getFilteredProducts(image.products, selections);
   }, [image, selections]);
 
-
-
-  // --- Auto-Select Default (First) Product on Load ---
-  // REMOVED based on user feedback (price showing before size selection)
-
-
   // --- Dynamic Options (Derived from Cascading Pools) ---
   const allTypes = useMemo(() => getUniqueValues("type", allProducts), [allProducts]);
   const allMedia = useMemo(() => getUniqueValues("media", productsAfterType), [productsAfterType]);
@@ -225,10 +225,23 @@ export default function ProductDetailPage() {
     return image.public_preview_uri;
   }, [finalProduct, image]);
 
-  const shouldShowOrderButton = useMemo(() => {
-    return !!finalProduct;
-  }, [finalProduct]);
-
+  const handleAddToCart = () => {
+    if (!finalProduct || !image) return;
+    
+    const cartProduct = {
+      _id: finalProduct.sku,
+      productTitle: image.title,
+      name: finalProduct.name,
+      price: finalProduct.total_price,
+      category: "Art",
+      image: selectedImage,
+      sku: finalProduct.sku
+    };
+    
+    dispatch(addToCart(cartProduct));
+    toast.success("Added to cart!");
+    openSidebar();
+  };
 
   if (isLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin w-10 h-10 text-gray-900" /></div>;
   if (isError || !image) return <div className="h-screen flex items-center justify-center text-red-500">Product not found</div>;
@@ -251,7 +264,6 @@ export default function ProductDetailPage() {
           {/* --- LEFT COLUMN: Image & Tools (7/12 cols) --- */}
           <div className="lg:col-span-6 flex flex-col items-center justify-start h-full">
             {/* Main Image Display - Mimicking a framed look */}
-            {/* Main Image Display - Mimicking a framed look */}
             <div className="relative w-[500px] bg-white">
               <div
                 className="relative w-full flex items-center justify-center overflow-hidden h-[500px] cursor-zoom-in"
@@ -261,8 +273,8 @@ export default function ProductDetailPage() {
                   <Image
                     src={selectedImage}
                     alt={image.title}
-                    fill // এটি কন্টেইনারের পুরো জায়গা নিয়ে নেবে
-                    className="object-contain" // p-4 দেওয়া হয়েছে যাতে একদম বর্ডারে না লেগে থাকে
+                    fill
+                    className="object-contain"
                   />
                 ) : (
                   <div className="text-gray-300">No Image Available</div>
@@ -290,7 +302,6 @@ export default function ProductDetailPage() {
             {/* Title Section */}
             <div className="mb-4">
               <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 mb-2">{image.title}</h1>
-              {/* If you had artist name it would go here, for now using description snippet or collection if available */}
               <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed">
                 {image.description}
               </p>
@@ -416,10 +427,9 @@ export default function ProductDetailPage() {
                 {/* Final Details & Button */}
                 <div className="pt-6 mt-4">
                   <button
-
                     className="w-full h-14 text-lg font-bold uppercase tracking-wide bg-black hover:bg-gray-800 text-white transition-all"
                     disabled={!finalProduct}
-                    onClick={() => setOrderForm(true)}
+                    onClick={handleAddToCart}
                   >
                     {finalProduct ? `Add to Cart - $${finalProduct.total_price.toFixed(0)}` : "Select Options"}
                   </button>
@@ -431,7 +441,7 @@ export default function ProductDetailPage() {
                   )}
                 </div>
 
-                {/* Trust Badges (Mimicking the icons at bottom of reference) */}
+                {/* Trust Badges */}
                 <div className="grid grid-cols-3 gap-2 mt-8 py-6 border-t border-gray-100 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <Box className="w-6 h-6 text-gray-400" />
