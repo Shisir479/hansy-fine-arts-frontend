@@ -98,6 +98,8 @@ export default function ProductDetailPage() {
     list_products: true,
   });
 
+  console.log(" product details data", data)
+
   const images: any[] = data?.images ?? [];
 
   // Find the specific image by ID (GUID)
