@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 import { useGesture } from "@use-gesture/react";
-import axios from "axios";
+import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
+import { useRouter } from "next/navigation";
 
-type ImageItem = string | { src: string; alt?: string; isSkeleton?: boolean };
+type ImageItem = string | { src: string; alt?: string; isSkeleton?: boolean; guid?: string };
 
 type DomeGalleryProps = {
   images?: ImageItem[];
@@ -33,6 +34,7 @@ type ItemDef = {
   sizeX: number;
   sizeY: number;
   isSkeleton?: boolean;
+  guid?: string;
 };
 
 // Default fallback images if needed (only used if API fails and no loading)
@@ -111,6 +113,7 @@ function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
       src: image.src || "",
       alt: image.alt || "",
       isSkeleton: image.isSkeleton || false,
+      guid: image.guid,
     };
   });
 
@@ -138,6 +141,7 @@ function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
     src: usedImages[i].src,
     alt: usedImages[i].alt,
     isSkeleton: usedImages[i].isSkeleton,
+    guid: usedImages[i].guid,
   }));
 }
 
@@ -168,11 +172,12 @@ export default function DomeGallery({
   segments = DEFAULTS.segments,
   dragDampening = 2,
   openedImageWidth = "90vh",
-  openedImageHeight = "75vh",
+  openedImageHeight = "80vh",
   imageBorderRadius = "0px",
   openedImageBorderRadius = "0px",
   grayscale = false,
 }: DomeGalleryProps) {
+  const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
   const sphereRef = useRef<HTMLDivElement>(null);
@@ -323,46 +328,51 @@ export default function DomeGallery({
     }
   }, []);
 
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchAllProducts();
-  }, []);
-
-  const fetchAllProducts = async () => {
-    try {
-      setLoading(true);
-      const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/arts`
-      );
-      setProducts(data.slice(0, 12)); // first 12
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  // 🔹 FinerWorks library info (same as other components)
+  const library = {
+    name: "inventory",
+    session_id: "1234567890",
+    account_key: "dc9e5410-0107-441a-92eb-6a4fd1c34c79",
+    site_id: 2,
   };
 
-  // Logic to determine final items: Skeleton, Products, or Default
+  // Dome er jonno just ekta page use korchi (sob images from response, no filtering)
+  const [page] = useState(1);
+  const { data, isLoading, isError, error } = useListFinerworksImagesQuery({
+    library,
+    page,
+  });
+
+  const fwImages: any[] = data?.images ?? [];
+
+  // Logic to determine final items: skeleton (loading) → FinerWorks images → fallback
   const finalImages = useMemo(() => {
-    if (loading) {
-        // Create 50 skeleton items to fill the dome
-        return Array.from({ length: 50 }).map(() => ({
-            src: "",
-            alt: "",
-            isSkeleton: true
-        }));
+    if (isLoading) {
+      // Create skeleton items to fill the dome
+      return Array.from({ length: 50 }).map(() => ({
+        src: "",
+        alt: "",
+        isSkeleton: true,
+      }));
     }
-    if (products.length > 0) {
-        return products.map((p) => ({
-            src: p.image || "/placeholder.jpg",
-            alt: p.productTitle || "Product",
-            isSkeleton: false
-        }));
+
+    if (fwImages.length > 0) {
+      // 🔥 NO FILTERING – sob response image use hocche
+      return fwImages.map((img: any) => ({
+        src: img.public_preview_uri || img.public_thumbnail_uri || "",
+        alt: img.title || "",
+        isSkeleton: false,
+        guid: img.guid,
+      }));
     }
+
+    // Fallback: local DEFAULT_IMAGES
     return DEFAULT_IMAGES;
-  }, [loading, products]);
+  }, [isLoading, fwImages]);
+
+  if (isError) {
+    console.error("DomeGallery: FinerWorks images fetch failed", error);
+  }
 
   const items = useMemo(
     () => buildItems(finalImages, segments),
@@ -371,7 +381,6 @@ export default function DomeGallery({
 
   // Responsive opened image size
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
   const responsiveOpenedWidth = isMobile ? "90vw" : openedImageWidth;
   const responsiveOpenedHeight = isMobile ? "55vh" : openedImageHeight;
 
@@ -668,6 +677,12 @@ export default function DomeGallery({
     };
   }, [enlargeTransitionMs, openedImageBorderRadius, grayscale]);
 
+  const handleNavigate = (guid?: string) => {
+    if (guid) {
+      router.push(`/product-detail/${guid}`);
+    }
+  };
+
   const openItemFromElement = (el: HTMLElement) => {
     if (openingRef.current) return;
     // Prevent opening skeletons
@@ -726,11 +741,25 @@ export default function DomeGallery({
     (el.style as any).zIndex = 0;
     const overlay = document.createElement("div");
     overlay.className = "enlarge";
-    overlay.style.cssText = `position:absolute; left:${
-      frameR.left - mainR.left
-    }px; top:${frameR.top - mainR.top}px; width:${frameR.width}px; height:${
-      frameR.height
-    }px; opacity:0; z-index:30; will-change:transform,opacity; transform-origin:top left; transition:transform ${enlargeTransitionMs}ms ease, opacity ${enlargeTransitionMs}ms ease; border-radius:${openedImageBorderRadius}; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.35);`;
+
+    // Add GUID to the overlay dataset for reading later if needed, 
+    // but primarily we attach a click listener to the overlay or image inside it
+    if (el.dataset.guid) {
+      overlay.dataset.guid = el.dataset.guid;
+    }
+
+    overlay.style.cssText = `position:absolute; left:${frameR.left - mainR.left
+      }px; top:${frameR.top - mainR.top}px; width:${frameR.width}px; height:${frameR.height
+      }px; opacity:0; z-index:30; will-change:transform,opacity; transform-origin:top left; transition:transform ${enlargeTransitionMs}ms ease, opacity ${enlargeTransitionMs}ms ease; border-radius:${openedImageBorderRadius}; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.35); cursor: pointer; pointer-events: auto;`;
+
+    // overlay.addEventListener('click', (e) => {
+    //   e.stopPropagation();
+    //   const guid = el.dataset.guid;
+    //   if (guid) {
+    //     handleNavigate(guid);
+    //   }
+    // });
+
     const rawSrc =
       parent.dataset.src ||
       (el.querySelector("img") as HTMLImageElement)?.src ||
@@ -742,13 +771,31 @@ export default function DomeGallery({
     const img = document.createElement("img");
     img.src = rawSrc;
     img.alt = rawAlt;
-    
-    // MODIFIED: Using contain to show full image aspect ratio when opened
-    img.style.cssText = `width:100%; height:100%; object-fit:contain; filter:${
-      grayscale ? "grayscale(1)" : "none"
-    };`;
-    
+
+    // opened image full contain
+    img.style.cssText = `width:100%; height:100%; object-fit:contain; filter:${grayscale ? "grayscale(1)" : "none"
+      };`;
+
     overlay.appendChild(img);
+
+    // Create "View Details" button
+    const guid = el.dataset.guid;
+    if (guid) {
+      const btn = document.createElement("button");
+      // Responsive classes: smaller on mobile (py-2 px-5 text-xs), larger on desktop (md:py-3 md:px-8 md:text-sm)
+      btn.className = "absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 bg-white/90 hover:bg-white text-black font-bold uppercase tracking-wide py-2 px-5 md:py-3 md:px-8 text-xs md:text-sm rounded-full shadow-2xl transition-all duration-300 backdrop-blur-sm z-50 flex items-center gap-2 border border-white/50 whitespace-nowrap";
+      btn.innerHTML = `
+         <span>View Product</span>
+         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:translate-x-1 md:w-[18px] md:h-[18px]"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+       `;
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleNavigate(guid);
+      });
+      overlay.appendChild(btn);
+    }
+
     viewerRef.current!.appendChild(overlay);
     const tx0 = tileR.left - frameR.left;
     const ty0 = tileR.top - frameR.top;
@@ -963,6 +1010,7 @@ export default function DomeGallery({
                       tabIndex={0}
                       aria-label={it.alt || "Open image"}
                       data-is-skeleton={it.isSkeleton}
+                      data-guid={it.guid} // Add guid to dataset
                       onClick={(e) => {
                         if (draggingRef.current) return;
                         if (movedRef.current) return;
@@ -988,8 +1036,8 @@ export default function DomeGallery({
                         inset: "10px",
                         borderRadius: `var(--tile-radius, ${imageBorderRadius})`,
                         backfaceVisibility: "hidden",
-                        pointerEvents: it.isSkeleton ? 'none' : 'auto', // Disable click on skeleton
-                        cursor: it.isSkeleton ? 'default' : 'pointer',
+                        pointerEvents: it.isSkeleton ? "none" : "auto", // Disable click on skeleton
+                        cursor: it.isSkeleton ? "default" : "pointer",
                       }}
                     >
                       {it.isSkeleton ? (
@@ -1002,9 +1050,8 @@ export default function DomeGallery({
                           className="w-full h-full object-cover pointer-events-none"
                           style={{
                             backfaceVisibility: "hidden",
-                            filter: `var(--image-filter, ${
-                              grayscale ? "grayscale(1)" : "none"
-                            })`,
+                            filter: `var(--image-filter, ${grayscale ? "grayscale(1)" : "none"
+                              })`,
                           }}
                         />
                       )}

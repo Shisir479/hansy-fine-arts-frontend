@@ -1,7 +1,7 @@
-// components/MobileMenu.tsx
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,162 +9,185 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
-  SheetTitle,
-  SheetClose, // Import SheetClose to enable closing the menu on link click
 } from "@/components/ui/sheet";
-import { Menu, ChevronDown, ChevronUp, Home } from "lucide-react"; // Added Home icon
+import { Menu, ChevronDown, X } from "lucide-react";
 
 export default function MobileMenu() {
   const pathname = usePathname();
   const [isShopArtOpen, setIsShopArtOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false); // State to control the Sheet open/close
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Function to determine if a link is active
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href:  string) => pathname === href;
 
-  // --- Styling Classes ---
-  // Base class for all main navigation items
-  const baseLinkClass = "py-2 px-3 rounded-lg transition-all duration-200 block";
-  // Default (inactive) style
-  const defaultLinkStyle = "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800";
-  // Active style: black underline, primary color text, and highlighted background
-  const activeLinkStyle =
-    "text-primary font-bold bg-primary-foreground dark:bg-gray-900 border-l-4 border-primary";
-    
-  // Active style for text/underline only
-  const activeTextStyle = "text-black dark:text-white underline decoration-black dark:decoration-white font-bold";
-
-  // Sub-links for the 'Shop Art' section
   const shopArtLinks = [
     { href: "/contemporary", label: "Contemporary" },
     { href: "/abstract-designs", label: "Abstract & Designs" },
     { href: "/custom-portrait", label: "Custom Portraits" },
   ];
 
-  // Determine if any Shop Art sub-link is currently active
   const isAnyShopArtActive = shopArtLinks.some((link) => isActive(link.href));
 
-  // Function to get the combined class name for a link
-  const getLinkClassName = (href: string, isSubLink = false) => {
-    if (isActive(href)) {
-        // Sub-links get the underline/bold style
-        if (isSubLink) {
-            return `${baseLinkClass} ${activeTextStyle}`;
-        }
-        // Main links get the highlighted block style
-        return `${baseLinkClass} ${activeLinkStyle}`;
-    }
-    return `${baseLinkClass} ${defaultLinkStyle}`;
+  const mainMenuItems = [
+    { href: "/", label: "Home" },
+    { href: "/artsy-products", label: "Artsy Products" },
+    { href:  "/about", label:  "About" },
+    { href: "/contact", label: "Contact" },
+    { href: "/shop", label: "Artist Shop" },
+    { href: "/faq", label: "FAQ" },
+  ];
+
+  const handleLinkClick = () => {
+    setIsOpen(false);
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" className="lg:hidden h-10 px-2">
-          <Menu className="h-7 w-7 text-gray-900 dark:text-gray-300" />
-        </Button>
-      </SheetTrigger>
+    <div className="lg:hidden flex items-center gap-2 flex-1">
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 hover:bg-transparent"
+          >
+            <Menu
+              className="h-6 w-6 text-gray-800 dark:text-gray-200"
+              strokeWidth={1.2}
+            />
+          </Button>
+        </SheetTrigger>
 
-      <SheetContent side="left" className="w-64 pt-10 overflow-y-auto">
-        <SheetTitle className="text-2xl font-extrabold mb-8 text-primary">
-          Artify Menu
-        </SheetTitle>
-
-        <nav className="flex flex-col space-y-2 text-lg">
-          {/* 🏠 Home Link */}
-          <SheetClose asChild>
-            <Link 
-              href="/" 
-              className={getLinkClassName("/")}
-            >
-                <div className="flex items-center gap-3">
-                    <Home className="h-5 w-5" />
-                    Home
-                </div>
+        <SheetContent
+          side="left"
+          className="w-[280px] p-0 border-r-0 bg-white dark:bg-gray-950 [&>button]:hidden"
+        >
+          {/* Header */}
+          <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-800">
+            <Link href="/" onClick={handleLinkClick}>
+              <Image
+                src="/hansyeaggy-logo.png"
+                alt="Hans Yeaggy"
+                width={130}
+                height={45}
+                className="object-contain"
+              />
             </Link>
-          </SheetClose>
-
-          {/* Main Navigation Links */}
-          <SheetClose asChild>
-            <Link
-              href="/artsy-products"
-              className={getLinkClassName("/artsy-products")}
-            >
-              ARTSY PRODUCTS
-            </Link>
-          </SheetClose>
-
-          <SheetClose asChild>
-            <Link
-              href="/about"
-              className={getLinkClassName("/about")}
-            >
-              About
-            </Link>
-          </SheetClose>
-
-          <SheetClose asChild>
-            <Link
-              href="/contact"
-              className={getLinkClassName("/contact")}
-            >
-              Contact
-            </Link>
-          </SheetClose>
-
-          <SheetClose asChild>
-            <Link
-              href="/shop"
-              className={getLinkClassName("/shop")}
-            >
-              Artist Shop
-            </Link>
-          </SheetClose>
-
-          <SheetClose asChild>
-            <Link
-              href="/faq"
-              className={getLinkClassName("/faq")}
-            >
-              FAQ
-            </Link>
-          </SheetClose>
-
-          {/* Shop Art Section with Toggle */}
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
             <button
-              onClick={() => setIsShopArtOpen(!isShopArtOpen)}
-              className={`flex items-center justify-between w-full font-bold text-xl py-2 px-3 transition-colors duration-200 ${
-                isAnyShopArtActive ? "text-primary" : "text-gray-900 dark:text-gray-100"
-              }`}
+              onClick={() => setIsOpen(false)}
+              className="p-1 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors"
             >
-              Shop Art
-              {isShopArtOpen ? (
-                <ChevronUp className="h-5 w-5 text-primary" />
-              ) : (
-                <ChevronDown className="h-5 w-5 text-primary" />
-              )}
+              <X className="h-5 w-5" strokeWidth={1.5} />
             </button>
-
-            {/* Collapsible Content */}
-            {(isShopArtOpen || isAnyShopArtActive) && (
-              <div className="flex flex-col space-y-1 text-base ml-2 border-l border-dashed border-gray-300 dark:border-gray-600 pl-4 py-2">
-                {shopArtLinks.map((link) => (
-                  <SheetClose asChild key={link.href}>
-                    <Link
-                      href={link.href}
-                      // Pass true for isSubLink to apply the underline style for active state
-                      className={getLinkClassName(link.href, true)}
-                    >
-                      {link.label}
-                    </Link>
-                  </SheetClose>
-                ))}
-              </div>
-            )}
           </div>
-        </nav>
-      </SheetContent>
-    </Sheet>
+
+          {/* Navigation */}
+          <nav className="py-4 px-4 overflow-y-auto max-h-[calc(100vh-180px)]">
+            {/* Main Links */}
+            {mainMenuItems.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={handleLinkClick}
+                  className="block py-3 px-2 border-b border-gray-100 dark:border-gray-800"
+                  style={{
+                    color: active ? "#000000" : "#374151",
+                    fontWeight: active ? 600 : 400,
+                  }}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+
+            {/* Shop Art Dropdown */}
+            <div className="mt-1">
+              <button
+                onClick={() => setIsShopArtOpen(! isShopArtOpen)}
+                className="flex items-center justify-between w-full py-3 px-2"
+                style={{
+                  color: isAnyShopArtActive ? "#000000" : "#374151",
+                  fontWeight: isAnyShopArtActive ? 600 :  400,
+                }}
+              >
+                <span>Shop Art</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-200 ${
+                    isShopArtOpen ? "rotate-180" :  ""
+                  }`}
+                  style={{ color: "#6B7280" }}
+                />
+              </button>
+
+              {isShopArtOpen && (
+                <div className="pl-4 pb-2 ml-2 border-l-2 border-gray-200 dark:border-gray-700">
+                  {shopArtLinks.map((link) => {
+                    const active = isActive(link.href);
+                    return (
+                      <Link
+                        key={link. href}
+                        href={link.href}
+                        onClick={handleLinkClick}
+                        className="block py-2. 5 px-2"
+                        style={{
+                          color:  active ? "#000000" : "#4B5563",
+                          fontWeight:  active ? 600 : 400,
+                        }}
+                      >
+                        {link.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="my-4 h-px bg-gray-200 dark:bg-gray-800" />
+
+            {/* Account Links */}
+            <Link
+              href="/login"
+              onClick={handleLinkClick}
+              className="block py-3 px-2"
+              style={{ color: "#374151" }}
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/sign-up"
+              onClick={handleLinkClick}
+              className="block py-3 px-2"
+              style={{ color: "#374151" }}
+            >
+              Create Account
+            </Link>
+          </nav>
+
+          {/* Footer */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+            <p className="text-center text-xs" style={{ color: "#9CA3AF" }}>
+              © 2024 Hans Yeaggy. All rights reserved.
+            </p>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Centered Logo */}
+      <div className="flex-1 flex justify-center">
+        <Link href="/">
+          <Image
+            src="/hansyeaggy-logo.png"
+            alt="Hans Yeaggy"
+            width={110}
+            height={36}
+            className="object-contain"
+          />
+        </Link>
+      </div>
+
+      {/* Spacer */}
+      <div className="w-9" />
+    </div>
   );
 }

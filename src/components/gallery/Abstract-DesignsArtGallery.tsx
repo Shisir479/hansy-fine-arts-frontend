@@ -1,58 +1,86 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import axios from "axios";
-import LoadingSpinner from "../shared/LoadingSpinner";
+import { useState } from "react";
 import ArtCard from "../shop/ArtCard";
+import LoadingSpinner from "../shared/LoadingSpinner";
+import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
 
 export interface ArtType {
   _id: string;
   title: string;
   image: string;
-  category: string;
-  // যদি আরো ফিল্ড থাকে (price, artist ইত্যাদি) পরে যোগ করতে পারো
+  category?: string;
 }
 
-export default function AbstractDesignsArtGallery() {
-  const [arts, setArts] = useState<ArtType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function AbstractArtGallery() {
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    const fetchArts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  // 🔹 FinerWorks library info
+  const library = {
+    name: "inventory",
+    session_id: "1234567890",
+    account_key: "dc9e5410-0107-441a-92eb-6a4fd1c34c79",
+    site_id: 2,
+  };
 
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/arts`
-          // অথবা যদি category অনুযায়ী আলাদা endpoint থাকে:
-          // `${process.env.NEXT_PUBLIC_API_URL}/arts?category=abstract`
-        );
+  const { data, isLoading, isError, error } = useListFinerworksImagesQuery({
+    library,
+    page,
+  });
 
-        setArts(response.data);
-      } catch (err: any) {
-        console.error("Failed to fetch arts:", err);
-        setError("Failed to load artworks. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const images: any[] = data?.images ?? [];
 
-    fetchArts();
-  }, []);
+  // =========================================
+  // 🔹 Filter:
+  //  - sob "Abstract"
+  //  - + jader personal_gallery_title faka / nai
+  //  - kintu "Contemporary" gula bad
+  // =========================================
+  const filteredImages = images.filter((img) => {
+    const title = (img.personal_gallery_title ?? "").trim().toLowerCase();
 
-  // Loading State
-  if (loading) return <LoadingSpinner />;
+    const isAbstract = title === "abstract";
+    const isContemporary = title === "contemporary";
+    const isEmpty = title === "";
 
-  // Error State
-  if (error) {
+    // Abstract নিলে সরাসরি নেবে
+    // title একদম empty হলে নেবে (কিন্তু contemporary নয় তো)
+    return isAbstract || (isEmpty && !isContemporary);
+  });
+
+  // FinerWorks docs:
+  // per_page (response) = ei page e koto ta image return korse
+  // count = total images in library (not filtered)
+  const totalLibraryCount = data?.count ?? 0; // full library count, API theke
+  const pageSize = 10; // tumi request e per_page: 10 pathaccho
+
+  const hasPrev = page > 1;
+  const hasNext = page * pageSize < totalLibraryCount;
+
+  const totalPages =
+    pageSize > 0
+      ? Math.max(1, Math.ceil(totalLibraryCount / pageSize))
+      : 1;
+
+  const abstractArts: ArtType[] = filteredImages.map((img: any) => ({
+    _id: img.guid,
+    title: img.title,
+    image: img.public_preview_uri || img.public_thumbnail_uri || "",
+    category: "abstract",
+  }));
+
+  if (isLoading) return <LoadingSpinner />;
+
+  if (isError) {
+    console.error("Failed to fetch FinerWorks arts:", error);
     return (
       <section className="bg-white py-20">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-red-600 font-medium">{error}</p>
+          <p className="text-red-600 font-medium">
+            Failed to load artworks. Please try again later.
+          </p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => location.reload()}
             className="mt-4 px-6 py-3 bg-black text-white text-sm uppercase tracking-wider hover:bg-zinc-800 transition"
           >
             Retry
@@ -62,12 +90,6 @@ export default function AbstractDesignsArtGallery() {
     );
   }
 
-  // Filter only abstract arts
-  const abstractArts = arts.filter(
-    (art) => art.category?.toLowerCase() === "abstract"
-  );
-
-  // Empty State
   if (abstractArts.length === 0) {
     return (
       <section className="bg-white py-20">
@@ -79,6 +101,14 @@ export default function AbstractDesignsArtGallery() {
       </section>
     );
   }
+
+  const handlePrev = () => {
+    if (hasPrev) setPage((p) => p - 1);
+  };
+
+  const handleNext = () => {
+    if (hasNext) setPage((p) => p + 1);
+  };
 
   return (
     <section className="bg-white py-10">
@@ -101,7 +131,8 @@ export default function AbstractDesignsArtGallery() {
             Artworks
           </h2>
           <p className="text-zinc-600 font-light mt-6 max-w-2xl mx-auto">
-            Explore our curated collection of abstract pieces, each telling its own unique story
+            Explore our curated collection of abstract pieces, each telling its
+            own unique story
           </p>
         </div>
 
@@ -112,11 +143,35 @@ export default function AbstractDesignsArtGallery() {
           ))}
         </div>
 
+        {/* Pagination Controls */}
+        <div className="mt-10 flex items-center justify-center gap-4">
+          <button
+            onClick={handlePrev}
+            disabled={!hasPrev}
+            className="px-4 py-2 border border-zinc-300 text-sm rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-100"
+          >
+            Prev
+          </button>
+
+          <span className="text-sm text-zinc-600">
+            Page {page} of {totalPages}
+          </span>
+
+          <button
+            onClick={handleNext}
+            disabled={!hasNext}
+            className="px-4 py-2 border border-zinc-300 text-sm rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-100"
+          >
+            Next
+          </button>
+        </div>
+
         {/* Footer Count */}
-        <div className="text-center mt-20">
-          <div className="w-32 h-[1px] bg-zinc-300 mx-auto mb-6" />
-          <p className="text-sm text-zinc-500 uppercase tracking-[0.3em]">
-            {abstractArts.length} Piece{abstractArts.length !== 1 ? "s" : ""} Available
+        <div className="text-center mt-6">
+          <div className="w-32 h-[1px] bg-zinc-300 mx-auto mb-3" />
+          <p className="text-xs text-zinc-500 uppercase tracking-[0.3em]">
+            Showing {abstractArts.length} Piece
+            {abstractArts.length !== 1 ? "s" : ""} on this page
           </p>
         </div>
       </div>

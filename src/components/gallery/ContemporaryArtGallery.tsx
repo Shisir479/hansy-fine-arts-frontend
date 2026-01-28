@@ -15,7 +15,7 @@ export interface ArtType {
 export default function ContemporaryArtGallery() {
   const [page, setPage] = useState(1);
 
-  // 🔹 FinerWorks library info – real data diye replace korbi
+  // 🔹 FinerWorks library info
   const library = {
     name: "inventory",
     session_id: "1234567890",
@@ -28,29 +28,38 @@ export default function ContemporaryArtGallery() {
     page,
   });
 
-  const images = data?.images ?? [];
+  const images: any[] = data?.images ?? [];
+
+  // =========================================
+  // 🔹 Filter: Only "Contemporary" gallery
+  // =========================================
+  const GALLERY_TITLE = "Contemporary";
+
+  const filteredImages = images.filter((img) =>
+    (img.personal_gallery_title ?? "").trim().toLowerCase() ===
+    GALLERY_TITLE.toLowerCase()
+  );
 
   // FinerWorks docs:
   // per_page (response) = ei page e koto ta image return korse
-  // count = total images in library
-  const totalCount = data?.count ?? 0;      // TOTAL images
-  const pageSize = 10;                     // tumi request e per_page: 10 pathaccho
+  // count = total images in library (not filtered)
+  const totalLibraryCount = data?.count ?? 0; // full library count, API theke
+  const pageSize = 10; // tumi request e per_page: 10 pathaccho
 
   const hasPrev = page > 1;
-  const hasNext = page * pageSize < totalCount;
+  const hasNext = page * pageSize < totalLibraryCount;
 
   const totalPages =
-    pageSize > 0 ? Math.max(1, Math.ceil(totalCount / pageSize)) : 1;
+    pageSize > 0
+      ? Math.max(1, Math.ceil(totalLibraryCount / pageSize))
+      : 1;
 
-  const contemporaryArts: ArtType[] = images.map((img) => ({
+  const contemporaryArts: ArtType[] = filteredImages.map((img: any) => ({
     _id: img.guid,
     title: img.title,
     image: img.public_preview_uri || img.public_thumbnail_uri || "",
     category: "contemporary",
   }));
-
-  // Debug korte chaile:
-  // console.log({ page, totalCount, pageSize, hasPrev, hasNext, totalPages });
 
   if (isLoading) return <LoadingSpinner />;
 
@@ -153,7 +162,8 @@ export default function ContemporaryArtGallery() {
         <div className="text-center mt-6">
           <div className="w-32 h-[1px] bg-zinc-300 mx-auto mb-3" />
           <p className="text-xs text-zinc-500 uppercase tracking-[0.3em]">
-            {totalCount} Piece{totalCount !== 1 ? "s" : ""} Total
+            Showing {contemporaryArts.length} Piece
+            {contemporaryArts.length !== 1 ? "s" : ""} on this page
           </p>
         </div>
       </div>

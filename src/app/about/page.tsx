@@ -56,37 +56,34 @@ export default function AboutSection() {
 
           {/* Main Content Grid */}
           {/* MODIFIED: Reduced gap and margin for mobile. Set grid to 1 column on small screens. */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 mb-16 md:mb-32">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 md: gap-32 mb-20 md:mb-40 items-center">
             {/* Left Side - Image */}
-            <div className="relative group mx-auto w-full max-w-lg lg:max-w-none">
-              {/* MODIFIED: Reduced offsets from -top-4 -left-4 to -top-2 -left-2 */}
-              <div className="absolute -top-2 -left-2 md:-top-8 md:-left-8 w-full h-full border-2 border-neutral-900 group-hover:translate-x-4 group-hover:translate-y-4 transition-transform duration-500"></div>
-              <div className="relative aspect-[3/4] bg-neutral-200 overflow-hidden">
+            <div className="relative mx-auto w-full max-w-md lg: max-w-lg">
+              {/* Simple floating border */}
+              <div className="absolute -top-3 -left-3 w-full h-full border border-neutral-300 transition-all duration-500"></div>
+
+              {/* Image container */}
+              <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden">
                 <img
                   src="/hans-about-ThArMNlV.jpg"
                   alt="Artist Portrait"
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                  className="w-full h-full object-cover grayscale-[30%] hover:grayscale-0 transition-all duration-700"
                 />
-                {/* MODIFIED: Reduced inner margin from m-3 to m-2 */}
-                <div className="absolute inset-0 border-4 border-white opacity-0 group-hover:opacity-100 transition-opacity duration-500 m-2 md:m-6"></div>
               </div>
-              {/* MODIFIED: Reduced offsets from -bottom-6 -right-6 to -bottom-4 -right-4 */}
-              {/* MODIFIED: Reduced padding from p-4 to p-3 */}
-              <div className="absolute -bottom-4 -right-2 md:-bottom-12 md:-right-12 bg-neutral-900 text-white p-3 md:p-8">
-                {/* MODIFIED: Reduced text size from text-3xl to text-2xl */}
-                <div className="text-2xl md:text-5xl font-extralight mb-2">
-                  15+
-                </div>
-                <div className="text-xs tracking-[0.3em] uppercase">
+
+              {/* Simple badge */}
+              <div className="absolute md:-bottom-6 -bottom-12 md:-right-6 -right-2 bg-neutral-900 text-white p-4 md:p-8">
+                <div className="text-3xl md:text-5xl font-light mb-1">15+</div>
+                <div className="text-[10px] tracking-[0.3em] uppercase opacity-90">
                   Years Experience
                 </div>
               </div>
             </div>
 
-            {/* Right Side - Content - REPLACED WITH SHORTENED BIOGRAPHY */}
+            {/* Right Side - Content - YOUR ORIGINAL CONTENT */}
             <div className="flex flex-col justify-center space-y-6 md:space-y-8">
               <div>
-                {/* MODIFIED: Reduced text-4xl to text-3xl for mobile */}
+                {/* MODIFIED:  Reduced text-4xl to text-3xl for mobile */}
                 <h2 className="text-3xl md:text-4xl font-extralight mb-4 md:mb-6 leading-tight">
                   Capturing Serenity and Awe from 30,000 Feet
                 </h2>
@@ -108,12 +105,12 @@ export default function AboutSection() {
                   over landscapes that few have the privilege to see so clearly.
                   These experiences inspire his signature project:
                   **transforming photographs of the skies he flies over into
-                  evocative watercolor paintings.** This process immortalizes
+                  evocative watercolor paintings. ** This process immortalizes
                   the fleeting magic viewed from the cockpit.
                 </p>
                 <p>
                   A notable achievement includes winning **second place** at the
-                  **“SubastArte”** silent auction (2006-2007), which raised
+                  **&quot;SubastArte&quot;** silent auction (2006-2007), which raised
                   funds for the Pediatric Foundation of Maracaibo Hospital.
                   Today, his pieces are acquired by collectors worldwide, drawn
                   to his ability to transport viewers to a world suspended in
@@ -130,7 +127,7 @@ export default function AboutSection() {
               <div className="pt-4">
                 <a
                   href="#"
-                  className="group inline-flex items-center gap-3 text-sm tracking-[0.3em] uppercase font-light hover:translate-x-2 transition-transform duration-300"
+                  className="group inline-flex items-center gap-3 text-sm tracking-[0.3em] uppercase font-light hover: translate-x-2 transition-transform duration-300"
                 >
                   View Portfolio
                   <ArrowUpRight className="h-5 w-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />

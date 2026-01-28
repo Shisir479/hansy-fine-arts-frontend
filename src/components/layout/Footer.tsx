@@ -38,10 +38,10 @@ export default function Footer() {
           <div className="lg:col-span-5">
             {/* Brand */}
             <div className="mb-12">
-              <h2 className="text-5xl md:text-6xl font-extralight tracking-tighter mb-3">
+              <h2 className="text-4xl md:text-5xl font-extralight tracking-tighter mb-3">
                 Hansy
               </h2>
-              <h2 className="text-5xl md:text-6xl font-light tracking-tighter italic">
+              <h2 className="text-4xl md:text-5xl font-light tracking-tighter italic">
                 Fine Arts
               </h2>
               <div className="w-20 h-[1px] bg-black mt-6 mb-8"></div>
