@@ -107,7 +107,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                               className="flex gap-4 pb-6 border-b border-black/20 dark:border-white/20 last:border-0 last:pb-0"
                             >
                               {/* ইমেজ এখন পুরোপুরি কালারে থাকবে */}
-                              <div className="w-24 h-24 border   overflow-hidden flex-shrink-0">
+                              <div className="w-24 h-24    overflow-hidden flex-shrink-0">
                                 <Image
                                   src={item.image || "/placeholder.jpg"}
                                   alt={
