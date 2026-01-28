@@ -7,7 +7,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { toggleTheme } from "@/lib/redux/slices/themeSlice";
-import dynamic from "next/dynamic";
+
 import { Moon, Sun, Heart, User } from "lucide-react";
 
 // Icons & Components
@@ -29,10 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 // Dynamic imports
-const MobileMenu = dynamic(() => import("@/components/layout/MobileMenu"), {
-  ssr: false,
-  loading: () => <div className="w-7 h-7" />,
-});
+import MobileMenu from "@/components/layout/MobileMenu";
 
 const borderColor = "border-gray-200 dark:border-gray-800";
 const iconColor = "text-gray-600 dark:text-gray-300";
@@ -73,6 +70,7 @@ const NavbarClient = () => {
       className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}
     >
       <div className="container mx-auto py-2 md:px-4 px-1 flex items-center justify-between">
+
         {/* Logo */}
         <Link href="/" className="hidden lg:flex">
           <Image
@@ -80,7 +78,7 @@ const NavbarClient = () => {
             alt="Hans Yeaggy"
             width={140}
             height={140}
-            className="object-contain"
+            className="object-contain dark:invert"
           />
         </Link>
 
@@ -90,6 +88,7 @@ const NavbarClient = () => {
         {/* Desktop Menu */}
         <NavigationMenu className="hidden lg:flex">
           <NavigationMenuList className="space-x-8">
+
             <NavigationMenuItem>
               {/* 3. Dynamic Class Logic:
                   If isShopArtActive is true, we force the bold/underline styles 
@@ -97,24 +96,19 @@ const NavbarClient = () => {
               */}
               <NavigationMenuTrigger
                 className={`text-base font-normal italic bg-transparent data-[state=open]:bg-transparent hover:bg-transparent focus:bg-transparent
-                  ${
-                    isShopArtActive
-                      ? "text-black font-bold underline decoration-2 decoration-black"
-                      : ""
+                  ${isShopArtActive
+                    ? "text-black dark:text-white font-bold underline decoration-2 decoration-black dark:decoration-white"
+                    : "text-gray-800 dark:text-gray-200"
                   }
                 `}
               >
-                SHOP ART
+                PRINTINGS
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 w-96 bg-white dark:bg-gray-950 border shadow-xl">
                   {shopArtRoutes.map((route, index) => {
                     // Mapping titles manually since array above is just strings
-                    const titles = [
-                      "Contemporary",
-                      "Abstract & Designs",
-                      "Custom Portraits",
-                    ];
+                    const titles = ["Contemporary", "Abstract & Designs", "Custom Portraits"];
                     return (
                       <li key={route}>
                         <Link href={route} legacyBehavior passHref>
@@ -129,7 +123,7 @@ const NavbarClient = () => {
                           </NavigationMenuLink>
                         </Link>
                       </li>
-                    );
+                    )
                   })}
                 </ul>
               </NavigationMenuContent>
@@ -143,10 +137,9 @@ const NavbarClient = () => {
                   <Link href={item.href} legacyBehavior passHref>
                     <span
                       className={`text-base italic cursor-pointer transition 
-                        ${
-                          active
-                            ? "text-black font-bold underline decoration-2 decoration-black"
-                            : "hover:text-primary"
+                        ${active
+                          ? "text-black dark:text-white font-bold underline decoration-2 decoration-black dark:decoration-white"
+                          : "text-gray-800 dark:text-gray-200 hover:text-primary dark:hover:text-primary"
                         }
                       `}
                     >

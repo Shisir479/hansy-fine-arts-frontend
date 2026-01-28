@@ -111,26 +111,26 @@ export default function AbstractArtGallery() {
   };
 
   return (
-    <section className="bg-white py-10">
+    <section className="bg-white dark:bg-black py-10 transition-colors duration-300">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-block mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-[1px] bg-black" />
-              <p className="text-zinc-800 uppercase tracking-[0.4em] text-[10px] font-medium">
+              <div className="w-12 h-[1px] bg-black dark:bg-white" />
+              <p className="text-zinc-800 dark:text-zinc-200 uppercase tracking-[0.4em] text-[10px] font-medium">
                 Collection
               </p>
-              <div className="w-12 h-[1px] bg-black" />
+              <div className="w-12 h-[1px] bg-black dark:bg-white" />
             </div>
           </div>
-          <h2 className="text-4xl md:text-5xl font-extralight text-black tracking-tighter mb-4">
+          <h2 className="text-4xl md:text-5xl font-extralight text-black dark:text-white tracking-tighter mb-4">
             Abstract
           </h2>
-          <h2 className="text-4xl md:text-5xl font-light text-black tracking-tighter italic">
+          <h2 className="text-4xl md:text-5xl font-light text-black dark:text-white tracking-tighter italic">
             Artworks
           </h2>
-          <p className="text-zinc-600 font-light mt-6 max-w-2xl mx-auto">
+          <p className="text-zinc-600 dark:text-zinc-400 font-light mt-6 max-w-2xl mx-auto">
             Explore our curated collection of abstract pieces, each telling its
             own unique story
           </p>
@@ -148,7 +148,7 @@ export default function AbstractArtGallery() {
           <button
             onClick={handlePrev}
             disabled={!hasPrev}
-            className="px-4 py-2 border border-zinc-300 text-sm rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-100"
+            className="px-4 py-2 border border-zinc-300 text-sm rounded disabled:opacity-40 disabled:cursor-not-allowed "
           >
             Prev
           </button>
@@ -160,7 +160,7 @@ export default function AbstractArtGallery() {
           <button
             onClick={handleNext}
             disabled={!hasNext}
-            className="px-4 py-2 border border-zinc-300 text-sm rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-100"
+            className="px-4 py-2 border border-zinc-300 text-sm rounded disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next
           </button>

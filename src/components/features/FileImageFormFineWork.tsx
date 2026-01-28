@@ -6,25 +6,20 @@ import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
 import { useRouter } from "next/navigation";
 
 // Define a separate Skeleton component
-const FileImageSkeleton = ({
-  colIdx,
-  columnCount,
-  isMobile,
-}: {
-  colIdx: number;
-  columnCount: number;
-  isMobile: boolean;
-}) => {
-  const desktopHeights = ["h-64", "h-80", "h-96", "h-72"];
-  const mobileHeights = ["h-48", "h-56", "h-60"];
-  const randomHeight = isMobile
-    ? mobileHeights[colIdx % mobileHeights.length]
-    : desktopHeights[colIdx % desktopHeights.length];
+const FileImageSkeleton = ({ index }: { index: number }) => {
+  // Define responsive height pairs (mobile md:desktop)
+  const heights = [
+    "h-48 md:h-64",
+    "h-56 md:h-80",
+    "h-60 md:h-96",
+    "h-48 md:h-72",
+  ];
+  const heightClass = heights[index % heights.length];
 
   return (
     <div
-      className={`bg-gray-200 dark:bg-gray-800 animate-pulse ${randomHeight} overflow-hidden shadow-lg transition-shadow duration-500`}
-      style={{ animationDelay: `${colIdx * 0.1}s` }}
+      className={`bg-gray-200 dark:bg-gray-800 animate-pulse ${heightClass} w-full overflow-hidden shadow-lg transition-shadow duration-500 relative break-inside-avoid mb-6`}
+      style={{ animationDelay: `${index * 0.1}s` }}
     >
       <div className="absolute inset-0 p-5 flex flex-col justify-end">
         <div className="h-6 w-3/4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
@@ -51,15 +46,8 @@ export default function FileImageFormFineWork() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   // responsive flags
-  const [isMobile, setIsMobile] = useState<boolean>(() =>
-    typeof window !== "undefined" ? window.innerWidth < 640 : false
-  );
-  const [columnCount, setColumnCount] = useState<number>(() => {
-    if (typeof window === "undefined") return 3;
-    if (window.innerWidth < 640) return 1;
-    if (window.innerWidth < 1024) return 2;
-    return 3;
-  });
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [columnCount, setColumnCount] = useState<number>(3);
 
   const cursorRef = useRef<HTMLDivElement | null>(null);
   const [showCursor, setShowCursor] = useState(false);
@@ -85,13 +73,17 @@ export default function FileImageFormFineWork() {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 640);
+      const mobile = window.innerWidth < 640;
+      setIsMobile(mobile);
       if (window.innerWidth < 640) setColumnCount(1);
       else if (window.innerWidth < 1024) setColumnCount(2);
       else setColumnCount(3);
     };
-    window.addEventListener("resize", handleResize);
+
+    // Initial check
     handleResize();
+
+    window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -127,7 +119,7 @@ export default function FileImageFormFineWork() {
     })
   );
 
-  const displayItems = isLoading ? skeletonItems : images;
+  const displayItems = images;
   const columns = distributeToColumns(displayItems);
 
   if (isError) {
@@ -166,169 +158,165 @@ export default function FileImageFormFineWork() {
         )}
 
         {/* Masonry Grid */}
-        <div className="flex gap-6">
-          {columns.map((column, colIdx) => (
-            <div key={colIdx} className="flex-1 flex flex-col gap-6">
-              {column.map((item, idx) => {
-                // If loading, render the skeleton component
-                if (isLoading) {
+        {isLoading ? (
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-6">
+            {skeletonItems.map((item, idx) => (
+              <FileImageSkeleton key={item.guid} index={idx} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex gap-6">
+            {columns.map((column, colIdx) => (
+              <div key={colIdx} className="flex-1 flex flex-col gap-6">
+                {column.map((item, idx) => {
+                  // Actual image card
+                  const image = item as ImageType;
+                  const desktopHeights = ["h-64", "h-80", "h-96", "h-72"];
+                  const mobileHeights = ["h-48", "h-56", "h-60"];
+                  const randomHeight = isMobile
+                    ? mobileHeights[(colIdx + idx) % mobileHeights.length]
+                    : desktopHeights[(colIdx + idx) % desktopHeights.length];
+
+                  const isHovered = hoveredCard === image.guid;
+
                   return (
-                    <FileImageSkeleton
-                      key={item.guid}
-                      colIdx={colIdx + idx}
-                      columnCount={columnCount}
-                      isMobile={isMobile}
-                    />
-                  );
-                }
-
-                // Otherwise, render the actual image card
-                const image = item as ImageType;
-                const desktopHeights = ["h-64", "h-80", "h-96", "h-72"];
-                const mobileHeights = ["h-48", "h-56", "h-60"];
-                const randomHeight = isMobile
-                  ? mobileHeights[(colIdx + idx) % mobileHeights.length]
-                  : desktopHeights[(colIdx + idx) % desktopHeights.length];
-
-                const isHovered = hoveredCard === image.guid;
-
-                return (
-                  <div
-                    key={image.guid}
-                    className="relative group"
-                    onMouseEnter={() =>
-                      !isMobile && setHoveredCard(image.guid)
-                    }
-                    onMouseLeave={() => !isMobile && setHoveredCard(null)}
-                    style={{
-                      animation: `fadeInUp 0.6s ease-out ${idx * 0.1}s both`,
-                    }}
-                  >
-                    {/* Outer frame - sharp edges (hide on mobile) */}
                     <div
-                      className={`absolute -inset-1 border transition-all duration-500 hidden md:block ${isHovered
+                      key={image.guid}
+                      className="relative group"
+                      onMouseEnter={() =>
+                        !isMobile && setHoveredCard(image.guid)
+                      }
+                      onMouseLeave={() => !isMobile && setHoveredCard(null)}
+                      style={{
+                        animation: `fadeInUp 0.6s ease-out ${idx * 0.1}s both`,
+                      }}
+                    >
+                      {/* Outer frame - sharp edges (hide on mobile) */}
+                      <div
+                        className={`absolute -inset-1 border transition-all duration-500 hidden md:block ${isHovered
                           ? "border-gray-800 opacity-100 scale-105"
                           : "border-gray-400 opacity-0 scale-100"
-                        }`}
-                    />
-
-                    {/* Card - no border radius */}
-                    <div
-                      className={`relative ${randomHeight} overflow-hidden cursor-pointer transform transition-all duration-500 ${isHovered
-                          ? "md:scale-[1.02] md:shadow-2xl"
-                          : "shadow-lg"
-                        }`}
-                      onClick={() => handleNavigate(image.guid)}
-                    >
-                      {/* Image with zoom effect */}
-                      <img
-                        src={image.public_preview_uri}
-                        alt={image.title}
-                        className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "md:scale-110" : ""
                           }`}
                       />
 
-                      {/* Simple dark overlay */}
+                      {/* Card - no border radius */}
                       <div
-                        className="absolute inset-0 transition-opacity duration-700 bg-black"
-                        style={{
-                          opacity: isHovered ? 0.5 : isMobile ? 0.15 : 0.2,
-                        }}
-                      />
+                        className={`relative ${randomHeight} overflow-hidden cursor-pointer transform transition-all duration-500 ${isHovered
+                          ? "md:scale-[1.02] md:shadow-2xl"
+                          : "shadow-lg"
+                          }`}
+                        onClick={() => handleNavigate(image.guid)}
+                      >
+                        {/* Image with zoom effect */}
+                        <img
+                          src={image.public_preview_uri}
+                          alt={image.title}
+                          className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "md:scale-110" : ""
+                            }`}
+                        />
 
-                      {/* Glass overlay */}
-                      <div
-                        className="absolute inset-0 transition-all duration-700"
-                        style={{
-                          backdropFilter: isHovered ? "blur(1px)" : "blur(0px)",
-                          opacity: isHovered ? 1 : 0,
-                        }}
-                      />
+                        {/* Simple dark overlay */}
+                        <div
+                          className="absolute inset-0 transition-opacity duration-700 bg-black"
+                          style={{
+                            opacity: isHovered ? 0.5 : isMobile ? 0.15 : 0.2,
+                          }}
+                        />
 
-                      {/* Content */}
-                      <div className="absolute inset-0 pt-5 pb-3 px-5 flex flex-col justify-end z-10">
-                        {/* Title */}
-                        <h2
-                          className={`text-white italic ${isMobile
+                        {/* Glass overlay */}
+                        <div
+                          className="absolute inset-0 transition-all duration-700"
+                          style={{
+                            backdropFilter: isHovered ? "blur(1px)" : "blur(0px)",
+                            opacity: isHovered ? 1 : 0,
+                          }}
+                        />
+
+                        {/* Content */}
+                        <div className="absolute inset-0 pt-5 pb-3 px-5 flex flex-col justify-end z-10">
+                          {/* Title */}
+                          <h2
+                            className={`text-white italic ${isMobile
                               ? "text-lg font-semibold"
                               : "text-2xl font-bold mb-2"
-                            } transition-all duration-500 uppercase tracking-wider`}
-                          style={{
-                            opacity: isMobile ? 1 : isHovered ? 1 : 0,
-                            transform:
-                              isMobile || isHovered
-                                ? "translateY(0) scale(1)"
-                                : "translateY(30px) scale(0.9)",
-                            textShadow:
-                              "2px 2px 12px rgba(0,0,0,0.9)",
-                          }}
-                        >
-                          {image.title}
-                        </h2>
+                              } transition-all duration-500 uppercase tracking-wider`}
+                            style={{
+                              opacity: isMobile ? 1 : isHovered ? 1 : 0,
+                              transform:
+                                isMobile || isHovered
+                                  ? "translateY(0) scale(1)"
+                                  : "translateY(30px) scale(0.9)",
+                              textShadow:
+                                "2px 2px 12px rgba(0,0,0,0.9)",
+                            }}
+                          >
+                            {image.title}
+                          </h2>
 
-                        {/* Description */}
-                        <p
-                          className={`text-white italic ${isMobile
+                          {/* Description */}
+                          <p
+                            className={`text-white italic ${isMobile
                               ? "text-xs leading-relaxed"
                               : "text-sm leading-relaxed"
-                            } transition-all duration-500`}
-                          style={{
-                            opacity: isMobile ? 1 : isHovered ? 0.95 : 0,
-                            transform:
-                              isMobile || isHovered
-                                ? "translateY(0)"
-                                : "translateY(30px)",
-                            transitionDelay: "150ms",
-                            textShadow:
-                              "1px 1px 8px rgba(0,0,0,0.9)",
-                          }}
-                        >
-                          {image.description}
-                        </p>
-
-                        {/* View button */}
-                        <div
-                          className="mt-4 transition-all duration-500"
-                          style={{
-                            opacity: isMobile ? 1 : isHovered ? 1 : 0,
-                            transform:
-                              isMobile || isHovered
-                                ? "translateY(0)"
-                                : "translateY(30px)",
-                            transitionDelay: "250ms",
-                          }}
-                        >
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleNavigate(image.guid);
+                              } transition-all duration-500`}
+                            style={{
+                              opacity: isMobile ? 1 : isHovered ? 0.95 : 0,
+                              transform:
+                                isMobile || isHovered
+                                  ? "translateY(0)"
+                                  : "translateY(30px)",
+                              transitionDelay: "150ms",
+                              textShadow:
+                                "1px 1px 8px rgba(0,0,0,0.9)",
                             }}
-                            className="inline-flex items-center gap-2 md:px-4 md:py-2 px-3 py-[4px] bg-white text-black text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition-all"
                           >
-                            <span>View Details</span>
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                            {image.description}
+                          </p>
+
+                          {/* View button */}
+                          <div
+                            className="mt-4 transition-all duration-500"
+                            style={{
+                              opacity: isMobile ? 1 : isHovered ? 1 : 0,
+                              transform:
+                                isMobile || isHovered
+                                  ? "translateY(0)"
+                                  : "translateY(30px)",
+                              transitionDelay: "250ms",
+                            }}
+                          >
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleNavigate(image.guid);
+                              }}
+                              className="inline-flex items-center gap-2 md:px-4 md:py-2 px-3 py-[4px] bg-white text-black text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition-all"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
-                              />
-                            </svg>
-                          </button>
+                              <span>View Details</span>
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <style jsx>{`
