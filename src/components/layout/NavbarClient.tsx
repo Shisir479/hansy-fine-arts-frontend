@@ -100,7 +100,7 @@ const NavbarClient = () => {
                   }
                 `}
               >
-                SHOP ART
+                PRINTINGS
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 w-96 bg-white dark:bg-gray-950 border shadow-xl">

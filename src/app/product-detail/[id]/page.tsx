@@ -14,7 +14,9 @@ import {
   Box,
   ShieldCheck,
   RotateCcw,
-  Smartphone
+  Smartphone,
+  Mail,
+  Heart
 } from "lucide-react";
 import OrderForm from "@/components/features/OrderForm";
 import LivePreviewARModal from "@/components/preview/LivePreviewARModal";
@@ -263,16 +265,59 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Visual Tools Bar - Under the image */}
-            <div className="flex flex-wrap md:gap-4 gap-2 mt-6">
-              <Button variant="outline" onClick={() => setIsAROpen(true)} className="flex gap-2 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">
-                <Smartphone size={18} /> Live AR
-              </Button>
-              <Button variant="outline" onClick={() => setIsWallViewOpen(true)} className="flex gap-2 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">
-                <ImageIcon size={18} /> Wall View
-              </Button>
-              <Button variant="outline" onClick={() => setIsZoomOpen(true)} className="flex gap-2 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">
-                <Maximize2 size={18} /> Zoom
-              </Button>
+            <div className="flex items-center justify-center gap-10 w-full mt-8 px-2 md:px-6">
+              {/* Live AR */}
+              <button
+                onClick={() => setIsAROpen(true)}
+                className="flex flex-col items-center gap-3 group"
+              >
+                <div className="p-2  border border-gray-300 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 group-hover:border-black dark:group-hover:border-white group-hover:text-black dark:group-hover:text-white transition-all duration-300">
+                  <Smartphone size={22} strokeWidth={1.5} />
+                </div>
+                <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors duration-300 font-medium">
+                  Live AR
+                </span>
+              </button>
+
+              {/* Wall View */}
+              <button
+                onClick={() => setIsWallViewOpen(true)}
+                className="flex flex-col items-center gap-3 group"
+              >
+                <div className="p-2  border border-gray-300 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 group-hover:border-black dark:group-hover:border-white group-hover:text-black dark:group-hover:text-white transition-all duration-300">
+                  <ImageIcon size={22} strokeWidth={1.5} />
+                </div>
+                <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors duration-300 font-medium">
+                  Wall View
+                </span>
+              </button>
+
+              {/* Save to Favorites */}
+              <button className="flex flex-col items-center gap-3 group">
+                <div className="p-2  border border-gray-300 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 group-hover:border-black dark:group-hover:border-white group-hover:text-black dark:group-hover:text-white transition-all duration-300">
+                  <Heart size={22} strokeWidth={1.5} />
+                </div>
+                <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors duration-300 font-medium">
+                  Favorites
+                </span>
+              </button>
+
+              {/* Email a Friend */}
+              <button
+                onClick={() => {
+                  const subject = encodeURIComponent(`Check out this artwork: ${image?.title || "Fine Art"}`);
+                  const body = encodeURIComponent(`I thought you might like this: ${window.location.href}`);
+                  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                }}
+                className="flex flex-col items-center gap-3 group"
+              >
+                <div className="p-2 border border-gray-300 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 group-hover:border-black dark:group-hover:border-white group-hover:text-black dark:group-hover:text-white transition-all duration-300">
+                  <Mail size={22} strokeWidth={1.5} />
+                </div>
+                <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors duration-300 font-medium">
+                  Email a Friend
+                </span>
+              </button>
             </div>
           </div>
 
