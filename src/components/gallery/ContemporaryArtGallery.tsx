@@ -140,7 +140,7 @@ export default function ContemporaryArtGallery() {
           <button
             onClick={handlePrev}
             disabled={!hasPrev}
-            className="px-4 py-2 border border-zinc-300 text-sm rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-100"
+            className="px-4 py-2 border border-zinc-300 text-sm rounded disabled:opacity-40 disabled:cursor-not-allowed "
           >
             Prev
           </button>
@@ -152,7 +152,7 @@ export default function ContemporaryArtGallery() {
           <button
             onClick={handleNext}
             disabled={!hasNext}
-            className="px-4 py-2 border border-zinc-300 text-sm rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-100"
+            className="px-4 py-2 border border-zinc-300 text-sm rounded disabled:opacity-40 disabled:cursor-not-allowed "
           >
             Next
           </button>
