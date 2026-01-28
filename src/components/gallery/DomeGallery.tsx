@@ -785,7 +785,7 @@ export default function DomeGallery({
       // Responsive classes: smaller on mobile (py-2 px-5 text-xs), larger on desktop (md:py-3 md:px-8 md:text-sm)
       btn.className = "absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 bg-white/90 hover:bg-white text-black font-bold uppercase tracking-wide py-2 px-5 md:py-3 md:px-8 text-xs md:text-sm rounded-full shadow-2xl transition-all duration-300 backdrop-blur-sm z-50 flex items-center gap-2 border border-white/50 whitespace-nowrap";
       btn.innerHTML = `
-         <span>View Product</span>
+         <span>Purchase Art</span>
          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:translate-x-1 md:w-[18px] md:h-[18px]"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
        `;
       btn.addEventListener('click', (e) => {

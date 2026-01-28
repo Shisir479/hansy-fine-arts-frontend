@@ -54,28 +54,28 @@ const ArtistCommissionAgreement = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 bg-white mt-10 mb-10 border-t-2 border-black">
+    <div className="max-w-4xl mx-auto p-4 bg-white dark:bg-black mt-10 mb-10 border-t-2 border-black dark:border-white transition-colors duration-300">
       {/* Header */}
       <div className="text-center mb-10">
-        <div className="w-px h-12 bg-black mx-auto mb-4"></div>
-        <h1 className="text-3xl italic text-black mb-4 tracking-tight">
+        <div className="w-px h-12 bg-black dark:bg-white mx-auto mb-4"></div>
+        <h1 className="text-3xl italic text-black dark:text-white mb-4 tracking-tight">
           COMMISSION AGREEMENT
         </h1>
         <div className="flex items-center justify-center gap-4 mb-4">
-          <div className="w-16 h-px bg-black"></div>
-          <div className="w-2 h-2 bg-black rotate-45"></div>
-          <div className="w-16 h-px bg-black"></div>
+          <div className="w-16 h-px bg-black dark:bg-white"></div>
+          <div className="w-2 h-2 bg-black dark:bg-white rotate-45"></div>
+          <div className="w-16 h-px bg-black dark:bg-white"></div>
         </div>
-        <p className="text-gray-600 text-sm font-light">
+        <p className="text-gray-600 dark:text-zinc-400 text-sm font-light">
           Please review all terms carefully before proceeding
         </p>
       </div>
 
       {/* Terms and Conditions */}
-      <div className="h-64 overflow-y-auto p-4 border border-black bg-white shadow-inner mb-8">
-        <p className="mb-4 text-gray-700 text-sm leading-relaxed">
+      <div className="h-64 overflow-y-auto p-4 border border-black dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-inner mb-8">
+        <p className="mb-4 text-gray-700 dark:text-zinc-300 text-sm leading-relaxed">
           This Art Commission Agreement (the &ldquo;Agreement&rdquo;) is made between
-          <span className="font-bold text-black">
+          <span className="font-bold text-black dark:text-white">
             {" "}
             [Your Full Name/Business Name]
           </span>{" "}
@@ -85,24 +85,24 @@ const ArtistCommissionAgreement = () => {
         </p>
         <ol className="list-none space-y-6">
           {/* 1. Artistic Discretion */}
-          <li className="flex border-l border-black pl-4">
-            <span className="font-bold text-base text-black w-8 text-left shrink-0">
+          <li className="flex border-l border-black dark:border-white pl-4">
+            <span className="font-bold text-base text-black dark:text-white w-8 text-left shrink-0">
               1.
             </span>
             <div className="flex-1">
-              <h2 className="font-bold text-base text-black inline font-serif">
+              <h2 className="font-bold text-base text-black dark:text-white inline font-serif">
                 Artistic Discretion
               </h2>
-              <ul className="list-none mt-2 text-gray-700 space-y-2 text-sm">
+              <ul className="list-none mt-2 text-gray-700 dark:text-zinc-300 space-y-2 text-sm">
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     The Artist retains the right to accept or decline any design
                     or picture submitted by the Client at their sole discretion.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     The Artist is under no obligation to create artwork from any
                     design or picture provided by the Client.
@@ -113,17 +113,17 @@ const ArtistCommissionAgreement = () => {
           </li>
 
           {/* 2. Timeline */}
-          <li className="flex border-l border-black pl-4">
-            <span className="font-bold text-base text-black w-8 text-left shrink-0">
+          <li className="flex border-l border-black dark:border-white pl-4">
+            <span className="font-bold text-base text-black dark:text-white w-8 text-left shrink-0">
               2.
             </span>
             <div className="flex-1">
-              <h2 className="font-bold text-base text-black inline font-serif">
+              <h2 className="font-bold text-base text-black dark:text-white inline font-serif">
                 Timeline
               </h2>
-              <ul className="list-none mt-2 text-gray-700 space-y-2 text-sm">
+              <ul className="list-none mt-2 text-gray-700 dark:text-zinc-300 space-y-2 text-sm">
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     If the Artist agrees to create the commissioned artwork, the
                     estimated completion time is 2-3 months, depending on the
@@ -131,7 +131,7 @@ const ArtistCommissionAgreement = () => {
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     The Artist will notify the Client of any significant delays.
                   </span>
@@ -141,15 +141,15 @@ const ArtistCommissionAgreement = () => {
           </li>
 
           {/* 3. Pricing */}
-          <li className="flex border-l border-black pl-4">
-            <span className="font-bold text-base text-black w-8 text-left shrink-0">
+          <li className="flex border-l border-black dark:border-white pl-4">
+            <span className="font-bold text-base text-black dark:text-white w-8 text-left shrink-0">
               3.
             </span>
             <div className="flex-1">
-              <h2 className="font-bold text-base text-black inline font-serif">
+              <h2 className="font-bold text-base text-black dark:text-white inline font-serif">
                 Pricing
               </h2>
-              <p className="text-gray-700 mt-2 leading-relaxed text-sm">
+              <p className="text-gray-700 dark:text-zinc-300 mt-2 leading-relaxed text-sm">
                 The price of the commissioned artwork will vary depending on the
                 complexity of the subject. The Client and the Artist will agree
                 upon the final price before the work begins.
@@ -158,36 +158,36 @@ const ArtistCommissionAgreement = () => {
           </li>
 
           {/* 4. Payment Terms */}
-          <li className="flex border-l border-black pl-4">
-            <span className="font-bold text-base text-black w-8 text-left shrink-0">
+          <li className="flex border-l border-black dark:border-white pl-4">
+            <span className="font-bold text-base text-black dark:text-white w-8 text-left shrink-0">
               4.
             </span>
             <div className="flex-1">
-              <h2 className="font-bold text-base text-black inline font-serif">
+              <h2 className="font-bold text-base text-black dark:text-white inline font-serif">
                 Payment Terms
               </h2>
-              <ul className="list-none mt-2 text-gray-700 space-y-2 text-sm">
+              <ul className="list-none mt-2 text-gray-700 dark:text-zinc-300 space-y-2 text-sm">
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     The Client is required to pay 50% of the agreed price upfront
                     as a non-refundable deposit.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     The remaining 50% is due before the completed artwork is
                     shipped or delivered.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     The Artist will provide the Client with a preview picture of
                     the finished artwork. If the Client is not satisfied with the
                     artwork based on the preview:
-                    <ul className="list-none mt-2 space-y-1 pl-4 text-gray-700">
+                    <ul className="list-none mt-2 space-y-1 pl-4 text-gray-700 dark:text-zinc-300">
                       <li className="flex items-start gap-1">
                         <span>•</span>
                         <span>The Client is not obligated to pay the remaining 50%.</span>
@@ -208,15 +208,15 @@ const ArtistCommissionAgreement = () => {
           </li>
 
           {/* 5. No Refund Policy */}
-          <li className="flex border-l border-black pl-4">
-            <span className="font-bold text-base text-black w-8 text-left shrink-0">
+          <li className="flex border-l border-black dark:border-white pl-4">
+            <span className="font-bold text-base text-black dark:text-white w-8 text-left shrink-0">
               5.
             </span>
             <div className="flex-1">
-              <h2 className="font-bold text-base text-black inline font-serif">
+              <h2 className="font-bold text-base text-black dark:text-white inline font-serif">
                 No Refund Policy
               </h2>
-              <p className="text-gray-700 mt-2 leading-relaxed text-sm">
+              <p className="text-gray-700 dark:text-zinc-300 mt-2 leading-relaxed text-sm">
                 The 50% upfront payment is non-refundable under any
                 circumstances, including dissatisfaction with the preview.
               </p>
@@ -224,24 +224,24 @@ const ArtistCommissionAgreement = () => {
           </li>
 
           {/* 6. Delivery */}
-          <li className="flex border-l border-black pl-4">
-            <span className="font-bold text-base text-black w-8 text-left shrink-0">
+          <li className="flex border-l border-black dark:border-white pl-4">
+            <span className="font-bold text-base text-black dark:text-white w-8 text-left shrink-0">
               6.
             </span>
             <div className="flex-1">
-              <h2 className="font-bold text-base text-black inline font-serif">
+              <h2 className="font-bold text-base text-black dark:text-white inline font-serif">
                 Delivery
               </h2>
-              <ul className="list-none mt-2 text-gray-700 space-y-2 text-sm">
+              <ul className="list-none mt-2 text-gray-700 dark:text-zinc-300 space-y-2 text-sm">
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     The completed artwork will be shipped or delivered to the
                     Client after the final payment is received.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     Delivery costs, if applicable, will be the responsibility of
                     the Client unless otherwise agreed upon.
@@ -252,17 +252,17 @@ const ArtistCommissionAgreement = () => {
           </li>
 
           {/* 7. Copyright and Usage */}
-          <li className="flex border-l border-black pl-4">
-            <span className="font-bold text-base text-black w-8 text-left shrink-0">
+          <li className="flex border-l border-black dark:border-white pl-4">
+            <span className="font-bold text-base text-black dark:text-white w-8 text-left shrink-0">
               7.
             </span>
             <div className="flex-1">
-              <h2 className="font-bold text-base text-black inline font-serif">
+              <h2 className="font-bold text-base text-black dark:text-white inline font-serif">
                 Copyright and Usage
               </h2>
-              <ul className="list-none mt-2 text-gray-700 space-y-2 text-sm">
+              <ul className="list-none mt-2 text-gray-700 dark:text-zinc-300 space-y-2 text-sm">
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     The Artist retains all copyright and intellectual property
                     rights to the artwork, including the right to reproduce,
@@ -271,7 +271,7 @@ const ArtistCommissionAgreement = () => {
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-black mt-1">—</span>
+                  <span className="text-black dark:text-white mt-1">—</span>
                   <span>
                     The Client may not reproduce or use the artwork for commercial
                     purposes without explicit written permission from the Artist.
@@ -282,17 +282,17 @@ const ArtistCommissionAgreement = () => {
           </li>
 
           {/* 8. Governing Law */}
-          <li className="flex border-l border-black pl-4">
-            <span className="font-bold text-base text-black w-8 text-left shrink-0">
+          <li className="flex border-l border-black dark:border-white pl-4">
+            <span className="font-bold text-base text-black dark:text-white w-8 text-left shrink-0">
               8.
             </span>
             <div className="flex-1">
-              <h2 className="font-bold text-base text-black inline font-serif">
+              <h2 className="font-bold text-base text-black dark:text-white inline font-serif">
                 Governing Law
               </h2>
-              <p className="text-gray-700 mt-2 leading-relaxed text-sm">
+              <p className="text-gray-700 dark:text-zinc-300 mt-2 leading-relaxed text-sm">
                 This Agreement is governed by the laws of the
-                <span className="font-bold text-black">
+                <span className="font-bold text-black dark:text-white">
                   {" "}
                   [Your Location, e.g., State of Texas]
                 </span>
@@ -302,15 +302,15 @@ const ArtistCommissionAgreement = () => {
           </li>
 
           {/* 9. Agreement Acceptance */}
-          <li className="flex border-l border-black pl-4">
-            <span className="font-bold text-base text-black w-8 text-left shrink-0">
+          <li className="flex border-l border-black dark:border-white pl-4">
+            <span className="font-bold text-base text-black dark:text-white w-8 text-left shrink-0">
               9.
             </span>
             <div className="flex-1">
-              <h2 className="font-bold text-base text-black inline font-serif">
+              <h2 className="font-bold text-base text-black dark:text-white inline font-serif">
                 Agreement Acceptance
               </h2>
-              <p className="text-gray-700 mt-2 leading-relaxed text-sm">
+              <p className="text-gray-700 dark:text-zinc-300 mt-2 leading-relaxed text-sm">
                 By submitting this form, the Client acknowledges that they have
                 read, understood, and agreed to the terms of this Agreement.
               </p>
@@ -320,15 +320,15 @@ const ArtistCommissionAgreement = () => {
       </div>
 
       {/* Accept Terms */}
-      <div className="mb-12 md:p-5 p-2 bg-white border-l border-black">
+      <div className="mb-12 md:p-5 p-2 bg-white dark:bg-black border-l border-black dark:border-white">
         <label className="flex items-center space-x-4 cursor-pointer group">
           <input
             type="checkbox"
             checked={isAccepted}
             onChange={handleCheckboxChange}
-            className="h-5 w-5 border border-black bg-white checked:bg-black focus:ring-0 focus:ring-offset-0 cursor-pointer"
+            className="h-5 w-5 border border-black dark:border-white bg-white dark:bg-black checked:bg-black dark:checked:bg-white focus:ring-0 focus:ring-offset-0 cursor-pointer"
           />
-          <span className="text-black text-xl font-serif group-hover:opacity-70 transition-opacity">
+          <span className="text-black dark:text-white text-xl font-serif group-hover:opacity-70 transition-opacity">
             I agree to the terms and conditions outlined above
           </span>
         </label>
@@ -339,7 +339,7 @@ const ArtistCommissionAgreement = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {/* Name */}
           <div>
-            <label className="block font-serif text-black text-xl mb-3">
+            <label className="block font-serif text-black dark:text-white text-xl mb-3">
               Full Name
             </label>
             <input
@@ -347,7 +347,7 @@ const ArtistCommissionAgreement = () => {
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full border border-black md:p-3 p-2 focus:border-gray-600 focus:outline-none transition-colors bg-white text-black text-lg"
+              className="w-full border border-black dark:border-white md:p-3 p-2 focus:border-gray-600 focus:outline-none transition-colors bg-white dark:bg-zinc-900 text-black dark:text-white text-lg"
               placeholder="Enter your name"
               required
             />
@@ -355,7 +355,7 @@ const ArtistCommissionAgreement = () => {
 
           {/* Email */}
           <div>
-            <label className="block font-serif text-black text-xl mb-3">
+            <label className="block font-serif text-black dark:text-white text-xl mb-3">
               Email Address
             </label>
             <input
@@ -363,7 +363,7 @@ const ArtistCommissionAgreement = () => {
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className="w-full border border-black md:p-3 p-2 focus:border-gray-600 focus:outline-none transition-colors bg-white text-black text-lg"
+              className="w-full border border-black dark:border-white md:p-3 p-2 focus:border-gray-600 focus:outline-none transition-colors bg-white dark:bg-zinc-900 text-black dark:text-white text-lg"
               placeholder="your@email.com"
               required
             />
@@ -372,7 +372,7 @@ const ArtistCommissionAgreement = () => {
 
         {/* Phone */}
         <div>
-          <label className="block font-serif text-black text-xl mb-3">
+          <label className="block font-serif text-black dark:text-white text-xl mb-3">
             Phone Number
           </label>
           <input
@@ -380,7 +380,7 @@ const ArtistCommissionAgreement = () => {
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
-            className="w-full border border-black md:p-3 p-2 focus:border-gray-600 focus:outline-none transition-colors bg-white text-black text-lg"
+            className="w-full border border-black dark:border-white md:p-3 p-2 focus:border-gray-600 focus:outline-none transition-colors bg-white dark:bg-zinc-900 text-black dark:text-white text-lg"
             placeholder="+1 (555) 000-0000"
             required
           />
@@ -388,7 +388,7 @@ const ArtistCommissionAgreement = () => {
 
         {/* Address */}
         <div>
-          <label className="block font-serif text-black text-xl mb-3">
+          <label className="block font-serif text-black dark:text-white text-xl mb-3">
             Delivery Address
           </label>
           <input
@@ -396,7 +396,7 @@ const ArtistCommissionAgreement = () => {
             name="address"
             value={formData.address}
             onChange={handleInputChange}
-            className="w-full border border-black md:p-3 p-2 focus:border-gray-600 focus:outline-none transition-colors bg-white text-black text-lg"
+            className="w-full border border-black dark:border-white md:p-3 p-2 focus:border-gray-600 focus:outline-none transition-colors bg-white dark:bg-zinc-900 text-black dark:text-white text-lg"
             placeholder="Your full address"
             required
           />
@@ -404,7 +404,7 @@ const ArtistCommissionAgreement = () => {
 
         {/* Upload Photo */}
         <div>
-          <label className="block font-serif text-black text-xl mb-3">
+          <label className="block font-serif text-black dark:text-white text-xl mb-3">
             Reference Photo
           </label>
           <input
@@ -412,11 +412,10 @@ const ArtistCommissionAgreement = () => {
             name="image"
             onChange={handleFileChange}
             accept="image/*"
-            className={`w-full border md:p-3 p-2 file:mr-4 file:py-1 file:px-5 file:border file:font-serif file:text-lg ${
-              isAccepted
-                ? "border-black file:border-black file:bg-black file:text-white hover:file:bg-white hover:file:text-black cursor-pointer"
-                : "border-gray-300 bg-gray-100 cursor-not-allowed file:border-gray-300 file:bg-gray-300 file:text-gray-500"
-            } transition-colors`}
+            className={`w-full border md:p-3 p-2 file:mr-4 file:py-1 file:px-5 file:border file:font-serif file:text-lg ${isAccepted
+                ? "border-black dark:border-white file:border-black dark:file:border-white file:bg-black dark:file:bg-white file:text-white dark:file:text-black hover:file:bg-white dark:hover:file:bg-black hover:file:text-black dark:hover:file:text-white cursor-pointer bg-white dark:bg-zinc-900 text-black dark:text-white"
+                : "border-gray-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800 cursor-not-allowed file:border-gray-300 dark:file:border-zinc-700 file:bg-gray-300 dark:file:bg-zinc-800 file:text-gray-500"
+              } transition-colors`}
             disabled={!isAccepted || loading}
             required
           />
@@ -426,11 +425,10 @@ const ArtistCommissionAgreement = () => {
         <div className="">
           <button
             onClick={handleSubmit}
-            className={` w-7/12 mx-auto md:py-3 md:px-3 py-1 px-2 font-serif md:text-lg text-[14px] transition-all duration-300 shadow-xl flex items-center justify-center gap-4 border ${
-              isAccepted && !loading
-                ? "bg-black text-white border-black hover:bg-white hover:text-black"
+            className={` w-7/12 mx-auto md:py-3 md:px-3 py-1 px-2 font-serif md:text-lg text-[14px] transition-all duration-300 shadow-xl flex items-center justify-center gap-4 border ${isAccepted && !loading
+                ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white"
                 : "bg-gray-400 text-gray-700 border-gray-400 cursor-not-allowed"
-            }`}
+              }`}
             disabled={!isAccepted || loading}
           >
             {loading ? (

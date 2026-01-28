@@ -70,28 +70,28 @@ const NewsSection = () => {
   }, [isPaused]);
 
   return (
-    <section className=" bg-white relative overflow-hidden">
+    <section className="bg-white dark:bg-black relative overflow-hidden transition-colors duration-300">
       {/* Header */}
       <div className="container mx-auto px-4 mb-12">
         <div className="flex items-end justify-between">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-[1px] bg-black"></div>
-              <p className="text-zinc-800 uppercase tracking-[0.4em] text-[10px] font-medium">
+              <div className="w-12 h-[1px] bg-black dark:bg-white"></div>
+              <p className="text-zinc-800 dark:text-zinc-200 uppercase tracking-[0.4em] text-[10px] font-medium">
                 Latest Updates
               </p>
             </div>
-            <h2 className="text-4xl md:text-5xl font-extralight text-black tracking-tighter">
+            <h2 className="text-4xl md:text-5xl font-extralight text-black dark:text-white tracking-tighter">
               News &
             </h2>
-            <h2 className="text-4xl md:text-5xl font-light text-black tracking-tighter italic">
+            <h2 className="text-4xl md:text-5xl font-light text-black dark:text-white tracking-tighter italic">
               Insights
             </h2>
           </div>
 
           <button
             onClick={() => setIsPaused(!isPaused)}
-            className="flex items-center gap-2 border border-black px-6 py-3 hover:bg-black hover:text-white transition-all duration-300 group"
+            className="flex items-center gap-2 border border-black dark:border-white px-6 py-3 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black text-black dark:text-white transition-all duration-300 group"
             aria-label={isPaused ? "Play marquee" : "Pause marquee"}
           >
             {isPaused ? (
@@ -134,8 +134,8 @@ const NewsSection = () => {
   md:h-[320px]    /* tablet */
   lg:h-[380px]    /* desktop */
   xl:h-[420px]    /* large desktop */
-  overflow-hidden bg-zinc-100 mb-5"
->
+  overflow-hidden bg-zinc-100 dark:bg-zinc-900 mb-5"
+              >
                 <img
                   src={news.imageUrl}
                   alt={news.title}
@@ -154,7 +154,7 @@ const NewsSection = () => {
 
                 {/* Read more button */}
                 <div className="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-                  <button className="bg-white text-black p-3 hover:bg-black hover:text-white transition-all duration-300 flex items-center justify-center">
+                  <button className="bg-white dark:bg-black text-black dark:text-white p-3 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 flex items-center justify-center">
                     <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />
                   </button>
                 </div>
@@ -162,15 +162,15 @@ const NewsSection = () => {
 
               {/* Content */}
               <div className="px-2">
-                <h3 className="text-lg font-light text-black mb-2 leading-tight tracking-tight group-hover:text-zinc-600 transition-colors duration-300">
+                <h3 className="text-lg font-light text-black dark:text-white mb-2 leading-tight tracking-tight group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-300">
                   {news.title}
                 </h3>
 
                 <div className="flex items-center gap-4">
-                  <time className="text-zinc-500 text-xs uppercase tracking-[0.2em]">
+                  <time className="text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-[0.2em]">
                     {news.date}
                   </time>
-                  <div className="w-8 h-[1px] bg-zinc-300 group-hover:w-12 group-hover:bg-black transition-all duration-500"></div>
+                  <div className="w-8 h-[1px] bg-zinc-300 dark:bg-zinc-700 group-hover:w-12 group-hover:bg-black dark:group-hover:bg-white transition-all duration-500"></div>
                 </div>
               </div>
             </div>
@@ -178,13 +178,13 @@ const NewsSection = () => {
         </div>
 
         {/* Gradient overlays for fade effect */}
-        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
-        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white dark:from-black to-transparent pointer-events-none"></div>
+        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-black to-transparent pointer-events-none"></div>
       </div>
 
       {/* Bottom decorative line */}
       <div className="container mx-auto px-4 mt-16">
-        <div className="w-full h-[1px] bg-zinc-200"></div>
+        <div className="w-full h-[1px] bg-zinc-200 dark:bg-zinc-800"></div>
       </div>
     </section>
   );

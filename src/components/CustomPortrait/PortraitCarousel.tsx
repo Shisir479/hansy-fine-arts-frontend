@@ -26,7 +26,7 @@ const PortraitCarousel: React.FC = () => {
         return;
       }
       try {
-        const response = await fetch(`${API_URL}/arts`);
+        const response = await fetch(`${API_URL}/inventory/list`);
         if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
         const data: Art[] = await response.json();
         setArts(data);
@@ -66,14 +66,14 @@ const PortraitCarousel: React.FC = () => {
 
   return (
     <>
-      <div className="py-5 px-4 bg-gray-50 min-h-screen">
+      <div className="py-5 px-4 bg-gray-50 dark:bg-black min-h-screen transition-colors duration-300">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="text-center mb-5">
-            <h2 className="text-3xl md:text-4xl font-light tracking-widest text-gray-900 uppercase">
+            <h2 className="text-3xl md:text-4xl font-light tracking-widest text-gray-900 dark:text-white uppercase transition-colors">
               Portrait Gallery
             </h2>
-            <div className="w-20 h-px bg-gray-800 mx-auto mt-3"></div>
+            <div className="w-20 h-px bg-gray-800 dark:bg-white mx-auto mt-3 transition-colors"></div>
           </div>
 
           {/* Main Image */}
@@ -119,11 +119,10 @@ const PortraitCarousel: React.FC = () => {
                   <button
                     key={art._id}
                     onClick={() => goToSlide(i)}
-                    className={`relative w-20 h-28 flex-shrink-0 border-2 transition-all duration-200 ${
-                      currentIndex === i
+                    className={`relative w-20 h-28 flex-shrink-0 border-2 transition-all duration-200 ${currentIndex === i
                         ? "border-gray-900 shadow-lg scale-105"
                         : "border-gray-300 hover:border-gray-500"
-                    }`}
+                      }`}
                   >
                     <img
                       src={art.image}

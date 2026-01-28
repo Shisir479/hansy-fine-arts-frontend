@@ -57,9 +57,9 @@ export default function PricingTestimonials() {
     return () => clearInterval(timer);
   }, []);
 
-  const getCardStyle = (index:number) => {
+  const getCardStyle = (index: number) => {
     const diff = (index - current + testimonials.length) % testimonials.length;
-    
+
     if (diff === 0) {
       return {
         transform: 'translateX(0%) translateZ(100px) scale(1.05) rotateY(0deg)',
@@ -92,13 +92,13 @@ export default function PricingTestimonials() {
   };
 
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section className="py-24 bg-white dark:bg-black relative overflow-hidden transition-colors duration-300">
       {/* Premium background pattern */}
       <div className="absolute inset-0 opacity-[0.015]">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="black" strokeWidth="0.5"/>
+              <path d="M 60 0 L 0 0 0 60" fill="none" className="stroke-black dark:stroke-white/20" strokeWidth="0.5" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
@@ -106,22 +106,22 @@ export default function PricingTestimonials() {
       </div>
 
       {/* Elegant top accent line */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-[1px] bg-black"></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-[1px] bg-black dark:bg-white"></div>
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Premium Header */}
         <div className="text-center mb-20">
           <div className="inline-block mb-5">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-[1px] bg-black"></div>
-              <p className="text-zinc-800 uppercase tracking-[0.4em] text-[10px] font-medium">Client Testimonials</p>
-              <div className="w-12 h-[1px] bg-black"></div>
+              <div className="w-12 h-[1px] bg-black dark:bg-white"></div>
+              <p className="text-zinc-800 dark:text-zinc-200 uppercase tracking-[0.4em] text-[10px] font-medium">Client Testimonials</p>
+              <div className="w-12 h-[1px] bg-black dark:bg-white"></div>
             </div>
           </div>
-          <h2 className="text-4xl md:text-5xl font-extralight text-black mb-3 tracking-tighter leading-[0.95]">
+          <h2 className="text-4xl md:text-5xl font-extralight text-black dark:text-white mb-3 tracking-tighter leading-[0.95]">
             Trusted by
           </h2>
-          <h2 className="text-4xl md:text-5xl font-light text-black tracking-tighter leading-[0.95] italic">
+          <h2 className="text-4xl md:text-5xl font-light text-black dark:text-white tracking-tighter leading-[0.95] italic">
             Collectors Worldwide
           </h2>
         </div>
@@ -135,42 +135,42 @@ export default function PricingTestimonials() {
                 className="absolute w-full max-w-2xl transition-all duration-700 ease-out preserve-3d"
                 style={getCardStyle(index)}
               >
-                <div className="bg-white border border-zinc-200 p-12 shadow-[0_20px_60px_rgba(0,0,0,0.08)] relative group hover:shadow-[0_30px_80px_rgba(0,0,0,0.12)] transition-shadow duration-500">
+                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-12 shadow-[0_20px_60px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] relative group hover:shadow-[0_30px_80px_rgba(0,0,0,0.12)] transition-all duration-500">
                   {/* Decorative corner elements */}
-                  <div className="absolute top-0 left-0 w-10 h-10 border-t border-l border-black opacity-20"></div>
-                  <div className="absolute top-0 right-0 w-10 h-10 border-t border-r border-black opacity-20"></div>
-                  <div className="absolute bottom-0 left-0 w-10 h-10 border-b border-l border-black opacity-20"></div>
-                  <div className="absolute bottom-0 right-0 w-10 h-10 border-b border-r border-black opacity-20"></div>
+                  <div className="absolute top-0 left-0 w-10 h-10 border-t border-l border-black dark:border-white opacity-20"></div>
+                  <div className="absolute top-0 right-0 w-10 h-10 border-t border-r border-black dark:border-white opacity-20"></div>
+                  <div className="absolute bottom-0 left-0 w-10 h-10 border-b border-l border-black dark:border-white opacity-20"></div>
+                  <div className="absolute bottom-0 right-0 w-10 h-10 border-b border-r border-black dark:border-white opacity-20"></div>
 
                   {/* Quote icon */}
                   <div className="flex justify-center mb-6">
-                    <Quote className="h-8 w-8 text-black opacity-15" strokeWidth={1} />
+                    <Quote className="h-8 w-8 text-black dark:text-white opacity-15" strokeWidth={1} />
                   </div>
 
                   {/* Quote text */}
-                  <blockquote className="text-zinc-800 text-lg md:text-xl leading-relaxed mb-10 font-light text-center min-h-[120px] flex items-center justify-center tracking-tight">
+                  <blockquote className="text-zinc-800 dark:text-zinc-100 text-lg md:text-xl leading-relaxed mb-10 font-light text-center min-h-[120px] flex items-center justify-center tracking-tight">
                     {testimonial.text}
                   </blockquote>
 
                   {/* Rating */}
                   <div className="flex gap-1.5 mb-8 justify-center">
                     {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star key={i} className="h-3.5 w-3.5 fill-black text-black" strokeWidth={1} />
+                      <Star key={i} className="h-3.5 w-3.5 fill-black dark:fill-white text-black dark:text-white" strokeWidth={1} />
                     ))}
                   </div>
 
                   {/* Divider */}
-                  <div className="w-16 h-[1px] bg-zinc-300 mx-auto mb-8"></div>
+                  <div className="w-16 h-[1px] bg-zinc-300 dark:bg-zinc-700 mx-auto mb-8"></div>
 
                   {/* Author info */}
                   <div className="text-center">
-                    <p className="text-black font-normal text-lg tracking-wide mb-2 uppercase" style={{ letterSpacing: '0.1em' }}>
+                    <p className="text-black dark:text-white font-normal text-lg tracking-wide mb-2 uppercase" style={{ letterSpacing: '0.1em' }}>
                       {testimonial.name}
                     </p>
-                    <p className="text-zinc-500 text-xs uppercase tracking-[0.3em] mb-1">
+                    <p className="text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-[0.3em] mb-1">
                       {testimonial.role}
                     </p>
-                    <p className="text-zinc-400 text-[10px] uppercase tracking-[0.4em]">
+                    <p className="text-zinc-400 dark:text-zinc-500 text-[10px] uppercase tracking-[0.4em]">
                       {testimonial.location}
                     </p>
                   </div>
@@ -182,14 +182,14 @@ export default function PricingTestimonials() {
           {/* Minimalist Navigation */}
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-40 bg-white hover:bg-black border border-black text-black hover:text-white md:w-14 w-11 h-11 md:h-14 transition-all duration-300 group flex items-center justify-center"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-40 bg-white dark:bg-black hover:bg-black dark:hover:bg-white border border-black dark:border-white text-black dark:text-white hover:text-white dark:hover:text-black md:w-14 w-11 h-11 md:h-14 transition-all duration-300 group flex items-center justify-center"
             aria-label="Previous testimonial"
           >
             <ChevronLeft className="md:h-5 md:w-5 h-4 w-4 group-hover:-translate-x-0.5 transition-transform" strokeWidth={1.5} />
           </button>
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-40 bg-white hover:bg-black border border-black text-black hover:text-white md:w-14 w-11 h-11 md:h-14 transition-all duration-300 group flex items-center justify-center"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-40 bg-white dark:bg-black hover:bg-black dark:hover:bg-white border border-black dark:border-white text-black dark:text-white hover:text-white dark:hover:text-black md:w-14 w-11 h-11 md:h-14 transition-all duration-300 group flex items-center justify-center"
             aria-label="Next testimonial"
           >
             <ChevronRight className="md:h-5 md:w-5 h-4 w-4 group-hover:translate-x-0.5 transition-transform" strokeWidth={1.5} />
@@ -213,9 +213,8 @@ export default function PricingTestimonials() {
                       setTimeout(() => setIsAnimating(false), 700);
                     }
                   }}
-                  className={`h-[1px] transition-all duration-700 ${
-                    index === current ? 'w-16 bg-black' : 'w-8 bg-zinc-300 hover:bg-zinc-400'
-                  }`}
+                  className={`h-[1px] transition-all duration-700 ${index === current ? 'w-16 bg-black dark:bg-white' : 'w-8 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-500'
+                    }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
               ))}

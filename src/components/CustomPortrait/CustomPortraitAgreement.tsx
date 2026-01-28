@@ -15,53 +15,62 @@ const CustomPortraitAgreement = () => {
   // };
 
   return (
-    <div className="max-w-3xl mx-auto p-4 bg-white shadow-md   ">
-      <h1 className="text-3xl font-semibold text-center mb-6 italic">
-        How Our Custom Portrait Process Works
-      </h1>
-      <div className="h-96 overflow-y-auto p-4 bg-gray-50 border   ">
-        <p className="text-lg text-gray-700 mb-4">
-          We’re excited to bring your memories to life through our custom
-          paintings or charcoal artwork!
+    <div className="max-w-4xl mx-auto p-4 bg-white dark:bg-black mt-10 mb-10 border-t-2 border-black dark:border-white transition-colors duration-300">
+      {/* Header */}
+      <div className="text-center mb-10">
+        <div className="w-px h-12 bg-black dark:bg-white mx-auto mb-4"></div>
+        <h1 className="text-3xl italic text-black dark:text-white mb-4 tracking-tight">
+          COMMISSION AGREEMENT
+        </h1>
+        <div className="flex items-center justify-center gap-4 mb-4">
+          <div className="w-16 h-px bg-black dark:bg-white"></div>
+          <div className="w-2 h-2 bg-black dark:bg-white rotate-45"></div>
+          <div className="w-16 h-px bg-black dark:bg-white"></div>
+        </div>
+        <p className="text-gray-600 dark:text-zinc-400 text-sm font-light">
+          Please review all terms carefully before proceeding
         </p>
-        <h2 className="text-xl font-semibold mb-4">
-          Here’s how the process works:
-        </h2>
-        <ol className="list-decimal list-inside space-y-4 text-gray-700">
-          <li>
-            <strong>Become a member (It’s Free!)</strong>
-            <ul className="list-disc list-inside pl-4">
-              <li>
-                To send us a photo of your custom artwork, you’ll first need to
-                become a member.
-              </li>
-              <li>
-                Membership is free and helps us keep our platform safe and
-                spam-free.
-              </li>
-              <li>
-                Once you create your account, you’ll unlock access to upload
-                your photos and manage your orders.
-              </li>
-            </ul>
-          </li>
-          <li>
-            <strong>Submit Your Photo</strong>
-            <ul className="list-disc list-inside pl-4">
-              <li>
-                After logging into your account, you’ll be able to upload the
-                photo you want turned into a masterpiece.
-              </li>
-              <li>
-                Please choose a high-quality image that clearly shows the
-                subject.
-              </li>
-              <li>
-                Keep in mind the background in your photo may not be replicated.
-                As the artist, I often create custom backgrounds that complement
-                the subject and add a unique touch.
-              </li>
-            </ul>
+      </div>
+
+      {/* Terms and Conditions */}
+      <div className="h-64 overflow-y-auto p-4 border border-black dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-inner mb-8">
+        <p className="mb-4 text-gray-700 dark:text-zinc-300 text-sm leading-relaxed">
+          This Art Commission Agreement (the &ldquo;Agreement&rdquo;) is made between
+          <span className="font-bold text-black dark:text-white">
+            {" "}
+            [Your Full Name/Business Name]
+          </span>{" "}
+          (&ldquo;Artist&rdquo;) and the individual commissioning the artwork (&ldquo;Client&rdquo;). By
+          submitting this Agreement, the Client agrees to the following terms
+          and conditions:
+        </p>
+        <ol className="list-none space-y-6">
+          {/* 1. Artistic Discretion */}
+          <li className="flex border-l border-black dark:border-white pl-4">
+            <span className="font-bold text-base text-black dark:text-white w-8 text-left shrink-0">
+              1.
+            </span>
+            <div className="flex-1">
+              <h2 className="font-bold text-base text-black dark:text-white inline font-serif">
+                Artistic Discretion
+              </h2>
+              <ul className="list-none mt-2 text-gray-700 dark:text-zinc-300 space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-black dark:text-white mt-1">—</span>
+                  <span>
+                    The Artist retains the right to accept or decline any design
+                    or picture submitted by the Client at their sole discretion.
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-black dark:text-white mt-1">—</span>
+                  <span>
+                    The Artist is under no obligation to create artwork from any
+                    design or picture provided by the Client.
+                  </span>
+                </li>
+              </ul>
+            </div>
           </li>
           <li>
             <strong>Sign The Contract</strong>

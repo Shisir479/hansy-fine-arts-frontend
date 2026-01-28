@@ -4,13 +4,6 @@ import React, { useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -230,11 +223,11 @@ export default function ProductDetailPage() {
   }, [finalProduct]);
 
 
-  if (isLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin w-10 h-10 text-gray-900" /></div>;
-  if (isError || !image) return <div className="h-screen flex items-center justify-center text-red-500">Product not found</div>;
+  if (isLoading) return <div className="h-screen flex items-center justify-center bg-white dark:bg-black"><Loader2 className="animate-spin w-10 h-10 text-gray-900 dark:text-white" /></div>;
+  if (isError || !image) return <div className="h-screen flex items-center justify-center bg-white dark:bg-black text-red-500">Product not found</div>;
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 py-12 px-4 md:px-8">
+    <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white py-12 px-4 md:px-8 transition-colors duration-300">
 
       {/* Modals */}
       <LivePreviewARModal isOpen={isAROpen} onClose={() => setIsAROpen(false)} imageSrc={selectedImage} />
@@ -251,10 +244,9 @@ export default function ProductDetailPage() {
           {/* --- LEFT COLUMN: Image & Tools (7/12 cols) --- */}
           <div className="lg:col-span-6 flex flex-col items-center justify-start h-full">
             {/* Main Image Display - Mimicking a framed look */}
-            {/* Main Image Display - Mimicking a framed look */}
-            <div className="relative w-[500px] bg-white">
+            <div className="relative w-full max-w-[500px] bg-gray-50 dark:bg-zinc-900 py-5 transition-colors duration-300">
               <div
-                className="relative w-full flex items-center justify-center overflow-hidden h-[500px] cursor-zoom-in"
+                className="relative w-full flex items-center justify-center overflow-hidden aspect-square md:h-[500px] cursor-zoom-in"
                 onClick={() => setIsZoomOpen(true)}
               >
                 {selectedImage ? (
@@ -265,20 +257,20 @@ export default function ProductDetailPage() {
                     className="object-contain" // p-4 দেওয়া হয়েছে যাতে একদম বর্ডারে না লেগে থাকে
                   />
                 ) : (
-                  <div className="text-gray-300">No Image Available</div>
+                  <div className="text-gray-300 dark:text-zinc-600">No Image Available</div>
                 )}
               </div>
             </div>
 
             {/* Visual Tools Bar - Under the image */}
-            <div className="flex gap-4 mt-6">
-              <Button variant="outline" onClick={() => setIsAROpen(true)} className="flex gap-2">
+            <div className="flex flex-wrap md:gap-4 gap-2 mt-6">
+              <Button variant="outline" onClick={() => setIsAROpen(true)} className="flex gap-2 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">
                 <Smartphone size={18} /> Live AR
               </Button>
-              <Button variant="outline" onClick={() => setIsWallViewOpen(true)} className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsWallViewOpen(true)} className="flex gap-2 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">
                 <ImageIcon size={18} /> Wall View
               </Button>
-              <Button variant="outline" onClick={() => setIsZoomOpen(true)} className="flex gap-2">
+              <Button variant="outline" onClick={() => setIsZoomOpen(true)} className="flex gap-2 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">
                 <Maximize2 size={18} /> Zoom
               </Button>
             </div>
@@ -289,33 +281,33 @@ export default function ProductDetailPage() {
 
             {/* Title Section */}
             <div className="mb-4">
-              <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 mb-2">{image.title}</h1>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">{image.title}</h1>
               {/* If you had artist name it would go here, for now using description snippet or collection if available */}
-              <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed">
+              <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 leading-relaxed">
                 {image.description}
               </p>
             </div>
 
             {/* Price & Rating Placeholder */}
-            <div className="flex items-end gap-3 mb-8 border-b border-gray-100 pb-6">
+            <div className="flex items-end gap-3 mb-8 border-b border-gray-100 dark:border-zinc-800 pb-6">
               {finalProduct ? (
                 <div className="flex flex-col">
-                  <span className="text-3xl font-bold text-gray-900">
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white">
                     ${finalProduct.total_price.toFixed(2)}
                   </span>
-                  <span className="text-xs text-green-600 font-medium">In Stock • Ready to Ship</span>
+                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">In Stock • Ready to Ship</span>
                 </div>
               ) : (
-                <span className="text-2xl font-bold text-gray-400">Configure to see price</span>
+                <span className="text-2xl font-bold text-gray-400 dark:text-zinc-600">Configure to see price</span>
               )}
             </div>
 
             {/* Configuration Form */}
             {orderForm && finalProduct ? (
-              <div className="bg-gray-50 p-6 rounded-lg border">
+              <div className="bg-gray-50 dark:bg-zinc-900 p-6 rounded-lg border dark:border-zinc-800">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold">Checkout</h2>
-                  <Button variant="ghost" size="sm" onClick={() => setOrderForm(false)}>Back</Button>
+                  <h2 className="text-xl font-bold dark:text-white">Checkout</h2>
+                  <Button variant="ghost" size="sm" onClick={() => setOrderForm(false)} className="dark:text-white dark:hover:bg-zinc-800">Back</Button>
                 </div>
                 <OrderForm
                   productSKU={finalProduct.sku}
@@ -330,47 +322,63 @@ export default function ProductDetailPage() {
                 <div className="space-y-4">
 
                   {/* Primary Selection Group */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {allTypes.length > 0 && (
                       <div className="space-y-1.5">
-                        <Label className="text-xs uppercase font-bold text-gray-500">Product Type</Label>
-                        <Select value={selections.type} onValueChange={(v) => handleDropdownChange("type", v)}>
-                          <SelectTrigger className="bg-gray-50 border-gray-200"><SelectValue placeholder="Select Type" /></SelectTrigger>
-                          <SelectContent>{allTypes.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                        </Select>
+                        <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Product Type</Label>
+                        <select
+                          value={selections.type}
+                          onChange={(e) => handleDropdownChange("type", e.target.value)}
+                          className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                        >
+                          <option value="" disabled>Select Type</option>
+                          {allTypes.map(o => <option key={o} value={o}>{o}</option>)}
+                        </select>
                       </div>
                     )}
 
                     {selections.type && allMedia.length > 0 && (
                       <div className="space-y-1.5">
-                        <Label className="text-xs uppercase font-bold text-gray-500">Media / Material</Label>
-                        <Select value={selections.media} onValueChange={(v) => handleDropdownChange("media", v)}>
-                          <SelectTrigger className="bg-gray-50 border-gray-200"><SelectValue placeholder="Select Material" /></SelectTrigger>
-                          <SelectContent>{allMedia.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                        </Select>
+                        <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Media / Material</Label>
+                        <select
+                          value={selections.media}
+                          onChange={(e) => handleDropdownChange("media", e.target.value)}
+                          className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                        >
+                          <option value="" disabled>Select Material</option>
+                          {allMedia.map(o => <option key={o} value={o}>{o}</option>)}
+                        </select>
                       </div>
                     )}
                   </div>
 
                   {/* Secondary Selections (Style, Collection) */}
                   {(allStyles.length > 0 || allCollections.length > 0) && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {selections.media && allStyles.length > 0 && (
                         <div className="space-y-1.5">
-                          <Label className="text-xs uppercase font-bold text-gray-500">Style</Label>
-                          <Select value={selections.style} onValueChange={(v) => handleDropdownChange("style", v)}>
-                            <SelectTrigger className="bg-gray-50 border-gray-200"><SelectValue placeholder="Style" /></SelectTrigger>
-                            <SelectContent>{allStyles.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                          </Select>
+                          <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Style</Label>
+                          <select
+                            value={selections.style}
+                            onChange={(e) => handleDropdownChange("style", e.target.value)}
+                            className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                          >
+                            <option value="" disabled>Style</option>
+                            {allStyles.map(o => <option key={o} value={o}>{o}</option>)}
+                          </select>
                         </div>
                       )}
                       {selections.style && allCollections.length > 0 && (
                         <div className="space-y-1.5">
-                          <Label className="text-xs uppercase font-bold text-gray-500">Size / Collection</Label>
-                          <Select value={selections.collection} onValueChange={(v) => handleDropdownChange("collection", v)}>
-                            <SelectTrigger className="bg-gray-50 border-gray-200"><SelectValue placeholder="Select Size" /></SelectTrigger>
-                            <SelectContent>{allCollections.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                          </Select>
+                          <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Size / Collection</Label>
+                          <select
+                            value={selections.collection}
+                            onChange={(e) => handleDropdownChange("collection", e.target.value)}
+                            className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                          >
+                            <option value="" disabled>Select Size</option>
+                            {allCollections.map(o => <option key={o} value={o}>{o}</option>)}
+                          </select>
                         </div>
                       )}
                     </div>
@@ -382,31 +390,43 @@ export default function ProductDetailPage() {
                   <div className="space-y-4">
                     {allFrames.length > 0 && (
                       <div className="space-y-1.5">
-                        <Label className="text-xs uppercase font-bold text-gray-500">Frame</Label>
-                        <Select value={selections.frame} onValueChange={(v) => handleDropdownChange("frame", v)}>
-                          <SelectTrigger className="h-12 border-gray-300"><SelectValue placeholder="Choose Frame" /></SelectTrigger>
-                          <SelectContent>{allFrames.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                        </Select>
+                        <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Frame</Label>
+                        <select
+                          value={selections.frame}
+                          onChange={(e) => handleDropdownChange("frame", e.target.value)}
+                          className="w-full h-12 px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                        >
+                          <option value="" disabled>Choose Frame</option>
+                          {allFrames.map(o => <option key={o} value={o}>{o}</option>)}
+                        </select>
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {allBaseMats.length > 0 && (
                         <div className="space-y-1.5">
-                          <Label className="text-xs uppercase font-bold text-gray-500">Matting</Label>
-                          <Select value={selections.baseMat} onValueChange={(v) => handleDropdownChange("baseMat", v)}>
-                            <SelectTrigger className="bg-gray-50 border-gray-200"><SelectValue placeholder="None" /></SelectTrigger>
-                            <SelectContent>{allBaseMats.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                          </Select>
+                          <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Matting</Label>
+                          <select
+                            value={selections.baseMat}
+                            onChange={(e) => handleDropdownChange("baseMat", e.target.value)}
+                            className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                          >
+                            <option value="" disabled>None</option>
+                            {allBaseMats.map(o => <option key={o} value={o}>{o}</option>)}
+                          </select>
                         </div>
                       )}
                       {allGlazings.length > 0 && (
                         <div className="space-y-1.5">
-                          <Label className="text-xs uppercase font-bold text-gray-500">Glazing</Label>
-                          <Select value={selections.glazing} onValueChange={(v) => handleDropdownChange("glazing", v)}>
-                            <SelectTrigger className="bg-gray-50 border-gray-200"><SelectValue placeholder="None" /></SelectTrigger>
-                            <SelectContent>{allGlazings.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-                          </Select>
+                          <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Glazing</Label>
+                          <select
+                            value={selections.glazing}
+                            onChange={(e) => handleDropdownChange("glazing", e.target.value)}
+                            className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                          >
+                            <option value="" disabled>None</option>
+                            {allGlazings.map(o => <option key={o} value={o}>{o}</option>)}
+                          </select>
                         </div>
                       )}
                     </div>
@@ -417,7 +437,7 @@ export default function ProductDetailPage() {
                 <div className="pt-6 mt-4">
                   <button
 
-                    className="w-full h-14 text-lg font-bold uppercase tracking-wide bg-black hover:bg-gray-800 text-white transition-all"
+                    className="w-full md:h-14 h-12 md:text-lg font-bold uppercase tracking-wide bg-black dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 text-white transition-all"
                     disabled={!finalProduct}
                     onClick={() => setOrderForm(true)}
                   >
@@ -432,18 +452,18 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Trust Badges (Mimicking the icons at bottom of reference) */}
-                <div className="grid grid-cols-3 gap-2 mt-8 py-6 border-t border-gray-100 text-center">
+                <div className="grid grid-cols-3 gap-2 mt-8 py-6 border-t border-gray-100 dark:border-zinc-800 text-center">
                   <div className="flex flex-col items-center gap-2">
-                    <Box className="w-6 h-6 text-gray-400" />
-                    <span className="text-[10px] font-semibold text-gray-600 uppercase">Fast Shipping</span>
+                    <Box className="w-6 h-6 text-gray-400 dark:text-gray-600" />
+                    <span className="text-[10px] font-semibold text-gray-600 dark:text-gray-400 uppercase">Fast Shipping</span>
                   </div>
                   <div className="flex flex-col items-center gap-2">
-                    <ShieldCheck className="w-6 h-6 text-gray-400" />
-                    <span className="text-[10px] font-semibold text-gray-600 uppercase">Premium Quality</span>
+                    <ShieldCheck className="w-6 h-6 text-gray-400 dark:text-gray-600" />
+                    <span className="text-[10px] font-semibold text-gray-600 dark:text-gray-400 uppercase">Premium Quality</span>
                   </div>
                   <div className="flex flex-col items-center gap-2">
-                    <RotateCcw className="w-6 h-6 text-gray-400" />
-                    <span className="text-[10px] font-semibold text-gray-600 uppercase">Easy Returns</span>
+                    <RotateCcw className="w-6 h-6 text-gray-400 dark:text-gray-600" />
+                    <span className="text-[10px] font-semibold text-gray-600 dark:text-gray-400 uppercase">Easy Returns</span>
                   </div>
                 </div>
 
