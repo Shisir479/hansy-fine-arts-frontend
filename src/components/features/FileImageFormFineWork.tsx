@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import ProductModal from "./ProductModal";
 import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
+import { useRouter } from "next/navigation";
 
 // Define a separate Skeleton component
 const FileImageSkeleton = ({
@@ -47,7 +47,7 @@ interface ImageType {
 const SKELETON_ITEMS_COUNT = 9;
 
 export default function FileImageFormFineWork() {
-  const [selectedImage, setSelectedImage] = useState<ImageType | null>(null);
+  const router = useRouter();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   // responsive flags
@@ -78,8 +78,9 @@ export default function FileImageFormFineWork() {
   const { data, isLoading, isError, error } = useListFinerworksImagesQuery({
     library,
     page,
+    list_products: true,
   });
-
+  console.log(data)
   const images: ImageType[] = (data?.images as ImageType[]) ?? [];
 
   useEffect(() => {
@@ -138,6 +139,10 @@ export default function FileImageFormFineWork() {
     );
   }
 
+  const handleNavigate = (guid: string) => {
+    router.push(`/product-detail/${guid}`);
+  };
+
   return (
     <div
       className="py-8"
@@ -149,9 +154,8 @@ export default function FileImageFormFineWork() {
         {!isMobile && (
           <div
             ref={cursorRef}
-            className={`fixed pointer-events-none z-50 w-12 h-12 border border-gray-800 transition-opacity duration-300 ${
-              showCursor && !hoveredCard ? "opacity-100" : "opacity-0"
-            }`}
+            className={`fixed pointer-events-none z-50 w-12 h-12 border border-gray-800 transition-opacity duration-300 ${showCursor && !hoveredCard ? "opacity-100" : "opacity-0"
+              }`}
             style={{
               transform: "translate(-50%, -50%)",
               willChange: "transform",
@@ -202,29 +206,26 @@ export default function FileImageFormFineWork() {
                   >
                     {/* Outer frame - sharp edges (hide on mobile) */}
                     <div
-                      className={`absolute -inset-1 border transition-all duration-500 hidden md:block ${
-                        isHovered
+                      className={`absolute -inset-1 border transition-all duration-500 hidden md:block ${isHovered
                           ? "border-gray-800 opacity-100 scale-105"
                           : "border-gray-400 opacity-0 scale-100"
-                      }`}
+                        }`}
                     />
 
                     {/* Card - no border radius */}
                     <div
-                      className={`relative ${randomHeight} overflow-hidden cursor-pointer transform transition-all duration-500 ${
-                        isHovered
+                      className={`relative ${randomHeight} overflow-hidden cursor-pointer transform transition-all duration-500 ${isHovered
                           ? "md:scale-[1.02] md:shadow-2xl"
                           : "shadow-lg"
-                      }`}
-                      onClick={() => !isMobile && setSelectedImage(image)}
+                        }`}
+                      onClick={() => handleNavigate(image.guid)}
                     >
                       {/* Image with zoom effect */}
                       <img
                         src={image.public_preview_uri}
                         alt={image.title}
-                        className={`w-full h-full object-cover transition-transform duration-700 ${
-                          isHovered ? "md:scale-110" : ""
-                        }`}
+                        className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "md:scale-110" : ""
+                          }`}
                       />
 
                       {/* Simple dark overlay */}
@@ -248,11 +249,10 @@ export default function FileImageFormFineWork() {
                       <div className="absolute inset-0 pt-5 pb-3 px-5 flex flex-col justify-end z-10">
                         {/* Title */}
                         <h2
-                          className={`text-white italic ${
-                            isMobile
+                          className={`text-white italic ${isMobile
                               ? "text-lg font-semibold"
                               : "text-2xl font-bold mb-2"
-                          } transition-all duration-500 uppercase tracking-wider`}
+                            } transition-all duration-500 uppercase tracking-wider`}
                           style={{
                             opacity: isMobile ? 1 : isHovered ? 1 : 0,
                             transform:
@@ -268,11 +268,10 @@ export default function FileImageFormFineWork() {
 
                         {/* Description */}
                         <p
-                          className={`text-white italic ${
-                            isMobile
+                          className={`text-white italic ${isMobile
                               ? "text-xs leading-relaxed"
                               : "text-sm leading-relaxed"
-                          } transition-all duration-500`}
+                            } transition-all duration-500`}
                           style={{
                             opacity: isMobile ? 1 : isHovered ? 0.95 : 0,
                             transform:
@@ -302,7 +301,7 @@ export default function FileImageFormFineWork() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setSelectedImage(image);
+                              handleNavigate(image.guid);
                             }}
                             className="inline-flex items-center gap-2 md:px-4 md:py-2 px-3 py-[4px] bg-white text-black text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition-all"
                           >
@@ -330,14 +329,6 @@ export default function FileImageFormFineWork() {
             </div>
           ))}
         </div>
-
-        {selectedImage && (
-          <ProductModal
-            image={{ ...selectedImage, products: selectedImage.products || [] }}
-            onOpenChange={() => setSelectedImage(null)}
-            open={!!selectedImage}
-          />
-        )}
       </div>
 
       <style jsx>{`

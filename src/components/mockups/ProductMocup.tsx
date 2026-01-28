@@ -395,25 +395,34 @@ export default function ProductMockup({
     return url.startsWith("http") ? url : `${BASE_IMG_URL}${url}`;
   };
 
-  const getFrameStyle = () => {
-    if (! selectedFrame) return {};
+const getFrameStyle = () => {
+    if (!selectedFrame) return {};
 
-    const frameWidth = 40;
+    const frameWidth = 30; // ফ্রেমের চওড়া
+
     const segmentUrl = getFullImageUrl(
       selectedFrame.segment_url || selectedFrame.image_url
     );
 
     return {
       borderStyle: "solid" as const,
-      borderWidth:  `${frameWidth}px`,
+      borderWidth: `${frameWidth}px`,
       borderImageSource: `url(${segmentUrl})`,
-      borderImageSlice: "30 fill",
-      boxSizing: "border-box" as const,
-      boxShadow: 
+      
+      // পরিবর্তন ১: আপনি ১০০ রাখতে চেয়েছেন, তাই ১০০-ই থাকল।
+      // 'fill' সরিয়ে দেওয়া ভালো যদি আপনি ছবির পেছনে ফ্রেমের টেক্সচার না চান।
+      borderImageSlice: "10", 
+      
+      // পরিবর্তন ২: এই লাইনটি যুক্ত করুন (খুবই গুরুত্বপূর্ণ)। 
+      // 'round' দিলে ফ্রেমের প্যাটার্নটি সুন্দরভাবে রিপিট হবে এবং পাশের গ্যাপ পূরণ হবে।
+      // যদি 'round' এ প্যাটার্ন নষ্ট মনে হয়, তবে 'stretch' দিয়ে দেখতে পারেন।
+      borderImageRepeat: "round", 
+      
+      borderImageOutset: "0",
+      boxShadow:
         "inset 0 0 20px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.5)",
     };
-  };
-
+};
   const handleAddToCart = () => {
     if (totalPrice === 0) {
       toast.error("Waiting for price.. .");
@@ -513,7 +522,7 @@ export default function ProductMockup({
                     <div
                       style={{
                         backgroundColor: selectedMat ? selectedMat.color : "transparent",
-                        padding: selectedMat ? `${matWidth * 10}px` : "0",
+                        padding: selectedMat ? `${matWidth * 15}px` : "0",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -575,7 +584,13 @@ export default function ProductMockup({
             </div>
 
             {/* 🔥 BUTTONS OUTSIDE IMAGE (BELOW) */}
-            <div className="flex gap-3 justify-center mt-4 bg-white px-6 py-3 shadow-md border border-gray-200">
+            <div className="flex gap-5 justify-center mt-4 bg-white px-6 py-3 shadow-md border border-gray-200">
+              <button
+                onClick={() => setIsAROpen(true)}
+                className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide hover:text-blue-600 transition-colors"
+              >
+                <ImageIcon size={16} /> Live Preview AR
+              </button>
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide hover:text-blue-600 transition-colors"
@@ -589,6 +604,7 @@ export default function ProductMockup({
               >
                 <ImageIcon size={16} /> Wall View
               </button>
+              
             </div>
           </div>
 
@@ -864,11 +880,11 @@ export default function ProductMockup({
                             <p className="text-[8px] text-center font-medium leading-tight truncate px-0.5">
                               {item.name}
                             </p>
-                            {item.starting_price && viewState === "frames" && (
+                            {/* {item.starting_price && viewState === "frames" && (
                               <p className="text-[7px] text-center text-gray-500 mt-0.5">
                                 from ${item.starting_price.toFixed(2)}
                               </p>
-                            )}
+                            )} */}
                           </div>
                         ))}
                       </div>
