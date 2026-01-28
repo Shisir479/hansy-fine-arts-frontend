@@ -36,10 +36,20 @@ const cartSlice = createSlice({
       }
       
       state.total = calculateTotal(state.items);
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cart', JSON.stringify(state));
+      }
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((item) => item._id !== action.payload);
       state.total = calculateTotal(state.items);
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cart', JSON.stringify(state));
+      }
     },
     updateQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
       const item = state.items.find((item) => item._id === action.payload.id);
@@ -53,10 +63,20 @@ const cartSlice = createSlice({
       }
       
       state.total = calculateTotal(state.items);
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cart', JSON.stringify(state));
+      }
     },
     clearCart: (state) => {
       state.items = [];
       state.total = 0;
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cart', JSON.stringify(state));
+      }
     },
   },
 });

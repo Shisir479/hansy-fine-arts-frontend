@@ -55,7 +55,7 @@ const NavbarClient = () => {
 
   // 2. Check if we are currently inside any Shop Art route
   const isShopArtActive = shopArtRoutes.some((route) =>
-    currentPath.startsWith(route)
+    currentPath.startsWith(route),
   );
 
   const menuItems = [
@@ -66,7 +66,9 @@ const NavbarClient = () => {
   ];
 
   return (
-    <div className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}>
+    <div
+      className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}
+    >
       <div className="container mx-auto py-2 md:px-4 px-1 flex items-center justify-between">
 
         {/* Logo */}
@@ -157,11 +159,17 @@ const NavbarClient = () => {
             onClick={() => dispatch(toggleTheme())}
             className={`transition ${iconColor} hover:text-foreground/90`}
           >
-            {theme === "light" ? <Moon className="w-6 h-6" /> : <Sun className="w-6 h-6" />}
+            {theme === "light" ? (
+              <Moon className="w-6 h-6" />
+            ) : (
+              <Sun className="w-6 h-6" />
+            )}
           </button>
 
           {/* Favorites */}
-          <button className={`relative inline-flex items-center transition ${iconColor} hover:text-foreground/90`}>
+          <button
+            className={`relative inline-flex items-center transition ${iconColor} hover:text-foreground/90`}
+          >
             <Heart className="w-6 h-6" />
             <span className="absolute -top-1 -right-3 text-[10px] leading-none px-[4px] py-[2px] bg-background text-foreground/80 border rounded-[2px]">
               0
@@ -174,21 +182,28 @@ const NavbarClient = () => {
           {/* Profile */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className={`transition ${iconColor} hover:text-foreground/90 inline-flex items-center`}>
+              <button
+                className={`transition ${iconColor} hover:text-foreground/90 inline-flex items-center`}
+              >
                 <User className="w-6 h-6" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className={`w-48 border ${borderColor} rounded-none`}>
+            <DropdownMenuContent
+              className={`w-48 border ${borderColor} rounded-none`}
+            >
               <DropdownMenuItem asChild>
-                <Link href="/login" className="w-full">Login</Link>
+                <Link href="/login" className="w-full">
+                  Login
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/sign-up" className="w-full">Create Account</Link>
+                <Link href="/sign-up" className="w-full">
+                  Create Account
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
       </div>
     </div>
   );

@@ -4,6 +4,17 @@ import React, { useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
+import { useAppDispatch } from "@/lib/redux/hooks";
+import { addToCart } from "@/lib/redux/slices/cartSlice";
+import { useCartSidebar } from "@/hooks/use-cart-sidebar";
+import { toast } from "react-hot-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -67,6 +78,8 @@ const getUniqueValues = (key: string, products: Product[]): string[] => {
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
+  const dispatch = useAppDispatch();
+  const { openSidebar } = useCartSidebar();
 
   // State for Preview Tools
   const [isAROpen, setIsAROpen] = useState(false);
@@ -86,6 +99,8 @@ export default function ProductDetailPage() {
     page: 1,
     list_products: true,
   });
+
+  console.log(" product details data", data)
 
   const images: any[] = data?.images ?? [];
 
@@ -163,12 +178,6 @@ export default function ProductDetailPage() {
     return getFilteredProducts(image.products, selections);
   }, [image, selections]);
 
-
-
-  // --- Auto-Select Default (First) Product on Load ---
-  // REMOVED based on user feedback (price showing before size selection)
-
-
   // --- Dynamic Options (Derived from Cascading Pools) ---
   const allTypes = useMemo(() => getUniqueValues("type", allProducts), [allProducts]);
   const allMedia = useMemo(() => getUniqueValues("media", productsAfterType), [productsAfterType]);
@@ -220,10 +229,23 @@ export default function ProductDetailPage() {
     return image.public_preview_uri;
   }, [finalProduct, image]);
 
-  const shouldShowOrderButton = useMemo(() => {
-    return !!finalProduct;
-  }, [finalProduct]);
-
+  const handleAddToCart = () => {
+    if (!finalProduct || !image) return;
+    
+    const cartProduct = {
+      _id: finalProduct.sku,
+      productTitle: image.title,
+      name: finalProduct.name,
+      price: finalProduct.total_price,
+      category: "Art",
+      image: selectedImage,
+      sku: finalProduct.sku
+    };
+    
+    dispatch(addToCart(cartProduct));
+    toast.success("Added to cart!");
+    openSidebar();
+  };
 
   if (isLoading) return <div className="h-screen flex items-center justify-center bg-white dark:bg-black"><Loader2 className="animate-spin w-10 h-10 text-gray-900 dark:text-white" /></div>;
   if (isError || !image) return <div className="h-screen flex items-center justify-center bg-white dark:bg-black text-red-500">Product not found</div>;
@@ -255,8 +277,8 @@ export default function ProductDetailPage() {
                   <Image
                     src={selectedImage}
                     alt={image.title}
-                    fill // এটি কন্টেইনারের পুরো জায়গা নিয়ে নেবে
-                    className="object-contain" // p-4 দেওয়া হয়েছে যাতে একদম বর্ডারে না লেগে থাকে
+                    fill
+                    className="object-contain"
                   />
                 ) : (
                   <div className="text-gray-300 dark:text-zinc-600">No Image Available</div>
@@ -484,7 +506,7 @@ export default function ProductDetailPage() {
 
                     className="w-full md:h-14 h-12 md:text-lg font-bold uppercase tracking-wide bg-black dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 text-white transition-all"
                     disabled={!finalProduct}
-                    onClick={() => setOrderForm(true)}
+                    onClick={handleAddToCart}
                   >
                     {finalProduct ? `Add to Cart - $${finalProduct.total_price.toFixed(0)}` : "Select Options"}
                   </button>

@@ -107,10 +107,12 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                               className="flex gap-4 pb-6 border-b border-black/20 dark:border-white/20 last:border-0 last:pb-0"
                             >
                               {/* ইমেজ এখন পুরোপুরি কালারে থাকবে */}
-                              <div className="w-24 h-24 border border-black dark:border-white overflow-hidden flex-shrink-0">
+                              <div className="w-24 h-24    overflow-hidden flex-shrink-0">
                                 <Image
                                   src={item.image || "/placeholder.jpg"}
-                                  alt={item.productTitle || item.name || "Artwork"}
+                                  alt={
+                                    item.productTitle || item.name || "Artwork"
+                                  }
                                   width={96}
                                   height={96}
                                   className="w-full h-full object-cover"
@@ -148,7 +150,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 </div>
                               </div>
 
-                              <div className="text-right">
+                              <div className="text-right mt-1">
                                 <button
                                   onClick={() => handleRemove(item._id)}
                                   className="block mb-4 opacity-40 hover:opacity-100 transition-opacity"
@@ -184,9 +186,11 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                           className="relative w-full h-12 bg-black dark:bg-white text-white dark:text-black text-sm uppercase tracking-wide font-medium group transition-all duration-500 hover:bg-black/80 dark:hover:bg-white/80 before:absolute before:inset-0 before:bg-white/10 dark:before:bg-black/10 before:transform before:scale-x-0 before:origin-left hover:before:scale-x-100 before:transition-transform before:duration-300"
                         >
                           <span className="relative z-10 flex items-center justify-center gap-2">
-                            <span className="group-hover:tracking-widest transition-all duration-300">Checkout</span>
+                            <span className="group-hover:tracking-widest transition-all duration-300">
+                              Checkout
+                            </span>
                           </span>
-                          
+
                           {/* Pulse rings */}
                           <span className="absolute inset-0 border border-white/20 dark:border-black/20 group-hover:animate-ping"></span>
                           <span className="absolute inset-0 border border-white/10 dark:border-black/10 group-hover:animate-pulse"></span>
