@@ -90,7 +90,7 @@ export default function ContactPage() {
 
           {/* Three Column Layout */}
           {/* MODIFIED: Changed grid-cols-3 to grid-cols-1 for mobile, 3 for md screens. Reduced mb. */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-neutral-900/10 dark:bg-neutral-100/10 mb-16 md:mb-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-neutral-900/10 dark:bg-neutral-100/10 mb-16 md:mb-24">
             {/* Email Card */}
             <div
               // MODIFIED: Reduced p-12 to p-8 for mobile
@@ -117,10 +117,10 @@ export default function ContactPage() {
                   </div>
                   {/* MODIFIED: Changed text-xl to text-lg for mobile */}
                   <a
-                    href="mailto:info@hansyfinearts.com"
+                    href="mailto:Studio@hansyaeggy.com"
                     className="text-lg md:text-xl font-light block hover:translate-x-2 transition-transform duration-300"
                   >
-                    info@hansyfinearts.com
+                    Studio@hansyaeggy.com
                   </a>
                 </div>
               </div>
@@ -129,48 +129,6 @@ export default function ContactPage() {
                 style={{
                   transform:
                     hoveredCard === "email" ? "scaleX(1)" : "scaleX(0)",
-                }}
-              ></div>
-            </div>
-
-            {/* Phone Card */}
-            <div
-              // MODIFIED: Reduced p-12 to p-8 for mobile
-              className="relative bg-white dark:bg-black p-8 md:p-12 group cursor-pointer overflow-hidden"
-              onMouseEnter={() => setHoveredCard("phone")}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div
-                className={`absolute inset-0 border-2 border-neutral-900 dark:border-white transition-all duration-500 ${hoveredCard === "phone"
-                    ? "scale-100 opacity-100"
-                    : "scale-95 opacity-0"
-                  }`}
-              ></div>
-              <div className="relative z-10">
-                {/* MODIFIED: Reduced mb-12 to mb-8 for mobile */}
-                <div className="mb-8 md:mb-12">
-                  <div className="w-10 h-10 md:w-12 md:h-12 border-2 border-neutral-900 rounded-full flex items-center justify-center mb-4 md:mb-6 group-hover:rotate-90 transition-transform duration-500">
-                    <Phone className="h-4 w-4 md:h-5 md:w-5" />
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="text-xs tracking-[0.3em] font-light uppercase text-neutral-500">
-                    Phone
-                  </div>
-                  {/* MODIFIED: Changed text-xl to text-lg for mobile */}
-                  <a
-                    href="tel:+15551234567"
-                    className="text-lg md:text-xl font-light block hover:translate-x-2 transition-transform duration-300"
-                  >
-                    +1 (555) 123-4567
-                  </a>
-                </div>
-              </div>
-              <div
-                className="absolute bottom-0 left-0 w-full h-px bg-neutral-900 dark:bg-white origin-left transition-all duration-500"
-                style={{
-                  transform:
-                    hoveredCard === "phone" ? "scaleX(1)" : "scaleX(0)",
                 }}
               ></div>
             </div>

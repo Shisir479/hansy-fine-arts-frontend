@@ -5,11 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, ChevronDown, X } from "lucide-react";
 
 export default function MobileMenu() {
@@ -17,22 +13,21 @@ export default function MobileMenu() {
   const [isShopArtOpen, setIsShopArtOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const isActive = (href:  string) => pathname === href;
+  const isActive = (href: string) => pathname === href;
 
   const shopArtLinks = [
-    { href: "/contemporary", label: "Contemporary" },
-    { href: "/abstract-designs", label: "Abstract & Designs" },
-    { href: "/custom-portrait", label: "Custom Portraits" },
+    { href: "/contemporary", label: "CONTEMPORARY" },
+    { href: "/abstract-designs", label: "ABSTRACT & DESIGNS" },
+    { href: "/custom-portrait", label: "CUSTOM PORTRAITS" },
   ];
 
   const isAnyShopArtActive = shopArtLinks.some((link) => isActive(link.href));
 
   const mainMenuItems = [
-    { href: "/", label: "Home" },
-    { href: "/artsy-products", label: "Artsy Products" },
-    { href:  "/about", label:  "About" },
-    { href: "/contact", label: "Contact" },
-    { href: "/shop", label: "Artist Shop" },
+    { href: "/", label: "HOME" },
+    { href: "/artsy-products", label: "SHOP" },
+    { href: "/about", label: "ABOUT" },
+    { href: "/contact", label: "CONTACT" },
     { href: "/faq", label: "FAQ" },
   ];
 
@@ -68,7 +63,7 @@ export default function MobileMenu() {
                 alt="Hans Yeaggy"
                 width={130}
                 height={45}
-                className="object-contain"
+                className="object-contain dark:invert"
               />
             </Link>
             <button
@@ -78,90 +73,80 @@ export default function MobileMenu() {
               <X className="h-5 w-5" strokeWidth={1.5} />
             </button>
           </div>
-
-          {/* Navigation */}
           <nav className="py-4 px-4 overflow-y-auto max-h-[calc(100vh-180px)]">
-            {/* Main Links */}
-            {mainMenuItems.map((item) => {
-              const active = isActive(item.href);
-              return (
+            {/* HOME */}
+            {mainMenuItems
+              .filter((item) => item.label === "HOME")
+              .map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={handleLinkClick}
                   className="block py-3 px-2 border-b border-gray-100 dark:border-gray-800"
                   style={{
-                    color: active ? "#000000" : "#374151",
-                    fontWeight: active ? 600 : 400,
+                    color: isActive(item.href) ? "#000000" : "#374151",
+                    fontWeight: isActive(item.href) ? 600 : 400,
                   }}
                 >
                   {item.label}
                 </Link>
-              );
-            })}
+              ))}
 
-            {/* Shop Art Dropdown */}
-            <div className="mt-1">
+            {/* PAINTINGS (after HOME) */}
+            <div className="mt-1 border-b border-gray-100 dark:border-gray-800">
               <button
-                onClick={() => setIsShopArtOpen(! isShopArtOpen)}
+                onClick={() => setIsShopArtOpen(!isShopArtOpen)}
                 className="flex items-center justify-between w-full py-3 px-2"
                 style={{
                   color: isAnyShopArtActive ? "#000000" : "#374151",
-                  fontWeight: isAnyShopArtActive ? 600 :  400,
+                  fontWeight: isAnyShopArtActive ? 600 : 400,
                 }}
               >
-                <span>Printings</span>
+                <span>PAINTINGS</span>
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-200 ${
-                    isShopArtOpen ? "rotate-180" :  ""
+                  className={`h-4 w-4 transition-transform ${
+                    isShopArtOpen ? "rotate-180" : ""
                   }`}
-                  style={{ color: "#6B7280" }}
                 />
               </button>
 
               {isShopArtOpen && (
                 <div className="pl-4 pb-2 ml-2 border-l-2 border-gray-200 dark:border-gray-700">
-                  {shopArtLinks.map((link) => {
-                    const active = isActive(link.href);
-                    return (
-                      <Link
-                        key={link. href}
-                        href={link.href}
-                        onClick={handleLinkClick}
-                        className="block py-2. 5 px-2"
-                        style={{
-                          color:  active ? "#000000" : "#4B5563",
-                          fontWeight:  active ? 600 : 400,
-                        }}
-                      >
-                        {link.label}
-                      </Link>
-                    );
-                  })}
+                  {shopArtLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={handleLinkClick}
+                      className="block py-2 px-2"
+                      style={{
+                        color: isActive(link.href) ? "#000000" : "#4B5563",
+                        fontWeight: isActive(link.href) ? 600 : 400,
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Divider */}
-            <div className="my-4 h-px bg-gray-200 dark:bg-gray-800" />
-
-            {/* Account Links */}
-            <Link
-              href="/login"
-              onClick={handleLinkClick}
-              className="block py-3 px-2"
-              style={{ color: "#374151" }}
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/sign-up"
-              onClick={handleLinkClick}
-              className="block py-3 px-2"
-              style={{ color: "#374151" }}
-            >
-              Create Account
-            </Link>
+            {/* REST MENU */}
+            {mainMenuItems
+              .filter((item) => item.label !== "HOME")
+              .map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={handleLinkClick}
+                  className="block py-3 px-2 border-b border-gray-100 dark:border-gray-800"
+                  style={{
+                    color: isActive(item.href) ? "#000000" : "#374151",
+                    fontWeight: isActive(item.href) ? 600 : 400,
+                  }}
+                >
+                  {item.label}
+                </Link>
+              ))}
           </nav>
 
           {/* Footer */}

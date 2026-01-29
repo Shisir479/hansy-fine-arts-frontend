@@ -2,7 +2,7 @@
 
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { X, ShoppingBag, Trash2 } from "lucide-react";
+import { X, ShoppingBag, Trash2, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
 import { removeFromCart, updateQuantity } from "@/lib/redux/slices/cartSlice";
@@ -65,7 +65,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full"
               >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
+                <Dialog.Panel className="pointer-events-auto w-screen max-w-sm">
                   <div className="flex h-full flex-col bg-white dark:bg-black text-black dark:text-white border-l border-black dark:border-white font-light">
                     {/* Header */}
                     <div className="flex items-center justify-between px-8 py-7 border-b border-black dark:border-white">
@@ -84,84 +84,95 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                       </button>
                     </div>
 
-                    {/* Cart Items */}
-                    <div className="flex-1 overflow-y-auto px-8 py-10">
+                    <div className="flex-1 overflow-y-auto px-6 py-5 scrollbar-hide">
                       {cart.length === 0 ? (
                         <div className="text-center py-32">
                           <ShoppingBag
                             className="mx-auto h-14 w-14 text-black/30 dark:text-white/30 mb-8"
                             strokeWidth={1}
                           />
-                          <p className="text-2xl tracking-wider mb-3">
-                            Your cart is empty
-                          </p>
+                          <p className="text-2xl tracking-wider mb-3">Your cart is empty</p>
                           <p className="text-sm text-black/50 dark:text-white/50 tracking-wide">
                             Start collecting artworks
                           </p>
                         </div>
                       ) : (
-                        <div className="space-y-8">
+                        <div className="space-y-6">
                           {cart.map((item) => (
                             <div
                               key={item._id}
-                              className="flex gap-4 pb-6 border-b border-black/20 dark:border-white/20 last:border-0 last:pb-0"
+                              className="flex gap-6 py-3 border-b border-neutral-200 dark:border-neutral-800 last:border-0"
                             >
-                              {/* ইমেজ এখন পুরোপুরি কালারে থাকবে */}
-                              <div className="w-24 h-24    overflow-hidden flex-shrink-0">
+                              {/* 1. IMAGE: Rounded, clean, object-cover */}
+                              <div className="relative h-24 w-24 sm:h-28 sm:w-28 flex-shrink-0 overflow-hidden bg-neutral-100 border border-neutral-100 dark:border-neutral-800">
                                 <Image
                                   src={item.image || "/placeholder.jpg"}
-                                  alt={
-                                    item.productTitle || item.name || "Artwork"
-                                  }
-                                  width={96}
-                                  height={96}
-                                  className="w-full h-full object-cover"
+                                  alt={item.productTitle || item.name || "Artwork"}
+                                  fill
+                                  className="object-cover"
                                 />
                               </div>
 
-                              <div className="flex-1">
-                                <h3 className="text-sm font-medium tracking-wide leading-relaxed">
-                                  {item.productTitle || item.name}
-                                </h3>
-                                <p className="text-xs text-black/50 dark:text-white/50 mt-1">
-                                  ${item.price}
-                                </p>
+                              {/* 2. CONTENT CONTAINER */}
+                              <div className="flex flex-1 justify-between">
+                                {/* Left Side: Title & Remove Button */}
+                                <div className="flex flex-col justify-between">
+                                  <div>
+                                    <h3 className="font-bold text-lg text-neutral-900 dark:text-white leading-tight mb-2">
+                                      {item.productTitle || item.name}
+                                    </h3>
+                                    {item.variantDetails ? (
+                                      <ul className="text-[11px] text-neutral-500 dark:text-neutral-400 space-y-0.5 leading-relaxed">
+                                        {item.variantDetails.map((detail, idx) => (
+                                          <li key={idx}>
+                                            <span className="font-bold text-neutral-800 dark:text-neutral-200">{detail.label}:</span> {detail.value}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    ) : (
+                                      <p className="text-xs font-medium tracking-widest text-neutral-500 uppercase">
+                                        {item.variant || "Original Piece"}
+                                      </p>
+                                    )}
+                                  </div>
 
-                                <div className="flex items-center gap-3 mt-4">
+                                  {/* Trash Icon (Aligned bottom-left) */}
                                   <button
-                                    onClick={() =>
-                                      handleQuantityChange(item._id, -1)
-                                    }
-                                    className="w-7 h-7 border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black flex items-center justify-center text-sm transition-colors"
+                                    onClick={() => handleRemove(item._id)}
+                                    className="text-neutral-400 hover:text-red-600 transition-colors p-1 -ml-1 w-fit"
+                                    aria-label="Remove item"
                                   >
-                                    −
-                                  </button>
-                                  <span className="w-8 text-center tracking-wide text-sm font-medium">
-                                    {item.quantity}
-                                  </span>
-                                  <button
-                                    onClick={() =>
-                                      handleQuantityChange(item._id, +1)
-                                    }
-                                    className="w-7 h-7 border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black flex items-center justify-center text-sm transition-colors"
-                                  >
-                                    +
+                                    <Trash2 className="h-5 w-5" />
                                   </button>
                                 </div>
-                              </div>
 
-                              <div className="text-right mt-1">
-                                <button
-                                  onClick={() => handleRemove(item._id)}
-                                  className="block mb-4 opacity-40 hover:opacity-100 transition-opacity"
-                                >
-                                  <Trash2
-                                    className="h-5 w-5"
-                                    strokeWidth={1.5}
-                                  />
-                                </button>
-                                <div className="text-sm font-semibold">
-                                  ${(item.price * item.quantity).toFixed(2)}
+                                {/* Right Side: Price & Quantity Controls */}
+                                <div className="flex flex-col justify-between items-end">
+                                  <p className="font-bold text-lg text-neutral-900 dark:text-white">
+                                    ${(item.price * item.quantity).toFixed(2)}
+                                  </p>
+
+                                  {/* Circular Quantity Buttons */}
+                                  <div className="flex items-center gap-3">
+                                    <button
+                                      onClick={() => handleQuantityChange(item._id, -1)}
+                                      disabled={item.quantity <= 1}
+                                      className="flex items-center justify-center w-6 h-6 border border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 hover:border-black hover:text-black dark:hover:border-white dark:hover:text-white disabled:opacity-30 transition-all"
+                                    >
+                                      <Minus className="h-4 w-4" />
+                                    </button>
+
+                                    <span className="w-4 text-center font-medium text-neutral-900 dark:text-white">
+                                      {item.quantity}
+                                    </span>
+
+                                    <button
+                                      onClick={() => handleQuantityChange(item._id, +1)}
+                                      className="flex items-center justify-center w-6 h-6  border border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 hover:border-black hover:text-black dark:hover:border-white dark:hover:text-white transition-all"
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -172,7 +183,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
                     {/* Footer */}
                     {cart.length > 0 && (
-                      <div className="border-t border-black dark:border-white px-8 py-10">
+                      <div className="border-t border-black dark:border-white px-8 py-5">
                         <div className="flex justify-between items-baseline mb-10 tracking-widest">
                           <span className="text-sm uppercase">Total</span>
                           <span className="text-2xl">${totalPrice}</span>

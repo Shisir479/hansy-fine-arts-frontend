@@ -59,7 +59,7 @@ const NavbarClient = () => {
   );
 
   const menuItems = [
-    { label: "ARTSY PRODUCTS", href: "/artsy-products" },
+    { label: "SHOP", href: "/artsy-products" },
     { label: "ABOUT", href: "/about" },
     { label: "CONTACT", href: "/contact" },
     { label: "FAQ", href: "/faq" },
@@ -102,7 +102,7 @@ const NavbarClient = () => {
                   }
                 `}
               >
-                PRINTINGS
+                PAINTINGS
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 w-96 bg-white dark:bg-gray-950 border shadow-xl">

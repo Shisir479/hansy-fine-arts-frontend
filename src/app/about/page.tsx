@@ -93,40 +93,41 @@ export default function AboutSection() {
                 <h2 className="text-3xl md:text-4xl font-extralight mb-4 md:mb-6 leading-tight">
                   Capturing Serenity and Awe from 30,000 Feet
                 </h2>
-                <div className="w-16 md:w-24 h-px bg-neutral-900 dark:bg-white mb-6 md:mb-8"></div>
+                <div className="w-16 md:w-24 h-px bg-neutral-900 dark:bg-white mb-6 md:mb-6"></div>
               </div>
 
               {/* NEW SHORTENED BIOGRAPHY CONTENT */}
-              <div className="space-y-6 text-base md:text-lg font-light leading-relaxed text-neutral-600 dark:text-neutral-400">
+              <div className="space-y-5 text-base md:text-lg font-light leading-relaxed text-neutral-600 dark:text-neutral-400">
                 <p>
-                  Originally from **Guatemala**, Captain Hans Yaeggy found in
-                  watercolor a way to capture more than just landscapes: he
-                  captures moments and emotions. Since the age of 16, he has
-                  refined his artistic technique at institutions like the
-                  Universidad Popular de Guatemala, merging traditional art with
-                  a deep understanding of emotional connection.
+                  Captain Hans Yaeggy is a Guatemalan-born airline captain and
+                  watercolor artist whose work lives at the intersection of
+                  precision and wonder. Aviation taught him discipline and
+                  responsibility; watercolor allows him to preserve fleeting
+                  emotion—light, atmosphere, and the quiet details most people
+                  pass by.
                 </p>
                 <p>
-                  Over his aviation career, he has traveled the world, soaring
-                  over landscapes that few have the privilege to see so clearly.
-                  These experiences inspire his signature project:
-                  **transforming photographs of the skies he flies over into
-                  evocative watercolor paintings. ** This process immortalizes
-                  the fleeting magic viewed from the cockpit.
+                  Through years of flying and traveling, Hans has developed a
+                  signature approach: collecting moments from around the world
+                  not as souvenirs, but as stories captured in pigment—skies,
+                  coastlines, streets, and landscapes seen from unique
+                  perspectives.
                 </p>
                 <p>
-                  A notable achievement includes winning **second place** at the
-                  **&quot;SubastArte&quot;** silent auction (2006-2007), which raised
-                  funds for the Pediatric Foundation of Maracaibo Hospital.
-                  Today, his pieces are acquired by collectors worldwide, drawn
-                  to his ability to transport viewers to a world suspended in
-                  time.
+                  His journey began humbly in Guatemala City, where his father
+                  made his first flight lessons possible. As training and school
+                  expenses grew, Hans turned to watercolor—selling early
+                  paintings to help cover the next steps and keep moving toward
+                  his goal of becoming a professional.
                 </p>
                 <p>
-                  Beyond the canvas and cockpit, Hans Yaeggy represents the
-                  Houston Chapter of the **Latino Pilots Association**,
-                  supporting and mentoring new generations while continuing to
-                  capture the soul of every landscape he encounters.
+                  Today, Hans continues to fly professionally while creating
+                  watercolors inspired by places around the world. Each piece
+                  captures the mood and cultural spirit of a moment—where time
+                  seems to pause and color moves with a quiet, dancing energy
+                  that speaks to the soul. His works are held in private
+                  collections worldwide and featured in select private
+                  exhibitions as distinctive, one-of-a-kind pieces.
                 </p>
               </div>
 
@@ -154,8 +155,8 @@ export default function AboutSection() {
               >
                 <div
                   className={`absolute inset-0 border-2 border-neutral-900 dark:border-white transition-all duration-500 ${hoveredStat === stat.id
-                      ? "scale-100 opacity-100"
-                      : "scale-95 opacity-0"
+                    ? "scale-100 opacity-100"
+                    : "scale-95 opacity-0"
                     }`}
                 ></div>
                 <div className="relative z-10 text-center">

@@ -18,6 +18,11 @@ export interface Product {
   quantity?: number;
   createdAt?: string;
   updatedAt?: string;
+  variant?: string;
+  variantDetails?: {
+    label: string;
+    value: string;
+  }[];
 }
 
 export interface CartItem extends Product {

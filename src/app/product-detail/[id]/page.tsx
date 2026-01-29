@@ -32,6 +32,7 @@ import {
 import OrderForm from "@/components/features/OrderForm";
 import LivePreviewARModal from "@/components/preview/LivePreviewARModal";
 import WallPreviewTool from "@/components/preview/RoomPreview";
+import GlassMagnifier from "@/components/ui/glass-magnifier";
 
 // --- Types ---
 interface LabelType {
@@ -231,7 +232,7 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!finalProduct || !image) return;
-    
+
     const cartProduct = {
       _id: finalProduct.sku,
       productTitle: image.title,
@@ -239,9 +240,32 @@ export default function ProductDetailPage() {
       price: finalProduct.total_price,
       category: "Art",
       image: selectedImage,
-      sku: finalProduct.sku
+      sku: finalProduct.sku,
+      variantDetails: [
+        {
+          label: "Medium",
+          value: finalProduct.labels.find(l => l.key === "media")?.value || selections.media || "Standard"
+        },
+        {
+          label: "Size",
+          value: finalProduct.product_size
+            ? `${finalProduct.product_size.width}x${finalProduct.product_size.height}`
+            : (finalProduct.labels.find(l => l.key === "collection")?.value || selections.collection || "Standard")
+        },
+        {
+          label: "Finishing",
+          value: (() => {
+            const frame = finalProduct.labels.find(l => l.key === "frame")?.value;
+            const mat = finalProduct.labels.find(l => l.key === "base mat")?.value;
+            if (frame) {
+              return frame + (mat ? ` + ${mat}` : "");
+            }
+            return "Just The Print";
+          })()
+        }
+      ]
     };
-    
+
     dispatch(addToCart(cartProduct));
     toast.success("Added to cart!");
     openSidebar();
@@ -268,26 +292,31 @@ export default function ProductDetailPage() {
           {/* --- LEFT COLUMN: Image & Tools (7/12 cols) --- */}
           <div className="lg:col-span-6 flex flex-col items-center justify-start h-full">
             {/* Main Image Display - Mimicking a framed look */}
-            <div className="relative w-full max-w-[500px] bg-gray-50 dark:bg-zinc-900 py-5 transition-colors duration-300">
+            <div className="relative w-full max-w-[500px] py-5 transition-colors duration-300">
               <div
-                className="relative w-full flex items-center justify-center overflow-hidden aspect-square md:h-[500px] cursor-zoom-in"
-                onClick={() => setIsZoomOpen(true)}
+                className="relative w-full flex items-center justify-center aspect-square md:h-[500px]"
               >
                 {selectedImage ? (
-                  <Image
+                  <GlassMagnifier
                     src={selectedImage}
                     alt={image.title}
-                    fill
-                    className="object-contain"
+                    className="w-full h-full flex items-center justify-center cursor-zoom-in"
+                    imageClassName="max-h-full max-w-full object-contain bg-gray-50 dark:bg-zinc-800"
+                    magnifierWidth={200}
+                    magnifierHeight={200}
+                    zoomLevel={2.5}
+                    onClick={() => setIsZoomOpen(true)}
                   />
                 ) : (
-                  <div className="text-gray-300 dark:text-zinc-600">No Image Available</div>
+                  <div className="flex items-center justify-center w-full h-full text-gray-300 dark:text-zinc-600 bg-gray-50 dark:bg-zinc-900">
+                    No Image Available
+                  </div>
                 )}
               </div>
             </div>
 
             {/* Visual Tools Bar - Under the image */}
-            <div className="flex items-center justify-center gap-10 w-full mt-8 px-2 md:px-6">
+            <div className="flex items-center justify-center md:gap-10 gap-5 w-full mt-8 px-2 md:px-6">
               {/* Live AR */}
               <button
                 onClick={() => setIsAROpen(true)}
