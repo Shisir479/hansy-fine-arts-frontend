@@ -14,10 +14,12 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { printfulApi } from "./api/printfulApi";
+import { baseApi } from "./api/baseApi";
 
 const rootReducer = combineReducers({
   [finerworksApi.reducerPath]: finerworksApi.reducer,
   [printfulApi.reducerPath]: printfulApi.reducer,
+  [baseApi.reducerPath]: baseApi.reducer,
   auth: authReducer,
   cart: cartReducer,
   wishlist: wishlistReducer,
@@ -40,7 +42,7 @@ export const makeStore = () => {
         serializableCheck: {
           ignoredActions: [PERSIST, REHYDRATE, REGISTER],
         },
-      }).concat(finerworksApi.middleware, printfulApi.middleware),
+      }).concat(finerworksApi.middleware, printfulApi.middleware, baseApi.middleware),
   });
 };
 

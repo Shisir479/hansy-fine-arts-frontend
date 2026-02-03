@@ -1,9 +1,11 @@
 "use client"
 import React, { useState } from "react";
 import { TbFidgetSpinner } from "react-icons/tb";
+import { useCreateCustomPortraitMutation } from "@/lib/redux/api/customPortraitApi";
+import { toast } from "react-hot-toast";
 
 const ArtistCommissionAgreement = () => {
-  const [loading, setLoading] = useState(false);
+  const [createCustomPortrait, { isLoading }] = useCreateCustomPortraitMutation();
   const [isAccepted, setIsAccepted] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -33,10 +35,18 @@ const ArtistCommissionAgreement = () => {
       alert("You must accept the terms and conditions.");
       return;
     }
-    setLoading(true);
+    const payload = new FormData();
+    payload.append("name", formData.name);
+    payload.append("address", formData.address);
+    payload.append("phone", formData.phone);
+    payload.append("email", formData.email);
+    if (formData.image) {
+      payload.append("image", formData.image);
+    }
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      alert("Your Portrait has been submitted!");
+      await createCustomPortrait(payload).unwrap();
+      toast.success("Your Portrait commission has been submitted!");
       setFormData({
         name: "",
         address: "",
@@ -47,9 +57,7 @@ const ArtistCommissionAgreement = () => {
       setIsAccepted(false);
     } catch (error) {
       console.error("Submission Error:", error);
-      alert("Something went wrong. Try again.");
-    } finally {
-      setLoading(false);
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
@@ -413,10 +421,10 @@ const ArtistCommissionAgreement = () => {
             onChange={handleFileChange}
             accept="image/*"
             className={`w-full border md:p-3 p-2 file:mr-4 file:py-1 file:px-5 file:border file:font-serif file:text-lg ${isAccepted
-                ? "border-black dark:border-white file:border-black dark:file:border-white file:bg-black dark:file:bg-white file:text-white dark:file:text-black hover:file:bg-white dark:hover:file:bg-black hover:file:text-black dark:hover:file:text-white cursor-pointer bg-white dark:bg-zinc-900 text-black dark:text-white"
-                : "border-gray-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800 cursor-not-allowed file:border-gray-300 dark:file:border-zinc-700 file:bg-gray-300 dark:file:bg-zinc-800 file:text-gray-500"
+              ? "border-black dark:border-white file:border-black dark:file:border-white file:bg-black dark:file:bg-white file:text-white dark:file:text-black hover:file:bg-white dark:hover:file:bg-black hover:file:text-black dark:hover:file:text-white cursor-pointer bg-white dark:bg-zinc-900 text-black dark:text-white"
+              : "border-gray-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800 cursor-not-allowed file:border-gray-300 dark:file:border-zinc-700 file:bg-gray-300 dark:file:bg-zinc-800 file:text-gray-500"
               } transition-colors`}
-            disabled={!isAccepted || loading}
+            disabled={!isAccepted || isLoading}
             required
           />
         </div>
@@ -425,13 +433,13 @@ const ArtistCommissionAgreement = () => {
         <div className="">
           <button
             onClick={handleSubmit}
-            className={` w-7/12 mx-auto md:py-3 md:px-3 py-1 px-2 font-serif md:text-lg text-[14px] transition-all duration-300 shadow-xl flex items-center justify-center gap-4 border ${isAccepted && !loading
-                ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white"
-                : "bg-gray-400 text-gray-700 border-gray-400 cursor-not-allowed"
+            className={` w-7/12 mx-auto md:py-3 md:px-3 py-1 px-2 font-serif md:text-lg text-[14px] transition-all duration-300 shadow-xl flex items-center justify-center gap-4 border ${isAccepted && !isLoading
+              ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white"
+              : "bg-gray-400 text-gray-700 border-gray-400 cursor-not-allowed"
               }`}
-            disabled={!isAccepted || loading}
+            disabled={!isAccepted || isLoading}
           >
-            {loading ? (
+            {isLoading ? (
               <>
                 <TbFidgetSpinner className="animate-spin w-7 h-7" />
                 <span>SUBMITTING REQUEST...</span>
