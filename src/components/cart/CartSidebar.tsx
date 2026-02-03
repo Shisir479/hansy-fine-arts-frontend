@@ -3,12 +3,12 @@
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { X, ShoppingBag, Trash2, Minus, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
 import { removeFromCart, updateQuantity } from "@/lib/redux/slices/cartSlice";
 import { useCheckoutSidebar } from "@/hooks/use-checkout-sidebar";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
+import { CartItem } from "@/types/product";
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -20,9 +20,9 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const dispatch = useAppDispatch();
   const { openCheckout } = useCheckoutSidebar();
 
-  const totalItems = cart.reduce((t, i) => t + i.quantity, 0);
+  const totalItems = cart.reduce((t: number, i: CartItem) => t + (i.quantity || 0), 0);
   const totalPrice = cart
-    .reduce((t, i) => t + i.quantity * i.price, 0)
+    .reduce((t: number, i: CartItem) => t + (i.quantity || 0) * (i.price || 0), 0)
     .toFixed(2);
 
   const handleRemove = (id: string) => {
@@ -33,7 +33,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const handleQuantityChange = (id: string, delta: number) => {
     const item = cart.find((i) => i._id === id);
     if (!item) return;
-    const newQty = item.quantity + delta;
+    const newQty = (item.quantity || 1) + delta;
     if (newQty < 1) return;
     dispatch(updateQuantity({ id, quantity: newQty }));
   };
@@ -98,13 +98,13 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                         </div>
                       ) : (
                         <div className="space-y-6">
-                          {cart.map((item) => (
+                          {cart.map((item: CartItem) => (
                             <div
                               key={item._id}
-                              className="flex gap-6 py-3 border-b border-neutral-200 dark:border-neutral-800 last:border-0"
+                              className="flex gap-4 py-3 border-b border-neutral-200 dark:border-neutral-800 last:border-0"
                             >
-                              {/* 1. IMAGE: Rounded, clean, object-cover */}
-                              <div className="relative h-24 w-24 sm:h-28 sm:w-28 flex-shrink-0 overflow-hidden bg-neutral-100 border border-neutral-100 dark:border-neutral-800">
+                              {/* 1. IMAGE: Smaller, clean, object-cover */}
+                              <div className="relative h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 overflow-hidden bg-neutral-100 border border-neutral-100 dark:border-neutral-800">
                                 <Image
                                   src={item.image || "/placeholder.jpg"}
                                   alt={item.productTitle || item.name || "Artwork"}
@@ -118,19 +118,19 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 {/* Left Side: Title & Remove Button */}
                                 <div className="flex flex-col justify-between">
                                   <div>
-                                    <h3 className="font-bold text-lg text-neutral-900 dark:text-white leading-tight mb-2">
+                                    <h3 className="font-bold text-sm text-neutral-900 dark:text-white leading-tight mb-1">
                                       {item.productTitle || item.name}
                                     </h3>
-                                    {item.variantDetails ? (
-                                      <ul className="text-[11px] text-neutral-500 dark:text-neutral-400 space-y-0.5 leading-relaxed">
+                                    {item.variantDetails && item.variantDetails.length > 0 ? (
+                                      <ul className="text-[10px] text-neutral-500 dark:text-neutral-400 space-y-0.5 leading-relaxed">
                                         {item.variantDetails.map((detail, idx) => (
                                           <li key={idx}>
-                                            <span className="font-bold text-neutral-800 dark:text-neutral-200">{detail.label}:</span> {detail.value}
+                                            <span className="font-bold text-neutral-700 dark:text-neutral-300">{detail.label}:</span> {detail.value}
                                           </li>
                                         ))}
                                       </ul>
                                     ) : (
-                                      <p className="text-xs font-medium tracking-widest text-neutral-500 uppercase">
+                                      <p className="text-[10px] font-medium tracking-widest text-neutral-500 uppercase">
                                         {item.variant || "Original Piece"}
                                       </p>
                                     )}
@@ -142,35 +142,35 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                     className="text-neutral-400 hover:text-red-600 transition-colors p-1 -ml-1 w-fit"
                                     aria-label="Remove item"
                                   >
-                                    <Trash2 className="h-5 w-5" />
+                                    <Trash2 className="h-4 w-4" />
                                   </button>
                                 </div>
 
                                 {/* Right Side: Price & Quantity Controls */}
                                 <div className="flex flex-col justify-between items-end">
-                                  <p className="font-bold text-lg text-neutral-900 dark:text-white">
-                                    ${(item.price * item.quantity).toFixed(2)}
+                                  <p className="font-bold text-sm text-neutral-900 dark:text-white">
+                                    ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}
                                   </p>
 
                                   {/* Circular Quantity Buttons */}
-                                  <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-2">
                                     <button
                                       onClick={() => handleQuantityChange(item._id, -1)}
-                                      disabled={item.quantity <= 1}
-                                      className="flex items-center justify-center w-6 h-6 border border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 hover:border-black hover:text-black dark:hover:border-white dark:hover:text-white disabled:opacity-30 transition-all"
+                                      disabled={(item.quantity || 1) <= 1}
+                                      className="flex items-center justify-center w-5 h-5 border border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 hover:border-black hover:text-black dark:hover:border-white dark:hover:text-white disabled:opacity-30 transition-all"
                                     >
-                                      <Minus className="h-4 w-4" />
+                                      <Minus className="h-3 w-3" />
                                     </button>
 
-                                    <span className="w-4 text-center font-medium text-neutral-900 dark:text-white">
-                                      {item.quantity}
+                                    <span className="w-4 text-center font-medium text-xs text-neutral-900 dark:text-white">
+                                      {item.quantity || 1}
                                     </span>
 
                                     <button
                                       onClick={() => handleQuantityChange(item._id, +1)}
-                                      className="flex items-center justify-center w-6 h-6  border border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 hover:border-black hover:text-black dark:hover:border-white dark:hover:text-white transition-all"
+                                      className="flex items-center justify-center w-5 h-5  border border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 hover:border-black hover:text-black dark:hover:border-white dark:hover:text-white transition-all"
                                     >
-                                      <Plus className="h-4 w-4" />
+                                      <Plus className="h-3 w-3" />
                                     </button>
                                   </div>
                                 </div>

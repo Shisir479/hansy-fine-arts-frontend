@@ -117,10 +117,10 @@ export default function ContactPage() {
                   </div>
                   {/* MODIFIED: Changed text-xl to text-lg for mobile */}
                   <a
-                    href="mailto:Studio@hansyaeggy.com"
+                    href="mailto:Contact@hansyaeggy.com"
                     className="text-lg md:text-xl font-light block hover:translate-x-2 transition-transform duration-300"
                   >
-                    Studio@hansyaeggy.com
+                    Contact@hansyaeggy.com
                   </a>
                 </div>
               </div>

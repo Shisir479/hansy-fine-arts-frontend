@@ -1,26 +1,27 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
+import {
+  useGetPrintfulProductsQuery,
+  useGetPrintfulCategoriesQuery,
+  useCreatePrintfulMockupTaskMutation,
+  useGetPrintfulMockupTaskResultQuery,
+  useGetPrintfulProductQuery,
+  useGetPrintfulLayoutTemplatesQuery
+} from "@/lib/redux/api/printfulApi";
+
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { addToCart } from "@/lib/redux/slices/cartSlice";
 import { useCartSidebar } from "@/hooks/use-cart-sidebar";
 import { toast } from "react-hot-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   Loader2,
-  Maximize2,
   ImageIcon,
   Box,
   ShieldCheck,
@@ -101,8 +102,6 @@ export default function ProductDetailPage() {
     list_products: true,
   });
 
-  console.log(" product details data", data)
-
   const images: any[] = data?.images ?? [];
 
   // Find the specific image by ID (GUID)
@@ -133,19 +132,437 @@ export default function ProductDetailPage() {
 
   const [orderForm, setOrderForm] = useState<boolean>(false);
 
-  // Helper to filter products based on specific keys
+  // --- Printful Integration State ---
+  const [printfulSelections, setPrintfulSelections] = useState({
+    categoryId: "",
+    productId: "",
+    variantId: "",
+  });
+
+  const [printfulMockup, setPrintfulMockup] = useState<string | null>(null);
+  const [mockupTaskKey, setMockupTaskKey] = useState<string | null>(null);
+
+  // ⭐ NEW: Reference to track current request and abort controller
+  const currentRequestRef = useRef<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const { data: printfulCategories } = useGetPrintfulCategoriesQuery(undefined, {
+    skip: selections.type !== "Other"
+  });
+
+  const { data: printfulProducts } = useGetPrintfulProductsQuery(printfulSelections.categoryId, {
+    skip: !printfulSelections.categoryId || selections.type !== "Other"
+  });
+
+  const { data: printfulProductDetails } = useGetPrintfulProductQuery(printfulSelections.productId, {
+    skip: !printfulSelections.productId || selections.type !== "Other"
+  });
+
+  const { data: printfulTemplates } = useGetPrintfulLayoutTemplatesQuery(printfulSelections.productId, {
+    skip: !printfulSelections.productId || selections.type !== "Other"
+  });
+
+  // ⭐ DEBUG: Log Printful Data when it arrives
+  React.useEffect(() => {
+    if (selections.type === "Other") {
+      console.log("🔍 [DEBUG] Printful Selections:", printfulSelections);
+
+      if (printfulProductDetails) {
+        console.log("📦 [DEBUG] Printful Product Details Response:", printfulProductDetails);
+        const result = printfulProductDetails?.data?.result || printfulProductDetails?.result;
+        console.log("   👉 Extracted Result:", result);
+
+        if (result) {
+          const variants = result.variants || result.product?.variants || [];
+          const selectedVariant = variants.find((v: any) => v.id === parseInt(printfulSelections.variantId));
+          console.log("   🎯 Selected Variant for Price:", selectedVariant);
+          if (selectedVariant) {
+            console.log("   💲 Price found:", selectedVariant.retail_price || selectedVariant.price);
+          }
+        }
+      } else {
+        console.log("⏳ [DEBUG] Waiting for Product Details...");
+      }
+    }
+  }, [printfulProductDetails, printfulSelections, selections.type]);
+
+  const [createMockupTask, { isLoading: isMockupLoading }] = useCreatePrintfulMockupTaskMutation();
+
+  // ⭐ FIXED: Handle Printful Changes - Clear everything on any change
+  const handlePrintfulChange = useCallback((field: string, value: string) => {
+    // Cancel any ongoing polling
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    // Clear previous mockup and task immediately
+    setPrintfulMockup(null);
+    setMockupTaskKey(null);
+    currentRequestRef.current = null;
+
+    setPrintfulSelections(prev => {
+      const newSel = { ...prev, [field]: value };
+      if (field === "categoryId") {
+        return { ...newSel, productId: "", variantId: "" };
+      }
+      if (field === "productId") {
+        return { ...newSel, variantId: "" };
+      }
+      return newSel;
+    });
+  }, []);
+
+  // ⭐ FIXED: Manual polling with proper cleanup and request tracking
+  React.useEffect(() => {
+    if (!mockupTaskKey) {
+      console.log("⏸️ No task key, polling stopped");
+      return;
+    }
+
+    // Create new abort controller for this polling session
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    // Capture current values at the start of this effect
+    const capturedTaskKey = mockupTaskKey;
+    const capturedProductId = printfulSelections.productId;
+    const capturedVariantId = printfulSelections.variantId;
+    const capturedRequestId = currentRequestRef.current;
+
+    console.log("⚙️ Setting up manual polling for task:", capturedTaskKey);
+    console.log("   Product ID:", capturedProductId);
+    console.log("   Variant ID:", capturedVariantId);
+    console.log("   Request ID:", capturedRequestId);
+
+    let pollCount = 0;
+    const maxPolls = 30;
+    let isActive = true;
+
+    const checkMockupStatus = async () => {
+      // Check if polling should stop
+      if (!isActive || abortController.signal.aborted) {
+        console.log("🛑 Polling stopped - inactive or aborted");
+        return;
+      }
+
+      // ⭐ CRITICAL: Check if the request is still current
+      if (currentRequestRef.current !== capturedRequestId) {
+        console.log("🛑 Request ID changed, stopping old poll");
+        console.log("   Old:", capturedRequestId);
+        console.log("   New:", currentRequestRef.current);
+        isActive = false;
+        return;
+      }
+
+      try {
+        pollCount++;
+        console.log(`🔄 Manual poll #${pollCount}/${maxPolls} for task: ${capturedTaskKey}`);
+
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/printful/mockup-generator/task?task_key=${capturedTaskKey}`;
+
+        const response = await fetch(apiUrl, {
+          signal: abortController.signal
+        });
+
+        if (!response.ok) {
+          console.error("❌ Polling request failed:", response.status, response.statusText);
+          return;
+        }
+
+        const data = await response.json();
+        console.log("📦 Manual Poll Response:", data);
+
+        const result = data?.data?.result || data?.result;
+        const status = result?.status;
+
+        console.log("   📊 Status:", status);
+
+        if (status === "completed") {
+          const mockups = result?.mockups;
+          console.log("   ✅ COMPLETED! Mockups:", mockups);
+
+          if (mockups && mockups.length > 0) {
+            const mockupUrl = mockups[0].mockup_url;
+            console.log("🎉 MANUAL POLL SUCCESS! Mockup URL:", mockupUrl);
+
+            // ⭐ Final check before updating state
+            if (isActive && currentRequestRef.current === capturedRequestId && !abortController.signal.aborted) {
+              setPrintfulMockup(mockupUrl);
+              setMockupTaskKey(null);
+              isActive = false;
+              toast.success("Preview Generated!");
+            } else {
+              console.log("⚠️ Ignoring result - request is no longer current");
+            }
+          } else {
+            console.error("⚠️ Completed but no mockups array!");
+          }
+        } else if (status === "failed") {
+          console.error("❌ Mockup generation failed:", result);
+          if (isActive && currentRequestRef.current === capturedRequestId) {
+            setMockupTaskKey(null);
+            isActive = false;
+            toast.error("Failed to generate preview");
+          }
+        } else if (status === "pending") {
+          console.log("   ⏳ Still pending, will retry in 2s...");
+        }
+
+        if (pollCount >= maxPolls && isActive) {
+          console.log("⏱️ Max polling attempts reached");
+          isActive = false;
+          if (currentRequestRef.current === capturedRequestId) {
+            toast.error("Mockup generation timeout");
+            setMockupTaskKey(null);
+          }
+        }
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          console.log("🛑 Fetch aborted");
+          isActive = false;
+          return;
+        }
+        console.error("❌ Manual poll error:", error);
+        if (pollCount >= maxPolls) {
+          isActive = false;
+          if (currentRequestRef.current === capturedRequestId) {
+            setMockupTaskKey(null);
+          }
+        }
+      }
+    };
+
+    // Start immediately
+    console.log("🚀 Starting immediate poll...");
+    checkMockupStatus();
+
+    // Set up interval for subsequent polls
+    const intervalId = setInterval(() => {
+      if (isActive && !abortController.signal.aborted) {
+        checkMockupStatus();
+      } else {
+        clearInterval(intervalId);
+      }
+    }, 2000);
+
+    // Cleanup function
+    return () => {
+      console.log("🛑 Cleaning up manual polling for task:", capturedTaskKey);
+      isActive = false;
+      abortController.abort();
+      clearInterval(intervalId);
+    };
+  }, [mockupTaskKey]);
+
+  // ⭐ FIXED: Mockup Generation Effect with proper request tracking
+  React.useEffect(() => {
+    // 1. Initial Checks
+    if (
+      !printfulSelections.productId ||
+      !printfulSelections.variantId ||
+      !image?.public_preview_uri ||
+      selections.type !== "Other"
+    ) {
+      return;
+    }
+
+    // 2. Wait for Data
+    if (!printfulTemplates?.data?.result?.templates?.length || !printfulProductDetails?.data?.result) {
+      return;
+    }
+
+    const variantIdInt = parseInt(printfulSelections.variantId);
+    if (isNaN(variantIdInt)) return;
+
+    // ⭐ Create unique request ID
+    const requestId = `${printfulSelections.productId}-${printfulSelections.variantId}-${Date.now()}`;
+    console.log("🆔 New Request ID:", requestId);
+
+    // 3. Get Templates and Product Files to determine valid placements
+    const templates = printfulTemplates.data.result.templates;
+    const productResult = printfulProductDetails.data.result;
+    const productFiles = productResult.product?.files || productResult.files || [];
+
+    // Find template that supports this variant
+    let selectedTemplate = templates.find((t: any) =>
+      t.variant_ids && t.variant_ids.includes(variantIdInt)
+    );
+
+    // Fallback: Use first available template
+    if (!selectedTemplate) {
+      selectedTemplate = templates[0];
+    }
+
+    if (!selectedTemplate) {
+      console.error("❌ No template found for variant");
+      return;
+    }
+
+    console.log(`✅ Selected Template:`, selectedTemplate);
+    console.log(`📦 Product Files:`, productFiles);
+
+    // 4. CRITICAL: Determine the correct placement
+    let placement = selectedTemplate.placement;
+
+    console.log("🔍 Detecting Placement...");
+    console.log("   Template placement:", placement);
+    console.log("   Product files:", productFiles.map((f: any) => ({ id: f.id, type: f.type })));
+
+    if (!placement && productFiles.length > 0) {
+      const hasOnlyDefaultFiles = productFiles.every((f: any) =>
+        ['default', 'label_inside', 'mockup', 'preview'].includes(f.type)
+      );
+
+      if (hasOnlyDefaultFiles) {
+        placement = undefined;
+        console.log(`   ℹ️  Poster/Print product detected - placement will be omitted`);
+      } else {
+        const validPlacements = ['front', 'back', 'embroidery_front', 'embroidery_back',
+          'embroidery_chest_left', 'embroidery_chest_center'];
+
+        for (const validPlacement of validPlacements) {
+          const file = productFiles.find((f: any) =>
+            f.type === validPlacement || f.id === validPlacement
+          );
+          if (file) {
+            placement = file.type || file.id;
+            console.log(`   ✅ Found valid placement: "${placement}"`);
+            break;
+          }
+        }
+
+        if (!placement) {
+          const firstFile = productFiles.find((f: any) =>
+            f.type !== 'default' && f.type !== 'mockup' && f.type !== 'preview'
+          );
+          if (firstFile) {
+            placement = firstFile.type || firstFile.id;
+          } else {
+            placement = 'front';
+          }
+          console.log(`   ⚠️  Using fallback placement: "${placement}"`);
+        }
+      }
+    }
+
+    console.log(`📍 Final Placement:`, placement || "(none - will be omitted)");
+
+    // 5. Position Data
+    const positionData = {
+      area_width: selectedTemplate.print_area_width,
+      area_height: selectedTemplate.print_area_height,
+      width: selectedTemplate.print_area_width,
+      height: selectedTemplate.print_area_height,
+      top: 0,
+      left: 0,
+    };
+
+    // 6. Build Payload
+    const fileConfig: any = {
+      image_url: image.public_preview_uri,
+      position: positionData
+    };
+
+    if (placement) {
+      fileConfig.placement = placement;
+    } else {
+      fileConfig.type = 'default';
+    }
+
+    const payload = {
+      productId: printfulSelections.productId,
+      mockupData: {
+        variant_ids: [variantIdInt],
+        format: "jpg",
+        files: [fileConfig]
+      }
+    };
+
+    console.log("📤 Final Payload:", JSON.stringify(payload, null, 2));
+
+    // 7. Generate Mockup
+    const generate = async () => {
+      try {
+        // ⭐ Cancel any previous request
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
+
+        // ⭐ Clear previous state and set new request ID
+        setPrintfulMockup(null);
+        setMockupTaskKey(null);
+        currentRequestRef.current = requestId;
+
+        console.log("🚀 Sending mockup generation request...", requestId);
+        const res = await createMockupTask(payload).unwrap();
+
+        // ⭐ Check if this request is still current AFTER the await
+        if (currentRequestRef.current !== requestId) {
+          console.log("⚠️ Request is no longer current, ignoring result");
+          console.log("   Expected:", requestId);
+          console.log("   Current:", currentRequestRef.current);
+          return;
+        }
+
+        console.log("📥 Response received:", res);
+
+        const taskKey = res?.task_key || res?.result?.task_key || res?.data?.result?.task_key;
+
+        if (taskKey) {
+          console.log("✅ Task Created:", taskKey);
+          console.log("⏰ Setting task key for polling...");
+          setMockupTaskKey(taskKey);
+        } else {
+          console.error("⚠️ No task_key found in response:", res);
+        }
+      } catch (err: any) {
+        if (err?.name === 'AbortError') {
+          console.log("⏸️ Request aborted");
+          return;
+        }
+
+        // ⭐ Only show error if this request is still current
+        if (currentRequestRef.current !== requestId) {
+          console.log("⚠️ Error for old request, ignoring");
+          return;
+        }
+
+        console.error("❌ Mockup Failed:", err);
+
+        if (err?.data?.error) {
+          console.error("Error Details:", err.data.error);
+          console.log("💡 Available placements from product:", productFiles.map((f: any) => f.type || f.id));
+          toast.error(`Mockup Error: ${err.data.error.message || 'Unknown error'}`);
+        }
+      }
+    };
+
+    console.log("🎬 Calling generate function...");
+    generate();
+
+  }, [
+    printfulSelections.productId,
+    printfulSelections.variantId,
+    image,
+    createMockupTask,
+    selections.type,
+    printfulTemplates,
+    printfulProductDetails
+  ]);
+
+  // Helper to filter products
   const getFilteredProducts = (sourceProducts: Product[], criteria: Partial<typeof selections>) => {
     return sourceProducts.filter(product => {
       return Object.entries(criteria).every(([key, value]) => {
         if (!value) return true;
-        // Map state keys to label keys
         const labelKey = key === "baseMat" ? "base mat" : key;
         return product.labels.some(label => label.key === labelKey && label.value === value);
       });
     });
   };
 
-  // --- Cascading Product Pools (Fixes "Disappearing Options" bug) ---
+  // --- Cascading Product Pools ---
   const allProducts = useMemo(() => image?.products || [], [image]);
 
   const productsAfterType = useMemo(() =>
@@ -168,19 +585,20 @@ export default function ProductDetailPage() {
     selections.frame ? getFilteredProducts(productsAfterCollection, { frame: selections.frame }) : [],
     [productsAfterCollection, selections.frame]);
 
-  // Filtered by ... + Base Mat -> determines available Glazings
   const productsAfterBaseMat = useMemo(() =>
     selections.baseMat ? getFilteredProducts(productsAfterFrame, { baseMat: selections.baseMat }) : [],
     [productsAfterFrame, selections.baseMat]);
 
-  // Final specific product (filtered by everything)
   const filteredProducts = useMemo(() => {
     if (!image?.products) return [];
     return getFilteredProducts(image.products, selections);
   }, [image, selections]);
 
-  // --- Dynamic Options (Derived from Cascading Pools) ---
-  const allTypes = useMemo(() => getUniqueValues("type", allProducts), [allProducts]);
+  // --- Dynamic Options ---
+  const allTypes = useMemo(() => {
+    const types = getUniqueValues("type", allProducts);
+    return [...types, "Other"];
+  }, [allProducts]);
   const allMedia = useMemo(() => getUniqueValues("media", productsAfterType), [productsAfterType]);
   const allStyles = useMemo(() => getUniqueValues("style", productsAfterMedia), [productsAfterMedia]);
   const allCollections = useMemo(() => getUniqueValues("collection", productsAfterStyle), [productsAfterStyle]);
@@ -189,9 +607,22 @@ export default function ProductDetailPage() {
   const allGlazings = useMemo(() => getUniqueValues("glazing", productsAfterBaseMat), [productsAfterBaseMat]);
 
   const handleDropdownChange = useCallback((field: string, value: string) => {
+    // ⭐ Clear Printful mockup when changing type
+    if (field === "type") {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      setPrintfulMockup(null);
+      setMockupTaskKey(null);
+      currentRequestRef.current = null;
+    }
+
     setSelections((prev) => {
       const newSelections = { ...prev, [field]: value };
-      // Reset logic
+      if (field === "type" && value === "Other") {
+        return { ...prev, type: "Other", media: "", style: "", collection: "", frame: "", baseMat: "", glazing: "" };
+      }
       if (field === "type") return { ...newSelections, media: "", style: "", collection: "", frame: "", baseMat: "", glazing: "" };
       if (field === "media") return { ...newSelections, style: "", collection: "", frame: "", baseMat: "", glazing: "" };
       if (field === "style") return { ...newSelections, collection: "", frame: "", baseMat: "", glazing: "" };
@@ -200,48 +631,136 @@ export default function ProductDetailPage() {
       if (field === "baseMat") return { ...newSelections, glazing: "" };
       return newSelections;
     });
+
+    if (field === "type" && value !== "Other") {
+      setPrintfulSelections({ categoryId: "", productId: "", variantId: "" });
+    }
     setOrderForm(false);
   }, []);
 
+  // --- FINAL PRODUCT CALCULATION ---
   const finalProduct = useMemo(() => {
+    // 1. Check for Printful ("Other") FIRST
+    if (selections.type === "Other") {
+      if (!printfulSelections.productId || !printfulSelections.variantId) return null;
+
+      const pProduct = printfulProducts?.data?.result?.find((p: any) => p.id === parseInt(printfulSelections.productId));
+
+      let dynamicPrice = 50;
+      let variantName = "Standard";
+      // Try to get title from the specific product details first, fallback to the list find
+      let productTitle = printfulProductDetails?.data?.result?.product?.title ||
+        printfulProductDetails?.data?.result?.product?.name ||
+        pProduct?.title ||
+        "Custom Print";
+
+      const result = printfulProductDetails?.data?.result;
+
+      if (result) {
+        // Variants can be in result.variants or result.product.variants depending on endpoint
+        const variants = result.variants || result.product?.variants || [];
+
+        // Find the specific variant
+        const pVariant = variants.find((v: any) => v.id === parseInt(printfulSelections.variantId));
+
+        if (pVariant) {
+          // Construct a rich variant name if properties exist
+          // Priority: Full Name > Color + Size > Size > "Standard"
+          if (pVariant.name) {
+            variantName = pVariant.name;
+          } else if (pVariant.color && pVariant.size) {
+            variantName = `${pVariant.color} / ${pVariant.size}`;
+          } else if (pVariant.size) {
+            variantName = `Size: ${pVariant.size}`;
+          } else {
+            variantName = "Standard Option";
+          }
+
+          if (pVariant.retail_price) {
+            dynamicPrice = parseFloat(pVariant.retail_price);
+          } else if (pVariant.price) {
+            dynamicPrice = parseFloat(pVariant.price);
+          }
+        }
+      }
+
+      // Final fallback if variantName is still empty/Standard check
+      if (!variantName || variantName === "Standard") {
+        variantName = "Standard Option";
+      }
+
+      // If API failed to give a price, fallback to 50 ONLY if strictly necessary
+      if (dynamicPrice === 0) dynamicPrice = 50;
+
+      return {
+        sku: `PF-${printfulSelections.productId}-${printfulSelections.variantId}`,
+        name: productTitle,
+        description_short: "Custom Print on Demand Product",
+        labels: [
+          { key: "type", value: "Other" },
+          { key: "printful_product", value: productTitle },
+          { key: "printful_variant", value: variantName }
+        ],
+        image_url_1: printfulMockup || image?.public_preview_uri,
+        total_price: dynamicPrice,
+        per_item_price: dynamicPrice,
+        product_size: { width: 0, height: 0 }
+      } as Product;
+    }
+
+    // 2. Check for Finerworks
     if (filteredProducts.length === 0) return null;
 
-    // Only require selection if options are actually available
     if (allTypes.length > 0 && !selections.type) return null;
     if (allMedia.length > 0 && !selections.media) return null;
     if (allStyles.length > 0 && !selections.style) return null;
     if (allCollections.length > 0 && !selections.collection) return null;
 
-    // Note: Frame/Mat/Glazing are considered optional add-ons for now 
-    // to ensure base price shows up easily. 
-
     return filteredProducts[0];
-  }, [filteredProducts, selections, allTypes, allMedia, allStyles, allCollections]);
+  }, [
+    filteredProducts,
+    selections,
+    allTypes,
+    allMedia,
+    allStyles,
+    allCollections,
+    printfulSelections,
+    printfulProducts,
+    printfulProductDetails,
+    printfulMockup,
+    image
+  ]);
 
   const selectedImage = useMemo(() => {
     if (!image) return "";
-
-    // Check if configuration is complete enough to show a specific product image
-    if (finalProduct && finalProduct.image_url_1) {
-      return finalProduct.image_url_1;
-    }
-
-    // Default to main artwork until fully selected
+    if (finalProduct && finalProduct.image_url_1) return finalProduct.image_url_1;
+    if (selections.type === "Other") return printfulMockup || image.public_preview_uri;
     return image.public_preview_uri;
-  }, [finalProduct, image]);
+  }, [finalProduct, image, selections.type, printfulMockup]);
+
+  const isGeneratingMockup = isMockupLoading || (mockupTaskKey !== null && !printfulMockup);
 
   const handleAddToCart = () => {
     if (!finalProduct || !image) return;
 
-    const cartProduct = {
-      _id: finalProduct.sku,
-      productTitle: image.title,
-      name: finalProduct.name,
-      price: finalProduct.total_price,
-      category: "Art",
-      image: selectedImage,
-      sku: finalProduct.sku,
-      variantDetails: [
+    // Custom Data Logic for Printful vs Standard
+    let variantDetails = [];
+
+    if (selections.type === "Other") {
+      // PRINTFUL DATA MAPPING
+      variantDetails = [
+        {
+          label: "Product",
+          value: finalProduct.labels.find(l => l.key === "printful_product")?.value || "Custom Print"
+        },
+        {
+          label: "Variant",
+          value: finalProduct.labels.find(l => l.key === "printful_variant")?.value || "Standard"
+        }
+      ];
+    } else {
+      // STANDARD FINE ART DATA MAPPING
+      variantDetails = [
         {
           label: "Medium",
           value: finalProduct.labels.find(l => l.key === "media")?.value || selections.media || "Standard"
@@ -263,7 +782,18 @@ export default function ProductDetailPage() {
             return "Just The Print";
           })()
         }
-      ]
+      ];
+    }
+
+    const cartProduct = {
+      _id: finalProduct.sku,
+      productTitle: image.title,
+      name: finalProduct.name,
+      price: finalProduct.total_price,
+      category: "Art",
+      image: selectedImage,
+      sku: finalProduct.sku,
+      variantDetails: variantDetails
     };
 
     dispatch(addToCart(cartProduct));
@@ -291,11 +821,18 @@ export default function ProductDetailPage() {
 
           {/* --- LEFT COLUMN: Image & Tools (7/12 cols) --- */}
           <div className="lg:col-span-6 flex flex-col items-center justify-start h-full">
-            {/* Main Image Display - Mimicking a framed look */}
             <div className="relative w-full max-w-[500px] py-5 transition-colors duration-300">
               <div
                 className="relative w-full flex items-center justify-center aspect-square md:h-[500px]"
               >
+                {/* Loading Overlay */}
+                {isGeneratingMockup && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 dark:bg-black/80 backdrop-blur-sm transition-all duration-300">
+                    <Loader2 className="w-10 h-10 animate-spin text-black dark:text-white" />
+                    <p className="text-sm font-medium mt-2 text-gray-700 dark:text-gray-300">Generating Mockup...</p>
+                  </div>
+                )}
+
                 {selectedImage ? (
                   <GlassMagnifier
                     src={selectedImage}
@@ -315,35 +852,32 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Visual Tools Bar - Under the image */}
+            {/* Visual Tools Bar */}
             <div className="flex items-center justify-center md:gap-10 gap-5 w-full mt-8 px-2 md:px-6">
-              {/* Live AR */}
               <button
                 onClick={() => setIsAROpen(true)}
-                className="flex flex-col items-center gap-3 group"
+                disabled={selections.type === "Other"}
+                className={`flex flex-col items-center gap-3 group ${selections.type === "Other" ? "opacity-30 cursor-not-allowed" : ""}`}
               >
-                <div className="p-2  border border-gray-300 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 group-hover:border-black dark:group-hover:border-white group-hover:text-black dark:group-hover:text-white transition-all duration-300">
+                <div className={`p-2 border border-gray-300 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 ${selections.type !== "Other" ? "group-hover:border-black dark:group-hover:border-white group-hover:text-black dark:group-hover:text-white" : ""} transition-all duration-300`}>
                   <Smartphone size={22} strokeWidth={1.5} />
                 </div>
-                <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors duration-300 font-medium">
+                <span className={`text-xs uppercase tracking-wide text-gray-500 dark:text-zinc-400 ${selections.type !== "Other" ? "group-hover:text-black dark:group-hover:text-white" : ""} transition-colors duration-300 font-medium`}>
                   Live AR
                 </span>
               </button>
-
-              {/* Wall View */}
               <button
                 onClick={() => setIsWallViewOpen(true)}
-                className="flex flex-col items-center gap-3 group"
+                disabled={selections.type === "Other"}
+                className={`flex flex-col items-center gap-3 group ${selections.type === "Other" ? "opacity-30 cursor-not-allowed" : ""}`}
               >
-                <div className="p-2  border border-gray-300 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 group-hover:border-black dark:group-hover:border-white group-hover:text-black dark:group-hover:text-white transition-all duration-300">
+                <div className={`p-2 border border-gray-300 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 ${selections.type !== "Other" ? "group-hover:border-black dark:group-hover:border-white group-hover:text-black dark:group-hover:text-white" : ""} transition-all duration-300`}>
                   <ImageIcon size={22} strokeWidth={1.5} />
                 </div>
-                <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors duration-300 font-medium">
+                <span className={`text-xs uppercase tracking-wide text-gray-500 dark:text-zinc-400 ${selections.type !== "Other" ? "group-hover:text-black dark:group-hover:text-white" : ""} transition-colors duration-300 font-medium`}>
                   Wall View
                 </span>
               </button>
-
-              {/* Save to Favorites */}
               <button className="flex flex-col items-center gap-3 group">
                 <div className="p-2  border border-gray-300 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 group-hover:border-black dark:group-hover:border-white group-hover:text-black dark:group-hover:text-white transition-all duration-300">
                   <Heart size={22} strokeWidth={1.5} />
@@ -352,8 +886,6 @@ export default function ProductDetailPage() {
                   Favorites
                 </span>
               </button>
-
-              {/* Email a Friend */}
               <button
                 onClick={() => {
                   const subject = encodeURIComponent(`Check out this artwork: ${image?.title || "Fine Art"}`);
@@ -372,19 +904,15 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* --- RIGHT COLUMN: Details & Config (5/12 cols) --- */}
+          {/* --- RIGHT COLUMN: Details & Config --- */}
           <div className="lg:col-span-5 flex flex-col h-full">
-
-            {/* Title Section */}
             <div className="mb-4">
               <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">{image.title}</h1>
-              {/* If you had artist name it would go here, for now using description snippet or collection if available */}
               <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 leading-relaxed">
                 {image.description}
               </p>
             </div>
 
-            {/* Price & Rating Placeholder */}
             <div className="flex items-end gap-3 mb-8 border-b border-gray-100 dark:border-zinc-800 pb-6">
               {finalProduct ? (
                 <div className="flex flex-col">
@@ -398,7 +926,6 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Configuration Form */}
             {orderForm && finalProduct ? (
               <div className="bg-gray-50 dark:bg-zinc-900 p-6 rounded-lg border dark:border-zinc-800">
                 <div className="flex justify-between items-center mb-6">
@@ -414,10 +941,9 @@ export default function ProductDetailPage() {
               </div>
             ) : (
               <div className="space-y-6 flex-grow">
-                {/* Visual grouping of Selects to look like the form options */}
                 <div className="space-y-4">
 
-                  {/* Primary Selection Group */}
+                  {/* Product Type & Printful Selections */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {allTypes.length > 0 && (
                       <div className="space-y-1.5">
@@ -433,7 +959,55 @@ export default function ProductDetailPage() {
                       </div>
                     )}
 
-                    {selections.type && allMedia.length > 0 && (
+                    {selections.type === "Other" && (
+                      <>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Category</Label>
+                          <select
+                            value={printfulSelections.categoryId}
+                            onChange={(e) => handlePrintfulChange("categoryId", e.target.value)}
+                            className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                          >
+                            <option value="" disabled>Select Category</option>
+                            {printfulCategories?.data?.result?.categories?.map((c: any) => <option key={c.id} value={c.id}>{c.title}</option>)}
+                          </select>
+                        </div>
+                        {printfulSelections.categoryId && (
+                          <div className="space-y-1.5">
+                            <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Product</Label>
+                            <select
+                              value={printfulSelections.productId}
+                              onChange={(e) => handlePrintfulChange("productId", e.target.value)}
+                              className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                            >
+                              <option value="" disabled>Select Product</option>
+                              {printfulProducts?.data?.result?.map((p: any) => <option key={p.id} value={p.id}>{p.title}</option>)}
+                            </select>
+                          </div>
+                        )}
+                        {printfulSelections.productId && (
+                          <div className="space-y-1.5">
+                            <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Variant/Size</Label>
+                            <select
+                              value={printfulSelections.variantId}
+                              onChange={(e) => handlePrintfulChange("variantId", e.target.value)}
+                              className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                            >
+                              <option value="" disabled>Select Variant</option>
+                              {printfulProductDetails?.data?.result?.product?.variants?.map((v: any) => (
+                                <option key={v.id} value={v.id}>{v.name || v.size || `Variant ${v.id}`}</option>
+                              )) || (
+                                  printfulProductDetails?.data?.result?.variants?.map((v: any) => (
+                                    <option key={v.id} value={v.id}>{v.name || v.size || `Variant ${v.id}`}</option>
+                                  ))
+                                )}
+                            </select>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {selections.type !== "Other" && selections.type && allMedia.length > 0 && (
                       <div className="space-y-1.5">
                         <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Media / Material</Label>
                         <select
@@ -448,8 +1022,8 @@ export default function ProductDetailPage() {
                     )}
                   </div>
 
-                  {/* Secondary Selections (Style, Collection) */}
-                  {(allStyles.length > 0 || allCollections.length > 0) && (
+                  {/* Secondary Selections for Finerworks */}
+                  {selections.type !== "Other" && (allStyles.length > 0 || allCollections.length > 0) && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {selections.media && allStyles.length > 0 && (
                         <div className="space-y-1.5">
@@ -482,62 +1056,62 @@ export default function ProductDetailPage() {
 
                   <Separator />
 
-                  {/* Framing Options */}
-                  <div className="space-y-4">
-                    {allFrames.length > 0 && (
-                      <div className="space-y-1.5">
-                        <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Frame</Label>
-                        <select
-                          value={selections.frame}
-                          onChange={(e) => handleDropdownChange("frame", e.target.value)}
-                          className="w-full h-12 px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
-                        >
-                          <option value="" disabled>Choose Frame</option>
-                          {allFrames.map(o => <option key={o} value={o}>{o}</option>)}
-                        </select>
-                      </div>
-                    )}
+                  {/* Framing Options for Finerworks */}
+                  {selections.type !== "Other" && (
+                    <div className="space-y-4">
+                      {allFrames.length > 0 && (
+                        <div className="space-y-1.5">
+                          <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Frame</Label>
+                          <select
+                            value={selections.frame}
+                            onChange={(e) => handleDropdownChange("frame", e.target.value)}
+                            className="w-full h-12 px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                          >
+                            <option value="" disabled>Choose Frame</option>
+                            {allFrames.map(o => <option key={o} value={o}>{o}</option>)}
+                          </select>
+                        </div>
+                      )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {allBaseMats.length > 0 && (
-                        <div className="space-y-1.5">
-                          <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Matting</Label>
-                          <select
-                            value={selections.baseMat}
-                            onChange={(e) => handleDropdownChange("baseMat", e.target.value)}
-                            className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
-                          >
-                            <option value="" disabled>None</option>
-                            {allBaseMats.map(o => <option key={o} value={o}>{o}</option>)}
-                          </select>
-                        </div>
-                      )}
-                      {allGlazings.length > 0 && (
-                        <div className="space-y-1.5">
-                          <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Glazing</Label>
-                          <select
-                            value={selections.glazing}
-                            onChange={(e) => handleDropdownChange("glazing", e.target.value)}
-                            className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
-                          >
-                            <option value="" disabled>None</option>
-                            {allGlazings.map(o => <option key={o} value={o}>{o}</option>)}
-                          </select>
-                        </div>
-                      )}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {allBaseMats.length > 0 && (
+                          <div className="space-y-1.5">
+                            <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Matting</Label>
+                            <select
+                              value={selections.baseMat}
+                              onChange={(e) => handleDropdownChange("baseMat", e.target.value)}
+                              className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                            >
+                              <option value="" disabled>None</option>
+                              {allBaseMats.map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
+                          </div>
+                        )}
+                        {allGlazings.length > 0 && (
+                          <div className="space-y-1.5">
+                            <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Glazing</Label>
+                            <select
+                              value={selections.glazing}
+                              onChange={(e) => handleDropdownChange("glazing", e.target.value)}
+                              className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                            >
+                              <option value="" disabled>None</option>
+                              {allGlazings.map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
-                {/* Final Details & Button */}
                 <div className="pt-6 mt-4">
                   <button
-
-                    className="w-full md:h-14 h-12 md:text-lg font-bold uppercase tracking-wide bg-black dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 text-white transition-all"
+                    className="w-full md:h-14 h-12 md:text-lg font-bold uppercase tracking-wide bg-black dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!finalProduct}
                     onClick={handleAddToCart}
                   >
-                    {finalProduct ? `Add to Cart - $${finalProduct.total_price.toFixed(0)}` : "Select Options"}
+                    {finalProduct ? `Add to Cart - $${finalProduct.total_price.toFixed(2)}` : "Select Options"}
                   </button>
 
                   {!finalProduct && (
@@ -547,7 +1121,6 @@ export default function ProductDetailPage() {
                   )}
                 </div>
 
-                {/* Trust Badges (Mimicking the icons at bottom of reference) */}
                 <div className="grid grid-cols-3 gap-2 mt-8 py-6 border-t border-gray-100 dark:border-zinc-800 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <Box className="w-6 h-6 text-gray-400 dark:text-gray-600" />
