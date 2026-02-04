@@ -7,11 +7,29 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, ChevronDown, X } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { logoutUser } from "@/lib/redux/slices/authSlice";
+import { useLogoutUserMutation } from "@/lib/redux/api/authApi";
 
 export default function MobileMenu() {
   const pathname = usePathname();
   const [isShopArtOpen, setIsShopArtOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+  const [logoutApi] = useLogoutUserMutation();
+
+  const handleLogout = async () => {
+    try {
+      if (user?._id) await logoutApi(user._id).unwrap();
+    } catch (e) {
+      console.error("Logout failed", e);
+    } finally {
+      dispatch(logoutUser());
+      window.location.href = "/";
+    }
+  };
 
   const isActive = (href: string) => pathname === href;
 
@@ -104,9 +122,8 @@ export default function MobileMenu() {
               >
                 <span>PAINTINGS</span>
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform ${
-                    isShopArtOpen ? "rotate-180" : ""
-                  }`}
+                  className={`h-4 w-4 transition-transform ${isShopArtOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -147,6 +164,47 @@ export default function MobileMenu() {
                   {item.label}
                 </Link>
               ))}
+
+            {/* AUTH LINKS */}
+            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+              {user ? (
+                <>
+                  <Link
+                    href="/checkout/success"
+                    onClick={handleLinkClick}
+                    className="block py-3 px-2 text-gray-700 dark:text-gray-300 font-medium"
+                  >
+                    MY ACCOUNT
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLinkClick();
+                      handleLogout();
+                    }}
+                    className="block w-full text-left py-3 px-2 text-red-500 font-medium"
+                  >
+                    LOGOUT
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={handleLinkClick}
+                    className="block py-3 px-2 text-gray-700 dark:text-gray-300 font-medium"
+                  >
+                    LOGIN
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={handleLinkClick}
+                    className="block py-3 px-2 text-gray-700 dark:text-gray-300 font-medium"
+                  >
+                    REGISTER
+                  </Link>
+                </>
+              )}
+            </div>
           </nav>
 
           {/* Footer */}

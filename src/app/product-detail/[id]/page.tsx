@@ -291,7 +291,6 @@ export default function ProductDetailPage() {
               setPrintfulMockup(mockupUrl);
               setMockupTaskKey(null);
               isActive = false;
-              toast.success("Preview Generated!");
             } else {
               console.log("⚠️ Ignoring result - request is no longer current");
             }
@@ -357,190 +356,194 @@ export default function ProductDetailPage() {
 
   // ⭐ FIXED: Mockup Generation Effect with proper request tracking
   React.useEffect(() => {
-    // 1. Initial Checks
-    if (
-      !printfulSelections.productId ||
-      !printfulSelections.variantId ||
-      !image?.public_preview_uri ||
-      selections.type !== "Other"
-    ) {
-      return;
-    }
+    const debounceTimer = setTimeout(() => {
+      // 1. Initial Checks
+      if (
+        !printfulSelections.productId ||
+        !printfulSelections.variantId ||
+        !image?.public_preview_uri ||
+        selections.type !== "Other"
+      ) {
+        return;
+      }
 
-    // 2. Wait for Data
-    if (!printfulTemplates?.data?.result?.templates?.length || !printfulProductDetails?.data?.result) {
-      return;
-    }
+      // 2. Wait for Data
+      if (!printfulTemplates?.data?.result?.templates?.length || !printfulProductDetails?.data?.result) {
+        return;
+      }
 
-    const variantIdInt = parseInt(printfulSelections.variantId);
-    if (isNaN(variantIdInt)) return;
+      const variantIdInt = parseInt(printfulSelections.variantId);
+      if (isNaN(variantIdInt)) return;
 
-    // ⭐ Create unique request ID
-    const requestId = `${printfulSelections.productId}-${printfulSelections.variantId}-${Date.now()}`;
-    console.log("🆔 New Request ID:", requestId);
+      // ⭐ Create unique request ID
+      const requestId = `${printfulSelections.productId}-${printfulSelections.variantId}-${Date.now()}`;
+      console.log("🆔 New Request ID:", requestId);
 
-    // 3. Get Templates and Product Files to determine valid placements
-    const templates = printfulTemplates.data.result.templates;
-    const productResult = printfulProductDetails.data.result;
-    const productFiles = productResult.product?.files || productResult.files || [];
+      // 3. Get Templates and Product Files to determine valid placements
+      const templates = printfulTemplates.data.result.templates;
+      const productResult = printfulProductDetails.data.result;
+      const productFiles = productResult.product?.files || productResult.files || [];
 
-    // Find template that supports this variant
-    let selectedTemplate = templates.find((t: any) =>
-      t.variant_ids && t.variant_ids.includes(variantIdInt)
-    );
-
-    // Fallback: Use first available template
-    if (!selectedTemplate) {
-      selectedTemplate = templates[0];
-    }
-
-    if (!selectedTemplate) {
-      console.error("❌ No template found for variant");
-      return;
-    }
-
-    console.log(`✅ Selected Template:`, selectedTemplate);
-    console.log(`📦 Product Files:`, productFiles);
-
-    // 4. CRITICAL: Determine the correct placement
-    let placement = selectedTemplate.placement;
-
-    console.log("🔍 Detecting Placement...");
-    console.log("   Template placement:", placement);
-    console.log("   Product files:", productFiles.map((f: any) => ({ id: f.id, type: f.type })));
-
-    if (!placement && productFiles.length > 0) {
-      const hasOnlyDefaultFiles = productFiles.every((f: any) =>
-        ['default', 'label_inside', 'mockup', 'preview'].includes(f.type)
+      // Find template that supports this variant
+      let selectedTemplate = templates.find((t: any) =>
+        t.variant_ids && t.variant_ids.includes(variantIdInt)
       );
 
-      if (hasOnlyDefaultFiles) {
-        placement = undefined;
-        console.log(`   ℹ️  Poster/Print product detected - placement will be omitted`);
-      } else {
-        const validPlacements = ['front', 'back', 'embroidery_front', 'embroidery_back',
-          'embroidery_chest_left', 'embroidery_chest_center'];
-
-        for (const validPlacement of validPlacements) {
-          const file = productFiles.find((f: any) =>
-            f.type === validPlacement || f.id === validPlacement
-          );
-          if (file) {
-            placement = file.type || file.id;
-            console.log(`   ✅ Found valid placement: "${placement}"`);
-            break;
-          }
-        }
-
-        if (!placement) {
-          const firstFile = productFiles.find((f: any) =>
-            f.type !== 'default' && f.type !== 'mockup' && f.type !== 'preview'
-          );
-          if (firstFile) {
-            placement = firstFile.type || firstFile.id;
-          } else {
-            placement = 'front';
-          }
-          console.log(`   ⚠️  Using fallback placement: "${placement}"`);
-        }
+      // Fallback: Use first available template
+      if (!selectedTemplate) {
+        selectedTemplate = templates[0];
       }
-    }
 
-    console.log(`📍 Final Placement:`, placement || "(none - will be omitted)");
-
-    // 5. Position Data
-    const positionData = {
-      area_width: selectedTemplate.print_area_width,
-      area_height: selectedTemplate.print_area_height,
-      width: selectedTemplate.print_area_width,
-      height: selectedTemplate.print_area_height,
-      top: 0,
-      left: 0,
-    };
-
-    // 6. Build Payload
-    const fileConfig: any = {
-      image_url: image.public_preview_uri,
-      position: positionData
-    };
-
-    if (placement) {
-      fileConfig.placement = placement;
-    } else {
-      fileConfig.type = 'default';
-    }
-
-    const payload = {
-      productId: printfulSelections.productId,
-      mockupData: {
-        variant_ids: [variantIdInt],
-        format: "jpg",
-        files: [fileConfig]
+      if (!selectedTemplate) {
+        console.error("❌ No template found for variant");
+        return;
       }
-    };
 
-    console.log("📤 Final Payload:", JSON.stringify(payload, null, 2));
+      console.log(`✅ Selected Template:`, selectedTemplate);
+      console.log(`📦 Product Files:`, productFiles);
 
-    // 7. Generate Mockup
-    const generate = async () => {
-      try {
-        // ⭐ Cancel any previous request
-        if (abortControllerRef.current) {
-          abortControllerRef.current.abort();
-        }
+      // 4. CRITICAL: Determine the correct placement
+      let placement = selectedTemplate.placement;
 
-        // ⭐ Clear previous state and set new request ID
-        setPrintfulMockup(null);
-        setMockupTaskKey(null);
-        currentRequestRef.current = requestId;
+      console.log("🔍 Detecting Placement...");
+      console.log("   Template placement:", placement);
+      console.log("   Product files:", productFiles.map((f: any) => ({ id: f.id, type: f.type })));
 
-        console.log("🚀 Sending mockup generation request...", requestId);
-        const res = await createMockupTask(payload).unwrap();
+      if (!placement && productFiles.length > 0) {
+        const hasOnlyDefaultFiles = productFiles.every((f: any) =>
+          ['default', 'label_inside', 'mockup', 'preview'].includes(f.type)
+        );
 
-        // ⭐ Check if this request is still current AFTER the await
-        if (currentRequestRef.current !== requestId) {
-          console.log("⚠️ Request is no longer current, ignoring result");
-          console.log("   Expected:", requestId);
-          console.log("   Current:", currentRequestRef.current);
-          return;
-        }
-
-        console.log("📥 Response received:", res);
-
-        const taskKey = res?.task_key || res?.result?.task_key || res?.data?.result?.task_key;
-
-        if (taskKey) {
-          console.log("✅ Task Created:", taskKey);
-          console.log("⏰ Setting task key for polling...");
-          setMockupTaskKey(taskKey);
+        if (hasOnlyDefaultFiles) {
+          placement = undefined;
+          console.log(`   ℹ️  Poster/Print product detected - placement will be omitted`);
         } else {
-          console.error("⚠️ No task_key found in response:", res);
-        }
-      } catch (err: any) {
-        if (err?.name === 'AbortError') {
-          console.log("⏸️ Request aborted");
-          return;
-        }
+          const validPlacements = ['front', 'back', 'embroidery_front', 'embroidery_back',
+            'embroidery_chest_left', 'embroidery_chest_center'];
 
-        // ⭐ Only show error if this request is still current
-        if (currentRequestRef.current !== requestId) {
-          console.log("⚠️ Error for old request, ignoring");
-          return;
-        }
+          for (const validPlacement of validPlacements) {
+            const file = productFiles.find((f: any) =>
+              f.type === validPlacement || f.id === validPlacement
+            );
+            if (file) {
+              placement = file.type || file.id;
+              console.log(`   ✅ Found valid placement: "${placement}"`);
+              break;
+            }
+          }
 
-        console.error("❌ Mockup Failed:", err);
-
-        if (err?.data?.error) {
-          console.error("Error Details:", err.data.error);
-          console.log("💡 Available placements from product:", productFiles.map((f: any) => f.type || f.id));
-          toast.error(`Mockup Error: ${err.data.error.message || 'Unknown error'}`);
+          if (!placement) {
+            const firstFile = productFiles.find((f: any) =>
+              f.type !== 'default' && f.type !== 'mockup' && f.type !== 'preview'
+            );
+            if (firstFile) {
+              placement = firstFile.type || firstFile.id;
+            } else {
+              placement = 'front';
+            }
+            console.log(`   ⚠️  Using fallback placement: "${placement}"`);
+          }
         }
       }
-    };
 
-    console.log("🎬 Calling generate function...");
-    generate();
+      console.log(`📍 Final Placement:`, placement || "(none - will be omitted)");
 
+      // 5. Position Data
+      const positionData = {
+        area_width: selectedTemplate.print_area_width,
+        area_height: selectedTemplate.print_area_height,
+        width: selectedTemplate.print_area_width,
+        height: selectedTemplate.print_area_height,
+        top: 0,
+        left: 0,
+      };
+
+      // 6. Build Payload
+      const fileConfig: any = {
+        image_url: image.public_preview_uri,
+        position: positionData
+      };
+
+      if (placement) {
+        fileConfig.placement = placement;
+      } else {
+        fileConfig.type = 'default';
+      }
+
+      const payload = {
+        productId: printfulSelections.productId,
+        mockupData: {
+          variant_ids: [variantIdInt],
+          format: "jpg",
+          files: [fileConfig]
+        }
+      };
+
+      console.log("📤 Final Payload:", JSON.stringify(payload, null, 2));
+
+      // 7. Generate Mockup
+      const generate = async () => {
+        try {
+          // ⭐ Cancel any previous request
+          if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+          }
+
+          // ⭐ Clear previous state and set new request ID
+          setPrintfulMockup(null);
+          setMockupTaskKey(null);
+          currentRequestRef.current = requestId;
+
+          console.log("🚀 Sending mockup generation request...", requestId);
+          const res = await createMockupTask(payload).unwrap();
+
+          // ⭐ Check if this request is still current AFTER the await
+          if (currentRequestRef.current !== requestId) {
+            console.log("⚠️ Request is no longer current, ignoring result");
+            console.log("   Expected:", requestId);
+            console.log("   Current:", currentRequestRef.current);
+            return;
+          }
+
+          console.log("📥 Response received:", res);
+
+          const taskKey = res?.task_key || res?.result?.task_key || res?.data?.result?.task_key;
+
+          if (taskKey) {
+            console.log("✅ Task Created:", taskKey);
+            console.log("⏰ Setting task key for polling...");
+            setMockupTaskKey(taskKey);
+          } else {
+            console.error("⚠️ No task_key found in response:", res);
+          }
+        } catch (err: any) {
+          if (err?.name === 'AbortError') {
+            console.log("⏸️ Request aborted");
+            return;
+          }
+
+          // ⭐ Only show error if this request is still current
+          if (currentRequestRef.current !== requestId) {
+            console.log("⚠️ Error for old request, ignoring");
+            return;
+          }
+
+          console.error("❌ Mockup Failed:", err);
+
+          if (err?.data?.error) {
+            console.error("Error Details:", err.data.error);
+            console.log("💡 Available placements from product:", productFiles.map((f: any) => f.type || f.id));
+            toast.error(`Mockup Error: ${err.data.error.message || 'Unknown error'}`);
+          }
+        }
+      };
+
+      console.log("🎬 Calling generate function...");
+      generate();
+
+    }, 1000); // 1 Second Debounce
+
+    return () => clearTimeout(debounceTimer);
   }, [
     printfulSelections.productId,
     printfulSelections.variantId,
@@ -691,6 +694,7 @@ export default function ProductDetailPage() {
 
       // If API failed to give a price, fallback to 50 ONLY if strictly necessary
       if (dynamicPrice === 0) dynamicPrice = 50;
+      console.log("dynamicPrice", dynamicPrice);
 
       return {
         sku: `PF-${printfulSelections.productId}-${printfulSelections.variantId}`,

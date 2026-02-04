@@ -1,35 +1,8 @@
-// components/FileImageFormFineWork.tsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { useListFinerworksImagesQuery } from "@/lib/redux/api/finerworksApi";
 import { useRouter } from "next/navigation";
-
-// Define a separate Skeleton component
-const FileImageSkeleton = ({ index }: { index: number }) => {
-  // Define responsive height pairs (mobile md:desktop)
-  const heights = [
-    "h-48 md:h-64",
-    "h-56 md:h-80",
-    "h-60 md:h-96",
-    "h-48 md:h-72",
-  ];
-  const heightClass = heights[index % heights.length];
-
-  return (
-    <div
-      className={`bg-gray-200 dark:bg-gray-800 animate-pulse ${heightClass} w-full overflow-hidden shadow-lg transition-shadow duration-500 relative break-inside-avoid mb-6`}
-      style={{ animationDelay: `${index * 0.1}s` }}
-    >
-      <div className="absolute inset-0 p-5 flex flex-col justify-end">
-        <div className="h-6 w-3/4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
-        <div className="h-3 w-full bg-gray-300 dark:bg-gray-700 rounded mb-1"></div>
-        <div className="h-3 w-1/2 bg-gray-300 dark:bg-gray-700 rounded"></div>
-        <div className="h-8 w-1/3 bg-gray-300 dark:bg-gray-700 mt-4"></div>
-      </div>
-    </div>
-  );
-};
+import { ArrowUpRight } from "lucide-react";
 
 interface ImageType {
   guid: string;
@@ -39,20 +12,10 @@ interface ImageType {
   products?: any[];
 }
 
-const SKELETON_ITEMS_COUNT = 9;
-
 export default function FileImageFormFineWork() {
   const router = useRouter();
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
-  // responsive flags
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [columnCount, setColumnCount] = useState<number>(3);
-
-  const cursorRef = useRef<HTMLDivElement | null>(null);
-  const [showCursor, setShowCursor] = useState(false);
-
-  // 🔹 Same library config as other components
+  // Library config
   const library = {
     name: "inventory",
     session_id: "123456789",
@@ -60,289 +23,96 @@ export default function FileImageFormFineWork() {
     site_id: 2,
   };
 
-  // ইচ্ছা করলে পরে pagination যোগ করা যাবে
-  const [page] = useState(1);
-
-  const { data, isLoading, isError, error } = useListFinerworksImagesQuery({
+  const { data, isLoading, isError } = useListFinerworksImagesQuery({
     library,
-    page,
+    page: 1,
     list_products: true,
   });
-  console.log(data)
-  const images: ImageType[] = (data?.images as ImageType[]) ?? [];
 
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 640;
-      setIsMobile(mobile);
-      if (window.innerWidth < 640) setColumnCount(1);
-      else if (window.innerWidth < 1024) setColumnCount(2);
-      else setColumnCount(3);
-    };
-
-    // Initial check
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // custom cursor movement (only for non-mobile)
-  useEffect(() => {
-    if (isMobile) return;
-    const handleMouseMove = (e: MouseEvent) => {
-      if (cursorRef.current) {
-        cursorRef.current.style.left = `${e.clientX}px`;
-        cursorRef.current.style.top = `${e.clientY}px`;
-      }
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [isMobile]);
-
-  const distributeToColumns = (items: (ImageType | { guid: string })[]) => {
-    const columns: (ImageType | { guid: string })[][] = Array.from(
-      { length: columnCount },
-      () => []
-    );
-    items.forEach((item, idx) => {
-      columns[idx % columnCount].push(item);
-    });
-    return columns;
-  };
-
-  // skeleton items
-  const skeletonItems = Array.from(
-    { length: SKELETON_ITEMS_COUNT },
-    (_, i) => ({
-      guid: `skeleton-${i}`,
-    })
-  );
-
-  const displayItems = images;
-  const columns = distributeToColumns(displayItems);
-
-  if (isError) {
-    console.error("FinerWorks images load error:", error);
-    return (
-      <div className="text-center py-8 text-red-500">
-        Failed to load images.
-      </div>
-    );
-  }
+  const latestworks = ((data?.images as ImageType[]) || []).slice(0, 3);
 
   const handleNavigate = (guid: string) => {
     router.push(`/product-detail/${guid}`);
   };
 
-  return (
-    <div
-      className="py-8"
-      onMouseEnter={() => !isMobile && setShowCursor(true)}
-      onMouseLeave={() => !isMobile && setShowCursor(false)}
-    >
-      <div className="md:container mx-auto px-4">
-        {/* Custom cursor: only render on non-mobile */}
-        {!isMobile && (
-          <div
-            ref={cursorRef}
-            className={`fixed pointer-events-none z-50 w-12 h-12 border border-gray-800 transition-opacity duration-300 ${showCursor && !hoveredCard ? "opacity-100" : "opacity-0"
-              }`}
-            style={{
-              transform: "translate(-50%, -50%)",
-              willChange: "transform",
-            }}
-          >
-            <div className="w-1 h-1 bg-gray-800 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-          </div>
-        )}
-
-        {/* Masonry Grid */}
-        {isLoading ? (
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-6">
-            {skeletonItems.map((item, idx) => (
-              <FileImageSkeleton key={item.guid} index={idx} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex gap-6">
-            {columns.map((column, colIdx) => (
-              <div key={colIdx} className="flex-1 flex flex-col gap-6">
-                {column.map((item, idx) => {
-                  // Actual image card
-                  const image = item as ImageType;
-                  const desktopHeights = ["h-64", "h-80", "h-96", "h-72"];
-                  const mobileHeights = ["h-48", "h-56", "h-60"];
-                  const randomHeight = isMobile
-                    ? mobileHeights[(colIdx + idx) % mobileHeights.length]
-                    : desktopHeights[(colIdx + idx) % desktopHeights.length];
-
-                  const isHovered = hoveredCard === image.guid;
-
-                  return (
-                    <div
-                      key={image.guid}
-                      className="relative group"
-                      onMouseEnter={() =>
-                        !isMobile && setHoveredCard(image.guid)
-                      }
-                      onMouseLeave={() => !isMobile && setHoveredCard(null)}
-                      style={{
-                        animation: `fadeInUp 0.6s ease-out ${idx * 0.1}s both`,
-                      }}
-                    >
-                      {/* Outer frame - sharp edges (hide on mobile) */}
-                      <div
-                        className={`absolute -inset-1 border transition-all duration-500 hidden md:block ${isHovered
-                          ? "border-gray-800 opacity-100 scale-105"
-                          : "border-gray-400 opacity-0 scale-100"
-                          }`}
-                      />
-
-                      {/* Card - no border radius */}
-                      <div
-                        className={`relative ${randomHeight} overflow-hidden cursor-pointer transform transition-all duration-500 ${isHovered
-                          ? "md:scale-[1.02] md:shadow-2xl"
-                          : "shadow-lg"
-                          }`}
-                        onClick={() => handleNavigate(image.guid)}
-                      >
-                        {/* Image with zoom effect */}
-                        <img
-                          src={image.public_preview_uri}
-                          alt={image.title}
-                          className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "md:scale-110" : ""
-                            }`}
-                        />
-
-                        {/* Simple dark overlay */}
-                        <div
-                          className="absolute inset-0 transition-opacity duration-700 bg-black"
-                          style={{
-                            opacity: isHovered ? 0.5 : isMobile ? 0.15 : 0.2,
-                          }}
-                        />
-
-                        {/* Glass overlay */}
-                        <div
-                          className="absolute inset-0 transition-all duration-700"
-                          style={{
-                            backdropFilter: isHovered ? "blur(1px)" : "blur(0px)",
-                            opacity: isHovered ? 1 : 0,
-                          }}
-                        />
-
-                        {/* Content */}
-                        <div className="absolute inset-0 pt-5 pb-3 px-5 flex flex-col justify-end z-10">
-                          {/* Title */}
-                          <h2
-                            className={`text-white italic ${isMobile
-                              ? "text-lg font-semibold"
-                              : "text-2xl font-bold mb-2"
-                              } transition-all duration-500 uppercase tracking-wider`}
-                            style={{
-                              opacity: isMobile ? 1 : isHovered ? 1 : 0,
-                              transform:
-                                isMobile || isHovered
-                                  ? "translateY(0) scale(1)"
-                                  : "translateY(30px) scale(0.9)",
-                              textShadow:
-                                "2px 2px 12px rgba(0,0,0,0.9)",
-                            }}
-                          >
-                            {image.title}
-                          </h2>
-
-                          {/* Description */}
-                          <p
-                            className={`text-white italic ${isMobile
-                              ? "text-xs leading-relaxed"
-                              : "text-sm leading-relaxed"
-                              } transition-all duration-500`}
-                            style={{
-                              opacity: isMobile ? 1 : isHovered ? 0.95 : 0,
-                              transform:
-                                isMobile || isHovered
-                                  ? "translateY(0)"
-                                  : "translateY(30px)",
-                              transitionDelay: "150ms",
-                              textShadow:
-                                "1px 1px 8px rgba(0,0,0,0.9)",
-                            }}
-                          >
-                            {image.description}
-                          </p>
-
-                          {/* View button */}
-                          <div
-                            className="mt-4 transition-all duration-500"
-                            style={{
-                              opacity: isMobile ? 1 : isHovered ? 1 : 0,
-                              transform:
-                                isMobile || isHovered
-                                  ? "translateY(0)"
-                                  : "translateY(30px)",
-                              transitionDelay: "250ms",
-                            }}
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleNavigate(image.guid);
-                              }}
-                              className="inline-flex items-center gap-2 md:px-4 md:py-2 px-3 py-[4px] bg-white text-black text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition-all"
-                            >
-                              <span>View Details</span>
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 5l7 7-7 7"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        )}
+  if (isLoading) {
+    return (
+      <div className="py-32 flex justify-center bg-white dark:bg-black">
+        <div className="animate-spin w-8 h-8 border-t-2 border-black dark:border-white rounded-full"></div>
       </div>
+    )
+  }
 
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes pulse {
-          0%,
-          100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-        .animate-pulse {
-          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-      `}</style>
-    </div>
+  if (isError || latestworks.length === 0) return null;
+
+  return (
+    <section
+      className="py-24 md:py-32 bg-[#FDFBF7] dark:bg-zinc-950 transition-colors duration-500 overflow-hidden"
+    >
+      <div className="container mx-auto px-4 md:px-8">
+
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 md:mb-20 gap-6 border-b border-zinc-200 dark:border-zinc-800 pb-6">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.4em] text-zinc-400 uppercase mb-4 ml-1">Curated Selection</p>
+            <h2 className="text-4xl md:text-6xl font-serif font-thin text-zinc-900 dark:text-zinc-50">
+              Latest <span className="italic font-normal">Arrivals</span>
+            </h2>
+          </div>
+
+          <button className="hidden md:flex items-center gap-3 group text-xs font-bold tracking-widest uppercase pb-2 hover:opacity-70 transition-opacity">
+            View Gallery
+            <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+          </button>
+        </div>
+
+        {/* Clean 3-Column Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+
+          {latestworks.map((work, index) => (
+            <div
+              key={work.guid}
+              className={`group cursor-pointer flex flex-col gap-6 ${index === 1 ? 'md:translate-y-12' : ''}`} // Subtle stagger for middle item
+              onClick={() => handleNavigate(work.guid)}
+            >
+              {/* Image Canvas */}
+              <div className="relative w-full aspect-[4/5] bg-white dark:bg-zinc-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-6 md:p-8 flex items-center justify-center transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-2">
+                <img
+                  src={work.public_preview_uri}
+                  alt={work.title}
+                  className="max-h-full max-w-full object-contain drop-shadow-md"
+                />
+
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-white/0 dark:bg-black/0 group-hover:bg-white/10 dark:group-hover:bg-black/10 transition-colors duration-300" />
+              </div>
+
+              {/* Info */}
+              <div className="text-center md:text-left space-y-2 px-2">
+                <div className="flex justify-between items-baseline border-t border-zinc-200 dark:border-zinc-800 pt-4">
+                  <h3 className="font-serif text-2xl text-zinc-900 dark:text-white group-hover:italic transition-all duration-300">
+                    {work.title || "Untitled"}
+                  </h3>
+                  <span className="text-[10px] font-mono text-zinc-400">0{index + 1}</span>
+                </div>
+                <p className="text-xs tracking-wide text-zinc-500 line-clamp-2 leading-relaxed">
+                  {work.description || "Fine Art Print Collection"}
+                </p>
+              </div>
+            </div>
+          ))}
+
+        </div>
+
+        {/* Mobile View More */}
+        <div className="md:hidden mt-12 text-center">
+          <button className="inline-flex items-center gap-2 text-xs uppercase tracking-widest border-b border-zinc-900 dark:border-white pb-1">
+            View Full Gallery
+            <ArrowUpRight className="w-4 h-4" />
+          </button>
+        </div>
+
+      </div>
+    </section>
   );
 }

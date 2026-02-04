@@ -7,6 +7,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { toggleTheme } from "@/lib/redux/slices/themeSlice";
+import { logoutUser } from "@/lib/redux/slices/authSlice";
+import { useLogoutUserMutation } from "@/lib/redux/api/authApi";
 
 import { Moon, Sun, Heart, User } from "lucide-react";
 
@@ -37,7 +39,20 @@ const iconColor = "text-gray-600 dark:text-gray-300";
 const NavbarClient = () => {
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state) => state.theme.mode);
+  const user = useAppSelector((state) => state.auth.user);
   const currentPath = usePathname();
+  const [logoutApi] = useLogoutUserMutation();
+
+  const handleLogout = async () => {
+    try {
+      if (user?._id) await logoutApi(user._id).unwrap();
+    } catch (e) {
+      console.error("Logout failed", e);
+    } finally {
+      dispatch(logoutUser());
+      window.location.href = "/";
+    }
+  };
 
   // Helper: Check if path is active
   const isActive = (href: string) => {
@@ -90,10 +105,6 @@ const NavbarClient = () => {
           <NavigationMenuList className="space-x-8">
 
             <NavigationMenuItem>
-              {/* 3. Dynamic Class Logic:
-                  If isShopArtActive is true, we force the bold/underline styles 
-                  even if the menu is closed.
-              */}
               <NavigationMenuTrigger
                 className={`text-base font-normal italic bg-transparent data-[state=open]:bg-transparent hover:bg-transparent focus:bg-transparent
                   ${isShopArtActive
@@ -189,18 +200,44 @@ const NavbarClient = () => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className={`w-48 border ${borderColor} rounded-none`}
+              className={`w-48 border ${borderColor} rounded-none bg-white dark:bg-black p-2`}
+              align="end"
             >
-              <DropdownMenuItem asChild>
-                <Link href="/login" className="w-full">
-                  Login
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/sign-up" className="w-full">
-                  Create Account
-                </Link>
-              </DropdownMenuItem>
+              {user ? (
+                <>
+                  <DropdownMenuItem className="font-bold pointer-events-none opacity-50 px-2 py-1.5 text-sm">
+                    Hello, {user.firstName || "User"}
+                  </DropdownMenuItem>
+                  {user.role === 'admin' && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/stats" className="w-full cursor-pointer px-2 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-900 block rounded-sm">
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem asChild>
+                    <Link href="/checkout/success" className="w-full cursor-pointer px-2 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-900 block rounded-sm">
+                      My Orders
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-500 hover:text-red-600 px-2 py-1.5 text-sm hover:bg-red-50 dark:hover:bg-red-900/10 block rounded-sm">
+                    Logout
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/login" className="w-full cursor-pointer px-2 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-900 block rounded-sm">
+                      Login
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/register" className="w-full cursor-pointer px-2 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-900 block rounded-sm">
+                      Create Account
+                    </Link>
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

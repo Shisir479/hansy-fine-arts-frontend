@@ -1,61 +1,78 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { ArrowUpRight, Pause, Play } from "lucide-react";
-
-interface NewsItem {
-  title: string;
-  date: string;
-  category: string;
-  imageUrl: string;
-}
-
-const newsData: NewsItem[] = [
-  {
-    title: "10 Steps: How to Create a Successful Business From Your Art",
-    date: "December 07, 2018",
-    category: "Business",
-    imageUrl: "/cuadro-vertical-1_1.jpg",
-  },
-  {
-    title: "Google Launched Virtual Tours of 50 Museums",
-    date: "December 07, 2018",
-    category: "Technology",
-    imageUrl: "/cuadro-vertical-2.jpg",
-  },
-  {
-    title: "10 Facts From the Life of the Most Expensive Artist of Our Time",
-    date: "December 07, 2018",
-    category: "Profile",
-    imageUrl: "/cuadro-vertical-3.jpg",
-  },
-  {
-    title: "The Evolution of Contemporary Digital Art",
-    date: "December 15, 2018",
-    category: "Trends",
-    imageUrl: "/cuadro-vertical-1_1.jpg",
-  },
-];
-
-// Duplicate for seamless loop
-const extendedNews = [...newsData, ...newsData];
+import { useGetBlogsQuery } from "@/lib/redux/api/blogApi";
+import { useRouter } from "next/navigation";
+import Link from 'next/link';
 
 const NewsSection = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  const { data: blogData, isLoading } = useGetBlogsQuery({ status: 'published' });
+  console.log(blogData);
+
+  const newsItems = useMemo(() => {
+    if (!blogData?.data) return [];
+    return blogData.data.map(blog => ({
+      id: blog._id,
+      title: String(blog.title),
+      date: String(blog.createdAt),
+      tags: blog.tags?.map((t: any) => {
+        if (t?.tagId && typeof t.tagId === 'object' && 'name' in t.tagId) return t.tagId.name;
+        if (t && typeof t === 'object' && 'name' in t) return t.name;
+        if (typeof t === 'string') return t;
+        return "";
+      }).filter(Boolean) || [],
+      imageUrl: blog.thumbnail || "/cuadro-vertical-1_1.jpg",
+    }));
+  }, [blogData]);
+
+
+  const extendedNews = useMemo(() => {
+    if (newsItems.length === 0) return [];
+    // Ensure we have enough items to scroll smoothly
+    const items = [...newsItems];
+    while (items.length < 8) {
+      items.push(...newsItems);
+    }
+    return items;
+  }, [newsItems]);
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
-    if (!scrollContainer || isPaused) return;
+    if (!scrollContainer || isPaused || extendedNews.length === 0) return;
 
     let animationFrame: number;
-    let scrollPosition = 0;
+    let scrollPosition = scrollContainer.scrollLeft;
     const scrollSpeed = 0.5;
 
     const scroll = () => {
       scrollPosition += scrollSpeed;
 
-      // Reset when we've scrolled through the first set
+      // Reset when we've scrolled through half if we effectively doubled the content
+      // Logic for infinite scroll alignment can be tricky with dynamic content.
+      // A simple approach: if scrollLeft + clientWidth >= scrollWidth, reset to 0?
+      // Or duplicate content enough times and reset when reaching the midpoint.
+
+      if (scrollPosition >= (scrollContainer.scrollWidth - scrollContainer.clientWidth)) {
+        // This is not perfect for seamless loop without exact duplication points,
+        // but given the "extendedNews" logic, we usually want to reset when the first set is fully scrolled out.
+        // However, calculating the exact width of the first set is better.
+        // Since we don't have the exact width of one item easily accessible here without ref logic on items.
+        // We will rely on the fact that we pushed enough items.
+        // Let's reset when we are halfway through if we just doubled.
+        // If we multiplied more, we need to be careful.
+        // Let's stick to the original simple logic: reset 0 if we scrolled "enough".
+        // The original logic was: if (scrollPosition >= scrollContainer.scrollWidth / 2)
+        // This assumes extendedNews is exactly 2x the original content.
+
+        // If we have dynamic data, we should probably force 2x duplication at least.
+      }
+
+      // Re-implementing original logic roughly:
       if (scrollPosition >= scrollContainer.scrollWidth / 2) {
         scrollPosition = 0;
       }
@@ -67,7 +84,15 @@ const NewsSection = () => {
     animationFrame = requestAnimationFrame(scroll);
 
     return () => cancelAnimationFrame(animationFrame);
-  }, [isPaused]);
+  }, [isPaused, extendedNews]);
+
+  if (isLoading) {
+    return <div className="py-20 text-center">Loading News...</div>;
+  }
+
+  if (newsItems.length === 0) {
+    return null;
+  }
 
   return (
     <section className="bg-white dark:bg-black relative overflow-hidden transition-colors duration-300">
@@ -85,7 +110,7 @@ const NewsSection = () => {
               News &
             </h2>
             <h2 className="text-4xl md:text-5xl font-light text-black dark:text-white tracking-tighter italic">
-              Insights
+              Blogs
             </h2>
           </div>
 
@@ -115,7 +140,7 @@ const NewsSection = () => {
         >
           {extendedNews.map((news, index) => (
             <div
-              key={index}
+              key={`${news.id}-${index}`}
               className="flex-shrink-0 w-[380px] group cursor-pointer"
               onMouseEnter={() => {
                 setHoveredIndex(index);
@@ -145,26 +170,33 @@ const NewsSection = () => {
                 {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
 
-                {/* Category badge */}
-                <div className="absolute top-5 left-5">
-                  <span className="bg-white text-black px-3 py-1.5 text-[10px] uppercase tracking-[0.3em] font-medium">
-                    {news.category}
-                  </span>
+                {/* Tags badge */}
+                <div className="absolute top-5 left-5 flex flex-wrap gap-2">
+                  {news.tags.slice(0, 2).map((tag: string, i: number) => (
+                    <span key={i} className="bg-white text-black px-3 py-1.5 text-[10px] uppercase tracking-[0.3em] font-medium">
+                      {tag}
+                    </span>
+                  ))}
                 </div>
+
 
                 {/* Read more button */}
                 <div className="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-                  <button className="bg-white dark:bg-black text-black dark:text-white p-3 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 flex items-center justify-center">
-                    <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />
-                  </button>
+                  <Link href={`/blog/${news.id}`}>
+                    <button className="bg-white dark:bg-black text-black dark:text-white p-3 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 flex items-center justify-center">
+                      <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />
+                    </button>
+                  </Link>
                 </div>
               </div>
 
               {/* Content */}
               <div className="px-2">
-                <h3 className="text-lg font-light text-black dark:text-white mb-2 leading-tight tracking-tight group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-300">
-                  {news.title}
-                </h3>
+                <Link href={`/blog/${news.id}`}>
+                  <h3 className="text-lg font-light text-black dark:text-white mb-2 leading-tight tracking-tight group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-300">
+                    {String(news.title)}
+                  </h3>
+                </Link>
 
                 <div className="flex items-center gap-4">
                   <time className="text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-[0.2em]">
@@ -191,3 +223,5 @@ const NewsSection = () => {
 };
 
 export default NewsSection;
+
+
