@@ -11,15 +11,10 @@ import { toast } from "react-hot-toast";
 // Stripe Imports
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { useRouter } from "next/navigation";
 
 // Initialize Stripe (Replace with your Publishable Key)
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_TYooMQauvdEDq54NiTphI7jx");
-// Note: If env var is missing, using a placeholder or user should provide it. 
-// Assuming user has one or I should use a generic test one if I knew it.
-// I will use a dummy key if env is not present for safety, but user should verify.
-// Wait, I should not hardcode a real key unless I am sure. 
-// I'll assume NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is set or use the user's provided one if any. 
-// For now I'll use process.env...
 
 interface CheckoutSidebarProps {
   isOpen: boolean;
@@ -32,6 +27,7 @@ interface CheckoutSidebarProps {
 function CheckoutForm({ onClose }: { onClose: () => void }) {
   const stripe = useStripe();
   const elements = useElements();
+  const router = useRouter();
 
   const cart = useAppSelector((state) => state.cart.items);
   const dispatch = useAppDispatch();
@@ -71,13 +67,17 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
         specifications: item.selectedOptions || {},
       }));
 
+      // Determine Order Type (Mixed Logic)
+      const uniqueTypes = new Set(orderItems.map((item: any) => item.productType || "artsy"));
+      const orderType = uniqueTypes.size > 1 ? "mixed" : (orderItems.length > 0 ? (orderItems[0].productType || "artsy") : "artsy");
+
       const orderPayload = {
-        orderType: orderItems.length > 0 ? orderItems[0].productType : "artsy",
+        orderType,
         items: orderItems,
         shippingAddress: {
           fullName: `${formData.firstName} ${formData.lastName}`,
           addressLine1: formData.address,
-          city: "New York",
+          city: "New York", // Hardcoded for simplified checkouts, ideally from form
           state: "NY",
           postalCode: "10001",
           country: "USA",
@@ -91,7 +91,7 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
       // 2. Process Payment
       if (paymentMethod === "paypal") {
         const response = await createPayPalOrder({ orderId }).unwrap();
-        const approveLink = response.data.links.find((link: any) => link.rel === "approve");
+        const approveLink = response.data.links.find((link: any) => link.rel === "approve" || link.rel === "payer-action");
         if (approveLink) window.location.href = approveLink.href;
       } else {
         // Stripe Logic
@@ -120,12 +120,10 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
           toast.error(result.error.message || "Payment Failed");
           console.error("Payment Error:", result.error);
         } else if (result.paymentIntent.status === "succeeded") {
-          console.log("Payment Successful!", result);
-          console.log("Payment Intent:", result.paymentIntent);
-
           toast.success("Payment Successful & Order Placed!");
-          dispatch(clearCart());
-          onClose(); // Optional: Comment this out if you want to keep the sidebar open to see logs comfortably
+          // dispatch(clearCart());
+          onClose();
+          router.push(`/checkout/success?token=${result.paymentIntent.id}`);
         }
       }
     } catch (error: any) {
@@ -135,167 +133,163 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
-      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-        <div className="flex items-start justify-between">
-          <Dialog.Title className="text-lg font-medium text-gray-900">
+    <div className="flex h-full flex-col bg-white shadow-2xl">
+      <div className="flex-1 overflow-y-auto px-6 py-8 min-h-[400px]">
+        <div className="flex items-center justify-between border-b border-zinc-100 pb-6 mb-8">
+          <Dialog.Title className="text-xl font-serif text-zinc-900 tracking-wide">
             Checkout
           </Dialog.Title>
-          <div className="ml-3 flex h-7 items-center">
-            <button
-              type="button"
-              className="mt-4 text-gray-400 hover:text-gray-500"
-              onClick={onClose}
-            >
-              <span className="sr-only">Close panel</span>
-              <X className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
+          <button
+            type="button"
+            className="text-zinc-400 hover:text-zinc-900 transition-colors"
+            onClick={onClose}
+          >
+            <span className="sr-only">Close panel</span>
+            <X className="h-6 w-6" aria-hidden="true" />
+          </button>
         </div>
 
-        <div className="mt-8">
-          <div className="flow-root">
-            {/* Payment Method Selection */}
-            <div className="mb-8 flex gap-4">
+        <div className="space-y-10">
+
+          {/* Payment Method Selection */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Payment Method</h3>
+            <div className="grid grid-cols-2 gap-px bg-zinc-200 border border-zinc-200">
               <button
                 onClick={() => setPaymentMethod("card")}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg border p-4 transition-all ${paymentMethod === "card"
-                    ? "border-black bg-black text-white"
-                    : "border-gray-200 hover:border-black"
+                className={`flex items-center justify-center gap-3 py-4 transition-colors ${paymentMethod === "card"
+                  ? "bg-white text-zinc-900"
+                  : "bg-zinc-50 text-zinc-500 hover:bg-white hover:text-zinc-900"
                   }`}
               >
-                <CreditCard className="h-5 w-5" />
-                <span className="font-medium">Stripe</span>
+                <CreditCard className="h-4 w-4" />
+                <span className="text-sm font-bold tracking-wider uppercase">Card</span>
               </button>
               <button
                 onClick={() => setPaymentMethod("paypal")}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg border p-4 transition-all ${paymentMethod === "paypal"
-                    ? "border-[#0070BA] bg-[#0070BA] text-white"
-                    : "border-gray-200 hover:border-[#0070BA]"
+                className={`flex items-center justify-center gap-3 py-4 transition-colors ${paymentMethod === "paypal"
+                  ? "bg-[#0070BA] text-white"
+                  : "bg-zinc-50 text-zinc-500 hover:bg-white hover:text-[#0070BA]"
                   }`}
               >
-                <Smartphone className="h-5 w-5" />
-                <span className="font-medium">PayPal</span>
+                <Smartphone className="h-4 w-4" />
+                <span className="text-sm font-bold tracking-wider uppercase">PayPal</span>
               </button>
             </div>
+          </div>
 
-            {/* Shipping Details Form */}
-            <div className="space-y-4">
-              <h3 className="font-medium text-gray-900">Shipping Details</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-sm text-gray-600">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none"
-                    placeholder="John"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm text-gray-600">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none"
-                    placeholder="Doe"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm text-gray-600">
-                  Email Address
-                </label>
+          {/* Shipping Details Form */}
+          <div className="space-y-6">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Shipping Information</h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="group">
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
                   onChange={handleInputChange}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none"
-                  placeholder="john@example.com"
+                  className="w-full border-b border-zinc-200 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors bg-transparent rounded-none"
+                  placeholder="First Name"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm text-gray-600">
-                  Address
-                </label>
                 <input
                   type="text"
-                  name="address"
-                  value={formData.address}
+                  name="lastName"
+                  value={formData.lastName}
                   onChange={handleInputChange}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none"
-                  placeholder="123 Main St, New York, NY 10001"
+                  className="w-full border-b border-zinc-200 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors bg-transparent rounded-none"
+                  placeholder="Last Name"
                 />
               </div>
             </div>
-
-            {/* Payment Details */}
-            {paymentMethod === "card" && (
-              <div className="mt-8 space-y-4">
-                <h3 className="font-medium text-gray-900">Card Information</h3>
-                <div className="rounded-md border border-gray-300 p-4">
-                  <CardElement
-                    options={{
-                      style: {
-                        base: {
-                          fontSize: "16px",
-                          color: "#424770",
-                          "::placeholder": { color: "#aab7c4" },
-                        },
-                        invalid: { color: "#9e2146" },
-                      },
-                      hidePostalCode: true,
-                    }}
-                  />
-                </div>
-              </div>
-            )}
+            <div>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full border-b border-zinc-200 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors bg-transparent rounded-none"
+                placeholder="Email Address"
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                className="w-full border-b border-zinc-200 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors bg-transparent rounded-none"
+                placeholder="Shipping Address"
+              />
+            </div>
           </div>
+
+          {/* Payment Details */}
+          {paymentMethod === "card" && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Card Details</h3>
+              <div className="border-b border-zinc-200 pb-2">
+                <CardElement
+                  options={{
+                    style: {
+                      base: {
+                        fontSize: "14px",
+                        color: "#18181b",
+                        fontFamily: "ui-sans-serif, system-ui, sans-serif",
+                        "::placeholder": { color: "#a1a1aa" },
+                        iconColor: "#18181b",
+                      },
+                      invalid: { color: "#ef4444" },
+                    },
+                    hidePostalCode: true,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {paymentMethod === "paypal" && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">PayPal Info</h3>
+              <div className="p-4 bg-zinc-50 text-zinc-600 text-sm border-l-2 border-[#0070BA]">
+                You will be redirected to PayPal to securely complete your payment.
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
-        <div className="flex justify-between text-base font-medium text-gray-900">
-          <p>Subtotal</p>
-          <p>${orderTotal.toFixed(2)}</p>
+      {/* Footer / Total */}
+      <div className="border-t border-zinc-100 px-6 py-8 bg-zinc-50/50">
+        <div className="flex justify-between items-end mb-2">
+          <p className="text-sm font-medium text-zinc-500">Total</p>
+          <p className="text-2xl font-serif text-zinc-900">${orderTotal.toFixed(2)}</p>
         </div>
-        <p className="mt-0.5 text-sm text-gray-500">
+        <p className="text-xs text-zinc-400 mb-6">
           Shipping and taxes calculated at checkout.
         </p>
-        <div className="mt-6">
+
+        <button
+          onClick={handlePlaceOrder}
+          disabled={isCreatingOrder || isPayPalLoading || isStripeLoading}
+          className="w-full bg-zinc-900 text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-black disabled:bg-zinc-400 transition-colors rounded-none"
+        >
+          {isCreatingOrder
+            ? "Creating Order..."
+            : isPayPalLoading || isStripeLoading
+              ? "Processing..."
+              : "Complete Purchase"}
+        </button>
+
+        <div className="mt-6 text-center">
           <button
-            onClick={handlePlaceOrder}
-            disabled={isCreatingOrder || isPayPalLoading || isStripeLoading}
-            className="flex w-full items-center justify-center rounded-md border border-transparent bg-black px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-gray-800 disabled:bg-gray-400"
+            type="button"
+            className="text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors"
+            onClick={onClose}
           >
-            {isCreatingOrder
-              ? "Creating Order..."
-              : isPayPalLoading || isStripeLoading
-                ? "Processing..."
-                : `Pay $${orderTotal.toFixed(2)}`}
+            Continue Shopping
           </button>
-        </div>
-        <div className="mt-6 flex justify-center text-center text-sm text-gray-500">
-          <p>
-            or{" "}
-            <button
-              type="button"
-              className="font-medium text-black hover:text-gray-800"
-              onClick={onClose}
-            >
-              Continue Shopping
-              <span aria-hidden="true"> &rarr;</span>
-            </button>
-          </p>
         </div>
       </div>
     </div>
@@ -318,12 +312,12 @@ export default function CheckoutSidebar({ isOpen, onClose }: CheckoutSidebarProp
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
-            <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+            <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-0 md:pl-10">
               <Transition.Child
                 as={Fragment}
                 enter="transform transition ease-in-out duration-500"

@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from "react";
 import { TbFidgetSpinner } from "react-icons/tb";
+import { X } from "lucide-react";
 import { useCreateCustomPortraitMutation } from "@/lib/redux/api/customPortraitApi";
 import { toast } from "react-hot-toast";
 
@@ -36,12 +37,14 @@ const ArtistCommissionAgreement = () => {
       return;
     }
     const payload = new FormData();
-    payload.append("name", formData.name);
-    payload.append("address", formData.address);
-    payload.append("phone", formData.phone);
+    payload.append("fullName", formData.name);
+    payload.append("deliveryAddress", formData.address);
+    payload.append("phoneNumber", formData.phone);
     payload.append("email", formData.email);
+    payload.append("isAggreed", "true"); // Sending as string "true"
+
     if (formData.image) {
-      payload.append("image", formData.image);
+      payload.append("porttraitImages", formData.image);
     }
 
     try {
@@ -55,9 +58,9 @@ const ArtistCommissionAgreement = () => {
         image: null,
       });
       setIsAccepted(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Submission Error:", error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(error?.data?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -415,18 +418,40 @@ const ArtistCommissionAgreement = () => {
           <label className="block font-serif text-black dark:text-white text-xl mb-3">
             Reference Photo
           </label>
-          <input
-            type="file"
-            name="image"
-            onChange={handleFileChange}
-            accept="image/*"
-            className={`w-full border md:p-3 p-2 file:mr-4 file:py-1 file:px-5 file:border file:font-serif file:text-lg ${isAccepted
-              ? "border-black dark:border-white file:border-black dark:file:border-white file:bg-black dark:file:bg-white file:text-white dark:file:text-black hover:file:bg-white dark:hover:file:bg-black hover:file:text-black dark:hover:file:text-white cursor-pointer bg-white dark:bg-zinc-900 text-black dark:text-white"
-              : "border-gray-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800 cursor-not-allowed file:border-gray-300 dark:file:border-zinc-700 file:bg-gray-300 dark:file:bg-zinc-800 file:text-gray-500"
-              } transition-colors`}
-            disabled={!isAccepted || isLoading}
-            required
-          />
+
+          {formData.image ? (
+            <div className="relative w-full max-w-sm mx-auto sm:mx-0">
+              <div className="relative aspect-[4/3] w-full overflow-hidden border border-black dark:border-white">
+                <img
+                  src={URL.createObjectURL(formData.image)}
+                  alt="Reference Preview"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, image: null })}
+                  className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white p-2 transition-colors rounded-none"
+                  aria-label="Remove image"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-zinc-500 text-xs mt-2 italic text-center sm:text-left">Click 'X' to remove and upload a different photo</p>
+            </div>
+          ) : (
+            <input
+              type="file"
+              name="image"
+              onChange={handleFileChange}
+              accept="image/*"
+              className={`w-full border md:p-3 p-2 file:mr-4 file:py-1 file:px-5 file:border file:font-serif file:text-lg ${isAccepted
+                ? "border-black dark:border-white file:border-black dark:file:border-white file:bg-black dark:file:bg-white file:text-white dark:file:text-black hover:file:bg-white dark:hover:file:bg-black hover:file:text-black dark:hover:file:text-white cursor-pointer bg-white dark:bg-zinc-900 text-black dark:text-white"
+                : "border-gray-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800 cursor-not-allowed file:border-gray-300 dark:file:border-zinc-700 file:bg-gray-300 dark:file:bg-zinc-800 file:text-gray-500"
+                } transition-colors`}
+              disabled={!isAccepted || isLoading}
+              required
+            />
+          )}
         </div>
 
         {/* Submit Button */}

@@ -23,6 +23,7 @@ export interface Product {
     label: string;
     value: string;
   }[];
+  productType?: string;
 }
 
 export interface CartItem extends Product {

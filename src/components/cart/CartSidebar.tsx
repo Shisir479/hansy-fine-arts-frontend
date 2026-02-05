@@ -194,10 +194,10 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                             onClose();
                             openCheckout();
                           }}
-                          className="relative w-full h-12 bg-black dark:bg-white text-white dark:text-black text-sm uppercase tracking-wide font-medium group transition-all duration-500 hover:bg-black/80 dark:hover:bg-white/80 before:absolute before:inset-0 before:bg-white/10 dark:before:bg-black/10 before:transform before:scale-x-0 before:origin-left hover:before:scale-x-100 before:transition-transform before:duration-300"
+                          className="relative w-full h-12 bg-black dark:bg-white text-white dark:text-black text-sm uppercase font-medium hover:bg-black/80 dark:hover:bg-white/80 before:absolute before:inset-0 before:bg-white/10 dark:before:bg-black/10 before:transform before:scale-x-0 before:origin-left hover:before:scale-x-100 before:transition-transform before:duration-300"
                         >
                           <span className="relative z-10 flex items-center justify-center gap-2">
-                            <span className="group-hover:tracking-widest transition-all duration-300">
+                            <span className="">
                               Checkout
                             </span>
                           </span>

@@ -74,7 +74,7 @@ const NavbarClient = () => {
   );
 
   const menuItems = [
-    { label: "SHOP", href: "/artsy-products" },
+    { label: "ARTSY", href: "/artsy-products" },
     { label: "ABOUT", href: "/about" },
     { label: "CONTACT", href: "/contact" },
     { label: "FAQ", href: "/faq" },

@@ -62,6 +62,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       ...product,
       productTitle: displayName,
       category: "art",
+      productType: "artsy",
       price: price || 0,
     };
     add(cartProduct);

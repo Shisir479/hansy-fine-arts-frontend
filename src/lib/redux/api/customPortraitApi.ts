@@ -4,7 +4,7 @@ export const customPortraitApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     createCustomPortrait: builder.mutation<void, FormData>({
       query: (formData) => ({
-        url: '/custom-portraits',
+        url: '/custom-portrait/create-custom-portrait',
         method: 'POST',
         body: formData,
       }),

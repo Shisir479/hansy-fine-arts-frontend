@@ -3,7 +3,6 @@ import { baseApi } from "./baseApi";
 export const paymentApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // Order Management
-    // Order Management
     createOrder: build.mutation({
       query: (data) => ({
         url: "/payment/orders",

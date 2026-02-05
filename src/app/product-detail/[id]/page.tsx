@@ -797,6 +797,7 @@ export default function ProductDetailPage() {
       category: "Art",
       image: selectedImage,
       sku: finalProduct.sku,
+      productType: selections.type === "Other" ? "printful" : "finerworks",
       variantDetails: variantDetails
     };
 
