@@ -436,7 +436,7 @@ const ArtistCommissionAgreement = () => {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <p className="text-zinc-500 text-xs mt-2 italic text-center sm:text-left">Click 'X' to remove and upload a different photo</p>
+              <p className="text-zinc-500 text-xs mt-2 italic text-center sm:text-left">Click &apos;X&apos; to remove and upload a different photo</p>
             </div>
           ) : (
             <input

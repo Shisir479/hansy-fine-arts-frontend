@@ -63,16 +63,29 @@ export default function GalleryPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#F0F0F0] dark:bg-zinc-950 pt-24 md:pt-32 pb-24 font-sans transition-colors duration-500">
+        <div className="min-h-screen bg-[#F0F0F0] dark:bg-zinc-950 py-10 font-sans transition-colors duration-500">
             <div className="container mx-auto px-4 md:px-8">
 
                 {/* Gallery Header - Minimal & Elegant */}
-                <div className="flex flex-col items-center justify-center mb-20 space-y-4 text-center">
-                    <span className="h-px w-20 bg-zinc-400 mb-4 inline-block"></span>
-                    <p className="text-xs font-bold tracking-[0.4em] uppercase text-zinc-500 dark:text-zinc-400">Explore the</p>
-                    <h1 className="text-5xl md:text-7xl font-serif text-zinc-900 dark:text-zinc-50 font-medium tracking-tight">
-                        Art <span className="italic font-light text-zinc-500 dark:text-zinc-400">Collection</span>
-                    </h1>
+                <div className="text-center mb-16">
+                    <div className="inline-block mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-[1px] bg-black dark:bg-white" />
+                            <p className="text-zinc-800 dark:text-zinc-200 uppercase tracking-[0.4em] text-[10px] font-medium">
+                                Explore the
+                            </p>
+                            <div className="w-12 h-[1px] bg-black dark:bg-white" />
+                        </div>
+                    </div>
+                    <h2 className="text-4xl md:text-5xl font-extralight text-black dark:text-white tracking-tighter mb-4">
+                        Art
+                    </h2>
+                    <h2 className="text-4xl md:text-5xl font-light text-black dark:text-white tracking-tighter italic">
+                        Collection
+                    </h2>
+                    <p className="text-zinc-600 dark:text-zinc-400 font-light mt-6 max-w-2xl mx-auto">
+                        Curated Masterpieces
+                    </p>
                 </div>
 
                 {/* Masonry Layout */}

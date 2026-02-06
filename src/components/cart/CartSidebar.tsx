@@ -9,6 +9,8 @@ import { useCheckoutSidebar } from "@/hooks/use-checkout-sidebar";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { CartItem } from "@/types/product";
+import { useRouter } from "next/navigation";
+import { selectCurrentUser } from "@/lib/redux/slices/authSlice";
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -16,6 +18,8 @@ interface CartSidebarProps {
 }
 
 export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
+  const router = useRouter();
+  const user = useAppSelector(selectCurrentUser);
   const cart = useAppSelector((state) => state.cart.items);
   const dispatch = useAppDispatch();
   const { openCheckout } = useCheckoutSidebar();
@@ -191,6 +195,12 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
                         <button
                           onClick={() => {
+                            if (!user) {
+                              toast.error("Please login first to place order");
+                              onClose();
+                              router.push("/login");
+                              return;
+                            }
                             onClose();
                             openCheckout();
                           }}

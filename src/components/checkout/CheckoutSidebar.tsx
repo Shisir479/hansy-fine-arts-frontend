@@ -39,6 +39,10 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
     lastName: "",
     email: "",
     address: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: "",
   });
 
   const [createOrder, { isLoading: isCreatingOrder }] = useCreateOrderMutation();
@@ -50,7 +54,8 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
   };
 
   const handlePlaceOrder = async () => {
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.address) {
+    // Basic validation
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.address || !formData.city || !formData.state || !formData.zip || !formData.country) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -64,7 +69,16 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
         quantity: item.quantity,
         unitPrice: item.price,
         totalPrice: item.price * item.quantity,
-        specifications: item.selectedOptions || {},
+        specifications: {
+          ...(item.selectedOptions || {}),
+          sku: item.sku,
+          product_guid: item.product_guid || item.id, // Some providers need GUID
+          image: item.image || item.imageUrl,
+          template: item.template,
+          files: item.files || item.selectedOptions?.files,
+          variant_id: item.variant_id || item.selectedOptions?.variant_id,
+          external_variant_id: item.external_variant_id || item.selectedOptions?.external_variant_id,
+        },
       }));
 
       // Determine Order Type (Mixed Logic)
@@ -77,11 +91,11 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
         shippingAddress: {
           fullName: `${formData.firstName} ${formData.lastName}`,
           addressLine1: formData.address,
-          city: "New York", // Hardcoded for simplified checkouts, ideally from form
-          state: "NY",
-          postalCode: "10001",
-          country: "USA",
-          phone: "+1234567890",
+          city: formData.city,
+          state: formData.state,
+          postalCode: formData.zip,
+          country: formData.country,
+          phone: "+1234567890", // Still hardcoded or add field? User didn't ask, keeping simple.
         },
       };
 
@@ -111,7 +125,13 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
             billing_details: {
               name: `${formData.firstName} ${formData.lastName}`,
               email: formData.email,
-              address: { line1: formData.address },
+              address: {
+                line1: formData.address,
+                city: formData.city,
+                state: formData.state,
+                postal_code: formData.zip,
+                country: formData.country
+              },
             },
           },
         });
@@ -121,7 +141,7 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
           console.error("Payment Error:", result.error);
         } else if (result.paymentIntent.status === "succeeded") {
           toast.success("Payment Successful & Order Placed!");
-          // dispatch(clearCart());
+          dispatch(clearCart());
           onClose();
           router.push(`/checkout/success?token=${result.paymentIntent.id}`);
         }
@@ -135,6 +155,7 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex h-full flex-col bg-white shadow-2xl">
       <div className="flex-1 overflow-y-auto px-6 py-8 min-h-[400px]">
+        {/* Header ... */}
         <div className="flex items-center justify-between border-b border-zinc-100 pb-6 mb-8">
           <Dialog.Title className="text-xl font-serif text-zinc-900 tracking-wide">
             Checkout
@@ -150,7 +171,6 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="space-y-10">
-
           {/* Payment Method Selection */}
           <div className="space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Payment Method</h3>
@@ -220,8 +240,54 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
                 value={formData.address}
                 onChange={handleInputChange}
                 className="w-full border-b border-zinc-200 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors bg-transparent rounded-none"
-                placeholder="Shipping Address"
+                placeholder="Shipping Address (Line 1)"
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  className="w-full border-b border-zinc-200 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors bg-transparent rounded-none"
+                  placeholder="City"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleInputChange}
+                  className="w-full border-b border-zinc-200 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors bg-transparent rounded-none"
+                  placeholder="State (e.g. NY)"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <input
+                  type="text"
+                  name="zip"
+                  value={formData.zip}
+                  onChange={handleInputChange}
+                  className="w-full border-b border-zinc-200 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors bg-transparent rounded-none"
+                  placeholder="Zip Code"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  className="w-full border-b border-zinc-200 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors bg-transparent rounded-none"
+                  placeholder="Country (e.g. US)"
+                />
+              </div>
             </div>
           </div>
 
@@ -292,7 +358,7 @@ function CheckoutForm({ onClose }: { onClose: () => void }) {
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 

@@ -43,7 +43,7 @@ export default function MobileMenu() {
 
   const mainMenuItems = [
     { href: "/", label: "HOME" },
-    { href: "/artsy-products", label: "SHOP" },
+    { href: "/artsy-products", label: "ARTSY" },
     { href: "/about", label: "ABOUT" },
     { href: "/contact", label: "CONTACT" },
     { href: "/faq", label: "FAQ" },

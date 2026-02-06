@@ -1,0 +1,10 @@
+Use this address for testing Finerworks integration:
+
+Address Line 1: 401 Broadway
+City: New York
+State: NY
+Zip Code: 10013
+Country: USA
+Phone: 2125551234
+
+(This is a generic office building in NYC)

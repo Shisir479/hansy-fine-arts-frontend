@@ -63,7 +63,7 @@ function VerifyEmailContent() {
                 </div>
                 <h1 className="text-2xl font-serif mb-2">Verify your Email</h1>
                 <p className="text-sm text-zinc-500">
-                    We've sent a 6-digit code to <span className="font-bold text-black dark:text-white">{email}</span>.
+                    We&apos;ve sent a 6-digit code to <span className="font-bold text-black dark:text-white">{email}</span>.
                     Please enter it below to verify your account.
                 </p>
             </div>

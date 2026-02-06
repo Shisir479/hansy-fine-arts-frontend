@@ -194,9 +194,16 @@ const NavbarClient = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className={`transition ${iconColor} hover:text-foreground/90 inline-flex items-center`}
+                className={`transition ${iconColor} hover:text-foreground/90 inline-flex items-center justify-center`}
               >
-                <User className="w-6 h-6" />
+                {user ? (
+                  <div className="h-8 w-8 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-bold text-xs border border-gray-200 dark:border-gray-800 shadow-sm animate-in fade-in zoom-in duration-300">
+                    {user.firstName?.charAt(0).toUpperCase()}
+                    {user.lastName?.charAt(0).toUpperCase()}
+                  </div>
+                ) : (
+                  <User className="w-6 h-6" />
+                )}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent

@@ -15,7 +15,7 @@ export default function Error({
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
       <div className="max-w-7xl w-full">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          
+
           {/* Left side - Text content */}
           <div className="space-y-10">
             <div className="space-y-6">
@@ -24,16 +24,14 @@ export default function Error({
                   Error 404
                 </span>
               </div>
-              
+
               <h1 className="text-7xl lg:text-8xl xl:text-9xl font-black leading-none">
                 Page Not
                 <br />
                 <span className="text-gray-300">Found</span>
               </h1>
-              
-              <p className="text-lg lg:text-xl text-gray-500 max-w-lg leading-relaxed font-light">
-                The page you're looking for seems to have wandered off into the creative void.
-              </p>
+
+              The page you&apos;re looking for seems to have wandered off into the creative void.
             </div>
 
             <div className="flex flex-wrap gap-5 pt-6">
@@ -44,7 +42,7 @@ export default function Error({
                 <FaArrowLeftLong className="group-hover:-translate-x-1 transition-transform duration-200" />
                 Return Home
               </Link>
-              
+
               <button
                 onClick={reset}
                 className="inline-flex items-center gap-3 border-2 border-black text-black px-9 py-4 font-semibold text-base hover:bg-black hover:text-white transition-all duration-200"

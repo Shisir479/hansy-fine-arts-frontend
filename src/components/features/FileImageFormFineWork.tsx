@@ -53,7 +53,7 @@ export default function FileImageFormFineWork() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 md:mb-20 gap-6 border-b border-zinc-200 dark:border-zinc-800 pb-6">
           <div>
             <p className="text-xs font-semibold tracking-[0.4em] text-zinc-400 uppercase mb-4 ml-1">Curated Selection</p>
-            <h2 className="text-4xl md:text-6xl font-serif font-thin text-zinc-900 dark:text-zinc-50">
+            <h2 className="md:text-5xl text-4xl font-serif font-thin text-zinc-900 dark:text-zinc-50">
               Latest <span className="italic font-normal">Arrivals</span>
             </h2>
           </div>

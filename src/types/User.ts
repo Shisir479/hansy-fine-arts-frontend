@@ -1,9 +1,10 @@
 export interface User {
   _id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  password: string;
-  role?: string;
+  password?: string; // Password is not always returned
+  role: string;      // Role is required in backend enum with default
   gender?: string;
   contactNo?: string;
   bio?: string;
@@ -13,5 +14,6 @@ export interface User {
   createdAt?: string;
   updatedAt?: string;
   commissionBalance?: number;
-  totalPaidOrders: number;
+  totalPaidOrders?: number; // Made optional as it wasn't in schema directly
+  image?: string;
 }
