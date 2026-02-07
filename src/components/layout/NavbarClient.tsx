@@ -74,6 +74,7 @@ const NavbarClient = () => {
   );
 
   const menuItems = [
+    { label: "GALLERY", href: "/gallery" },
     { label: "ARTSY", href: "/artsy-products" },
     { label: "ABOUT", href: "/about" },
     { label: "CONTACT", href: "/contact" },
@@ -84,7 +85,7 @@ const NavbarClient = () => {
     <div
       className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b ${borderColor} shadow-sm`}
     >
-      <div className="container mx-auto py-2 md:px-4 px-1 flex items-center justify-between">
+      <div className="container mx-auto py-2 md:px-4 px-2 flex items-center justify-between">
 
         {/* Logo */}
         <Link href="/" className="hidden lg:flex">

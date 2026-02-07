@@ -15,6 +15,7 @@ const config: Config = {
         Meie: ['"Meie Script"', 'serif'],
         Lato: ['Lato', 'serif'],
       },
+      
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
