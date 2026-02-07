@@ -60,10 +60,10 @@ export default function FileImageFormFineWork() {
 
           <button
             onClick={() => router.push("/gallery")}
-            className="hidden md:flex items-center gap-3 group text-xs font-bold tracking-widest uppercase pb-2 hover:opacity-70 transition-opacity"
+            className="hidden md:flex items-center gap-3 group text-xl font-bold tracking-widest uppercase pb-2 hover:opacity-70 transition-opacity"
           >
             View Gallery
-            <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+            <ArrowUpRight className="w-6 h-6 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
           </button>
         </div>
 

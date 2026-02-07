@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { ArrowUpRight, Pause, Play } from "lucide-react";
-import { useGetBlogsQuery } from "@/lib/redux/api/blogApi";
+import { useGetPublishedBlogsQuery } from "@/lib/redux/api/blogApi";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
 
@@ -11,8 +11,8 @@ const NewsSection = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const { data: blogData, isLoading } = useGetBlogsQuery({ status: 'published' });
-  console.log(blogData);
+  const { data: blogData, isLoading } = useGetPublishedBlogsQuery({});
+
 
   const newsItems = useMemo(() => {
     if (!blogData?.data) return [];
@@ -90,9 +90,9 @@ const NewsSection = () => {
     return <div className="py-20 text-center">Loading News...</div>;
   }
 
-  if (newsItems.length === 0) {
-    return null;
-  }
+  //   if (newsItems.length === 0) {
+  //     return null;
+  //   }
 
   return (
     <section className="bg-white dark:bg-black relative overflow-hidden transition-colors duration-300">
@@ -138,75 +138,81 @@ const NewsSection = () => {
           className="flex gap-8 overflow-x-hidden"
           style={{ scrollBehavior: "auto" }}
         >
-          {extendedNews.map((news, index) => (
-            <div
-              key={`${news.id}-${index}`}
-              className="flex-shrink-0 w-[380px] group cursor-pointer"
-              onMouseEnter={() => {
-                setHoveredIndex(index);
-                setIsPaused(true);
-              }}
-              onMouseLeave={() => {
-                setHoveredIndex(null);
-                setIsPaused(false);
-              }}
-            >
-              {/* Image Container */}
+          {extendedNews.length === 0 ? (
+            <div className="w-full text-center py-20 text-zinc-500 italic font-light">
+              No latest updates available at the moment.
+            </div>
+          ) : (
+            extendedNews.map((news, index) => (
               <div
-                className="relative w-full 
+                key={`${news.id}-${index}`}
+                className="flex-shrink-0 w-[380px] group cursor-pointer"
+                onMouseEnter={() => {
+                  setHoveredIndex(index);
+                  setIsPaused(true);
+                }}
+                onMouseLeave={() => {
+                  setHoveredIndex(null);
+                  setIsPaused(false);
+                }}
+              >
+                {/* Image Container */}
+                <div
+                  className="relative w-full 
   h-[250px]       /* mobile */
   sm:h-[280px] 
   md:h-[320px]    /* tablet */
   lg:h-[380px]    /* desktop */
   xl:h-[420px]    /* large desktop */
   overflow-hidden bg-zinc-100 dark:bg-zinc-900 mb-5"
-              >
-                <img
-                  src={news.imageUrl}
-                  alt={news.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                />
+                >
+                  <img
+                    src={news.imageUrl}
+                    alt={news.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  />
 
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
+                  {/* Overlay on hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
 
-                {/* Tags badge */}
-                <div className="absolute top-5 left-5 flex flex-wrap gap-2">
-                  {news.tags.slice(0, 2).map((tag: string, i: number) => (
-                    <span key={i} className="bg-white text-black px-3 py-1.5 text-[10px] uppercase tracking-[0.3em] font-medium">
-                      {tag}
-                    </span>
-                  ))}
+                  {/* Tags badge */}
+                  <div className="absolute top-5 left-5 flex flex-wrap gap-2">
+                    {news.tags.slice(0, 2).map((tag: string, i: number) => (
+                      <span key={i} className="bg-white text-black px-3 py-1.5 text-[10px] uppercase tracking-[0.3em] font-medium">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+
+                  {/* Read more button */}
+                  <div className="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                    <Link href={`/blog/${news.id}`}>
+                      <button className="bg-white dark:bg-black text-black dark:text-white p-3 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 flex items-center justify-center">
+                        <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />
+                      </button>
+                    </Link>
+                  </div>
                 </div>
 
-
-                {/* Read more button */}
-                <div className="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                {/* Content */}
+                <div className="px-2">
                   <Link href={`/blog/${news.id}`}>
-                    <button className="bg-white dark:bg-black text-black dark:text-white p-3 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 flex items-center justify-center">
-                      <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />
-                    </button>
+                    <h3 className="text-lg font-light text-black dark:text-white mb-2 leading-tight tracking-tight group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-300">
+                      {String(news.title)}
+                    </h3>
                   </Link>
+
+                  <div className="flex items-center gap-4">
+                    <time className="text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-[0.2em]">
+                      {news.date}
+                    </time>
+                    <div className="w-8 h-[1px] bg-zinc-300 dark:bg-zinc-700 group-hover:w-12 group-hover:bg-black dark:group-hover:bg-white transition-all duration-500"></div>
+                  </div>
                 </div>
               </div>
-
-              {/* Content */}
-              <div className="px-2">
-                <Link href={`/blog/${news.id}`}>
-                  <h3 className="text-lg font-light text-black dark:text-white mb-2 leading-tight tracking-tight group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-300">
-                    {String(news.title)}
-                  </h3>
-                </Link>
-
-                <div className="flex items-center gap-4">
-                  <time className="text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-[0.2em]">
-                    {news.date}
-                  </time>
-                  <div className="w-8 h-[1px] bg-zinc-300 dark:bg-zinc-700 group-hover:w-12 group-hover:bg-black dark:group-hover:bg-white transition-all duration-500"></div>
-                </div>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Gradient overlays for fade effect */}

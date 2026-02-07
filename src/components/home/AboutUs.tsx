@@ -76,9 +76,8 @@ export default function AboutUs() {
                   Artist
                 </div>
                 <div className="text-2xl font-thin text-stone-900 dark:text-white tracking-wide">
-                  Hansy
+                  Hansy Yaeggy
                 </div>
-                <div className="text-xs text-stone-600 dark:text-stone-400 mt-1">Est. 1994</div>
               </div>
             </div>
           </div>

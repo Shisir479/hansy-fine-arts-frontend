@@ -1,5 +1,6 @@
 "use client"
 import { useState } from 'react';
+import Link from 'next/link';
 import { Mail, Phone, MapPin, ArrowUpRight, Send } from 'lucide-react';
 
 export default function Footer() {
@@ -17,15 +18,27 @@ export default function Footer() {
   const navSections = [
     {
       title: 'Explore',
-      links: ['Shop', 'Gallery', 'Custom Portraits', 'About', 'Process']
+      links: [
+        { name: 'Shop', href: '/artsy-products' },
+        { name: 'Gallery', href: '/gallery' },
+        { name: 'Custom Portraits', href: '/custom-portrait' },
+        { name: 'About', href: '/about' },
+      ]
     },
     {
       title: 'Support',
-      links: ['Contact', 'FAQ', 'Shipping', 'Returns', 'Care Guide']
+      links: [
+        { name: 'Contact', href: '/contact' },
+        { name: 'FAQ', href: '/faq' },
+        { name: 'Care Guide', href: '#' }
+      ]
     },
     {
       title: 'Legal',
-      links: ['Privacy', 'Terms', 'Cookies', 'Licenses']
+      links: [
+        { name: 'Privacy', href: '#' },
+        { name: 'Terms', href: '#' },
+      ]
     }
   ];
 
@@ -88,13 +101,13 @@ export default function Footer() {
                   <ul className="space-y-3">
                     {section.links.map((link, linkIdx) => (
                       <li key={linkIdx}>
-                        <a
-                          href="#"
+                        <Link
+                          href={link.href}
                           className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors text-sm font-light group inline-flex items-center gap-2"
                         >
-                          {link}
+                          {link.name}
                           <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" strokeWidth={1.5} />
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>

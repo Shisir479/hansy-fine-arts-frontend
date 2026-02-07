@@ -11,6 +11,14 @@ export const blogApi = baseApi.injectEndpoints({
       }),
       providesTags: ['Blog'],
     }),
+    getPublishedBlogs: build.query<BlogResponse, Record<string, any>>({
+      query: (params) => ({
+        url: '/blog/published',
+        method: 'GET',
+        params: params,
+      }),
+      providesTags: ['Blog'],
+    }),
     getBlogById: build.query<SingleBlogResponse, string>({
       query: (id) => ({
         url: `/blog/${id}`,
@@ -21,4 +29,4 @@ export const blogApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetBlogsQuery, useGetBlogByIdQuery } = blogApi;
+export const { useGetBlogsQuery, useGetBlogByIdQuery, useGetPublishedBlogsQuery } = blogApi;

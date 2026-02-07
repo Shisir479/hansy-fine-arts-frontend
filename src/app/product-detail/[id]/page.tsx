@@ -150,6 +150,11 @@ export default function ProductDetailPage() {
   const [mockupTaskKey, setMockupTaskKey] = useState<string | null>(null);
   const [manualLoading, setManualLoading] = useState(false); // New state to cover gap before task key
 
+  // ⭐ NEW: Quantity State
+  const [quantity, setQuantity] = useState(1);
+  const handleIncrement = () => setQuantity((prev) => prev + 1);
+  const handleDecrement = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+
   // ⭐ NEW: Reference to track current request and abort controller
   const currentRequestRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -806,6 +811,7 @@ export default function ProductDetailPage() {
       image: selectedImage,
       sku: finalProduct.sku,
       productType: selections.type === "Other" ? "printful" : "finerworks",
+      quantity: quantity,
       variantDetails: variantDetails,
       // Add Printful Data
       selectedOptions: selections.type === "Other" ? {
@@ -971,21 +977,18 @@ export default function ProductDetailPage() {
                     {allTypes.length > 0 && (
                       <div className="space-y-1.5">
                         <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Product Type</Label>
-                        <Select
+                        <select
                           value={selections.type}
-                          onValueChange={(value) => handleDropdownChange("type", value)}
+                          onChange={(e) => handleDropdownChange("type", e.target.value)}
+                          className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
                         >
-                          <SelectTrigger className="w-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
-                            <SelectValue placeholder="Select Type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {allTypes.map((o) => (
-                              <SelectItem key={o} value={o}>
-                                {o}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          <option value="" disabled>Select Type</option>
+                          {allTypes.map((o) => (
+                            <option key={o} value={o}>
+                              {o}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     )}
 
@@ -993,64 +996,55 @@ export default function ProductDetailPage() {
                       <>
                         <div className="space-y-1.5">
                           <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Category</Label>
-                          <Select
+                          <select
                             value={printfulSelections.categoryId}
-                            onValueChange={(value) => handlePrintfulChange("categoryId", value)}
+                            onChange={(e) => handlePrintfulChange("categoryId", e.target.value)}
+                            className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
                           >
-                            <SelectTrigger className="w-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
-                              <SelectValue placeholder="Select Category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {printfulCategories?.data?.result?.categories?.map((c: any) => (
-                                <SelectItem key={c.id} value={String(c.id)}>
-                                  {c.title}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            <option value="" disabled>Select Category</option>
+                            {printfulCategories?.data?.result?.categories?.map((c: any) => (
+                              <option key={c.id} value={String(c.id)}>
+                                {c.title}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
                         {printfulSelections.categoryId && (
                           <div className="space-y-1.5">
                             <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Product</Label>
-                            <Select
+                            <select
                               value={printfulSelections.productId}
-                              onValueChange={(value) => handlePrintfulChange("productId", value)}
+                              onChange={(e) => handlePrintfulChange("productId", e.target.value)}
+                              className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
                             >
-                              <SelectTrigger className="w-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
-                                <SelectValue placeholder="Select Product" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {printfulProducts?.data?.result?.map((p: any) => (
-                                  <SelectItem key={p.id} value={String(p.id)}>
-                                    {p.title}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                              <option value="" disabled>Select Product</option>
+                              {printfulProducts?.data?.result?.map((p: any) => (
+                                <option key={p.id} value={String(p.id)}>
+                                  {p.title}
+                                </option>
+                              ))}
+                            </select>
                           </div>
                         )}
 
                         {printfulSelections.productId && (
                           <div className="space-y-1.5">
                             <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Variant/Size</Label>
-                            <Select
+                            <select
                               value={printfulSelections.variantId}
-                              onValueChange={(value) => handlePrintfulChange("variantId", value)}
+                              onChange={(e) => handlePrintfulChange("variantId", e.target.value)}
+                              className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
                             >
-                              <SelectTrigger className="w-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
-                                <SelectValue placeholder="Select Variant" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {(printfulProductDetails?.data?.result?.product?.variants ||
-                                  printfulProductDetails?.data?.result?.variants)?.map((v: any) => (
-                                    <SelectItem key={v.id} value={String(v.id)}>
-                                      {v.name || v.size || `Variant ${v.id}`}
-                                    </SelectItem>
-                                  ))
-                                }
-                              </SelectContent>
-                            </Select>
+                              <option value="" disabled>Select Variant</option>
+                              {(printfulProductDetails?.data?.result?.product?.variants ||
+                                printfulProductDetails?.data?.result?.variants)?.map((v: any) => (
+                                  <option key={v.id} value={String(v.id)}>
+                                    {v.name || v.size || `Variant ${v.id}`}
+                                  </option>
+                                ))
+                              }
+                            </select>
                           </div>
                         )}
                       </>
@@ -1059,21 +1053,18 @@ export default function ProductDetailPage() {
                     {selections.type !== "Other" && selections.type && allMedia.length > 0 && (
                       <div className="space-y-1.5">
                         <Label className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Media / Material</Label>
-                        <Select
+                        <select
                           value={selections.media}
-                          onValueChange={(value) => handleDropdownChange("media", value)}
+                          onChange={(e) => handleDropdownChange("media", e.target.value)}
+                          className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
                         >
-                          <SelectTrigger className="w-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
-                            <SelectValue placeholder="Select Material" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {allMedia.map((o) => (
-                              <SelectItem key={o} value={o}>
-                                {o}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          <option value="" disabled>Select Material</option>
+                          {allMedia.map((o) => (
+                            <option key={o} value={o}>
+                              {o}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     )}
                   </div>
@@ -1087,7 +1078,7 @@ export default function ProductDetailPage() {
                           <select
                             value={selections.style}
                             onChange={(e) => handleDropdownChange("style", e.target.value)}
-                            className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
+                            className="w-full h-10 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white dark:text-white"
                           >
                             <option value="" disabled>Style</option>
                             {allStyles.map(o => <option key={o} value={o}>{o}</option>)}
@@ -1161,7 +1152,38 @@ export default function ProductDetailPage() {
                   )}
                 </div>
 
-                <div className="pt-6 mt-4">
+                <div className="pt-6 mt-4 space-y-4">
+
+                  {/* Quantity Selector */}
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-bold uppercase text-gray-500 dark:text-gray-400">Quantity</span>
+                    <div className="flex items-center border border-gray-300 dark:border-zinc-700 h-10 w-32 bg-white dark:bg-zinc-800 rounded-sm">
+                      <button
+                        onClick={handleDecrement}
+                        className="px-3 h-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors text-gray-600 dark:text-gray-300 border-r border-gray-200 dark:border-zinc-700"
+                        disabled={quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        value={quantity}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          setQuantity(isNaN(val) || val < 1 ? 1 : val);
+                        }}
+                        className="flex-1 w-full text-center font-bold text-gray-900 dark:text-white focus:outline-none h-full bg-transparent appearance-none"
+                      />
+                      <button
+                        onClick={handleIncrement}
+                        className="px-3 h-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors text-gray-600 dark:text-gray-300 border-l border-gray-200 dark:border-zinc-700"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
                   <button
                     className="w-full md:h-14 h-12 md:text-lg font-bold uppercase tracking-wide bg-black dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     disabled={!finalProduct || isGeneratingMockup || (selections.type === "Other" && !printfulMockup)}
